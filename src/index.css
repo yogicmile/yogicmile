@@ -184,19 +184,69 @@ All colors MUST be HSL for consistent theming
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    /* Mobile optimizations */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    /* Enable momentum scrolling */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+    /* Prevent pull-to-refresh */
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Mobile-first responsive container */
+  .mobile-container {
+    width: 100%;
+    max-width: 428px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    /* Safe area handling */
+    padding-top: var(--safe-area-inset-top);
+    padding-left: var(--safe-area-inset-left);
+    padding-right: var(--safe-area-inset-right);
   }
   
   .font-display {
     font-family: 'Playfair Display', Georgia, serif;
   }
+
+  /* Focus management for accessibility */
+  .focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2;
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    :root {
+      --border: 0 0% 30%;
+      --muted-foreground: 0 0% 20%;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
-  /* Step Tracking Dashboard Cards */
+  /* Mobile-Optimized Dashboard Components */
   .dashboard-card {
     @apply bg-surface/80 backdrop-blur-md rounded-2xl p-5 border border-border/30;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-md);
+    transition: all var(--animation-duration-normal) var(--animation-easing);
+    /* Ensure compositing layer for smooth animations */
+    will-change: transform, box-shadow;
   }
 
   .stat-card {
@@ -204,14 +254,196 @@ All colors MUST be HSL for consistent theming
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(12px);
+    /* Mobile touch optimization */
+    min-height: var(--touch-target-min);
+    cursor: pointer;
+    /* Improve touch response */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .stat-card:active {
+    transform: scale(0.98) translateY(1px);
   }
 
   .ad-banner {
     @apply dashboard-card bg-gradient-to-br from-secondary/60 via-muted/40 to-secondary/60 p-4;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: var(--shadow-sm);
     backdrop-filter: blur(8px);
   }
+
+  /* Enhanced Mobile Progress Ring */
+  .progress-ring {
+    transform-origin: center;
+    transition: stroke-dashoffset 2s var(--animation-easing);
+    /* GPU acceleration */
+    will-change: stroke-dashoffset;
+  }
+
+  .progress-ring-stroke {
+    stroke-linecap: round;
+    transition: stroke-dashoffset 2s var(--animation-easing);
+  }
+
+  .progress-ring-container {
+    /* Ensure 44px minimum touch target */
+    min-width: var(--touch-target-min);
+    min-height: var(--touch-target-min);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .progress-ring-glow {
+    filter: drop-shadow(0 0 12px hsl(var(--tier-1-paisa) / 0.4)) 
+            drop-shadow(0 0 24px hsl(var(--tier-1-paisa) / 0.2));
+  }
+
+  /* Tier-specific progress ring glows */
+  .tier-1-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-1-paisa) / 0.5)); }
+  .tier-2-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-2-coin) / 0.5)); }
+  .tier-3-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-3-token) / 0.5)); }
+  .tier-4-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-4-gem) / 0.5)); }
+  .tier-5-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-5-diamond) / 0.5)); }
+  .tier-6-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-6-crown) / 0.5)); }
+  .tier-7-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-7-emperor) / 0.5)); }
+  .tier-8-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-8-legend) / 0.5)); }
+  .tier-9-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-9-immortal) / 0.5)); }
+
+  /* Mobile-Optimized CTA Button */
+  .cta-button {
+    @apply bg-gradient-primary text-primary-foreground font-bold py-5 px-8 rounded-2xl
+           shadow-premium hover:shadow-glow transition-all duration-300
+           hover:scale-[1.02] active:scale-[0.98] active:opacity-90 backdrop-blur-sm;
+    font-size: 1.1rem;
+    letter-spacing: 0.025em;
+    background: linear-gradient(135deg, hsl(var(--tier-1-paisa)), hsl(var(--tier-2-coin)));
+    /* Ensure minimum touch target */
+    min-height: var(--touch-target-comfortable);
+    /* Remove default button styles */
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    /* Improve button press feedback */
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .cta-button:disabled {
+    @apply opacity-50 grayscale cursor-not-allowed;
+    transform: none !important;
+    filter: grayscale(1);
+  }
+
+  /* Secondary Button with Touch Optimization */
+  .btn-secondary {
+    @apply border-2 border-tier-1-paisa text-tier-1-paisa bg-transparent font-semibold py-3 px-6 rounded-xl
+           hover:bg-tier-1-paisa hover:text-tier-1-paisa-foreground transition-all duration-300
+           hover:scale-[1.02] active:scale-[0.98] active:opacity-90;
+    min-height: var(--touch-target-min);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Mobile-Optimized Navigation Cards */
+  .nav-card {
+    @apply dashboard-card cursor-pointer hover:scale-105 transition-all duration-500 
+           hover:shadow-premium active:scale-95 text-center;
+    min-height: var(--touch-target-comfortable);
+    -webkit-tap-highlight-color: transparent;
+    /* Ensure proper touch feedback */
+    touch-action: manipulation;
+  }
+
+  /* Enhanced Tab Navigation */
+  .tab-button {
+    @apply flex flex-col items-center justify-center gap-1 py-3 px-4 rounded-xl 
+           transition-all duration-300 backdrop-blur-sm;
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .tab-active {
+    @apply bg-gradient-primary text-primary-foreground shadow-premium;
+    box-shadow: var(--shadow-premium);
+  }
+
+  .tab-inactive {
+    @apply text-muted-foreground hover:text-foreground hover:bg-secondary/70;
+  }
+
+  /* Mobile Bottom Navigation */
+  .bottom-navigation {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 428px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid hsl(var(--border) / 0.5);
+    padding: 0.5rem 1.5rem;
+    /* Handle safe areas */
+    padding-bottom: calc(0.5rem + var(--safe-area-inset-bottom));
+    z-index: 50;
+    /* Enable hardware acceleration */
+    will-change: transform;
+  }
+
+  /* Responsive Typography */
+  .text-heading {
+    @apply font-bold text-foreground;
+    font-size: clamp(1.125rem, 4vw, 1.5rem);
+    line-height: 1.2;
+  }
+
+  .text-tier-heading {
+    @apply font-bold text-tier-1-paisa;
+    font-size: clamp(1.125rem, 4vw, 1.5rem);
+    line-height: 1.2;
+  }
+
+  .text-counter {
+    @apply font-bold;
+    font-size: clamp(1.75rem, 6vw, 3rem);
+    font-variant-numeric: tabular-nums;
+    color: hsl(var(--foreground));
+    line-height: 1;
+  }
+
+  .text-small {
+    @apply text-sm opacity-75;
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* Skeleton Loading States */
+  .skeleton {
+    @apply bg-muted animate-pulse rounded-lg;
+  }
+
+  .skeleton-text {
+    @apply skeleton h-4 mb-2;
+  }
+
+  .skeleton-avatar {
+    @apply skeleton w-12 h-12 rounded-full;
+  }
+
+  .skeleton-card {
+    @apply skeleton w-full h-32;
+  }
+
+  /* Error States */
+  .error-boundary {
+    @apply p-6 text-center bg-destructive/10 rounded-xl border border-destructive/20;
+  }
+
+  .offline-indicator {
+    @apply bg-warning text-warning-foreground px-3 py-1 rounded-full text-xs font-medium
+           animate-pulse;
+  }
+}
 
   /* Enhanced Step Tracking Progress Ring */
   .progress-ring {

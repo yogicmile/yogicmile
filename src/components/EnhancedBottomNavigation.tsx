@@ -36,6 +36,14 @@ export const EnhancedBottomNavigation = ({
   const handleTabChange = (tabId: typeof activeTab) => {
     triggerHaptic('light');
     onTabChange(tabId);
+    
+    // Announce tab change to screen readers
+    const announcement = document.createElement('div');
+    announcement.setAttribute('aria-live', 'polite');
+    announcement.textContent = `Switched to ${tabs.find(t => t.id === tabId)?.label} tab`;
+    announcement.className = 'sr-only';
+    document.body.appendChild(announcement);
+    setTimeout(() => document.body.removeChild(announcement), 1000);
   };
 
   const getNotificationCount = (tabId: string) => {
@@ -47,6 +55,13 @@ export const EnhancedBottomNavigation = ({
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       handleTabChange(tabId);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
+      const nextIndex = e.key === 'ArrowLeft' 
+        ? (currentIndex - 1 + tabs.length) % tabs.length
+        : (currentIndex + 1) % tabs.length;
+      handleTabChange(tabs[nextIndex].id);
     }
   };
 
@@ -84,7 +99,7 @@ export const EnhancedBottomNavigation = ({
 
   return (
     <nav 
-      className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-surface/80 backdrop-blur-md border-t border-border/50 px-6 py-2 z-50"
+      className="bottom-navigation"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -98,6 +113,7 @@ export const EnhancedBottomNavigation = ({
           left: `${indicatorPosition}%`,
           width: '25%',
         }}
+        aria-hidden="true"
       />
       
       <div className="flex justify-around relative">
@@ -112,10 +128,12 @@ export const EnhancedBottomNavigation = ({
               onKeyDown={(e) => handleKeyDown(e, tab.id)}
               className={`relative tab-button ${
                 isActive ? 'tab-active' : 'tab-inactive'
-              } focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 rounded-xl`}
+              } focus-visible`}
               role="tab"
+              id={`${tab.id}-tab`}
               aria-selected={isActive}
               aria-controls={`${tab.id}-panel`}
+              aria-label={`${tab.label}${notificationCount > 0 ? ` (${notificationCount} notifications)` : ''}`}
               tabIndex={isActive ? 0 : -1}
             >
               <div className="relative">
@@ -123,11 +141,15 @@ export const EnhancedBottomNavigation = ({
                   className={`w-5 h-5 transition-all duration-300 ${
                     isActive ? 'scale-110' : 'group-hover:scale-105'
                   }`} 
+                  aria-hidden="true"
                 />
                 
                 {/* Notification badge */}
                 {notificationCount > 0 && (
-                  <div className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center animate-pulse">
+                  <div 
+                    className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center animate-pulse"
+                    aria-label={`${notificationCount} notifications`}
+                  >
                     <span className="text-xs font-bold text-destructive-foreground">
                       {notificationCount > 99 ? '99+' : notificationCount}
                     </span>
@@ -143,7 +165,10 @@ export const EnhancedBottomNavigation = ({
               
               {/* Active indicator dot */}
               {isActive && (
-                <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary-foreground rounded-full animate-scale-in" />
+                <div 
+                  className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary-foreground rounded-full animate-scale-in" 
+                  aria-hidden="true"
+                />
               )}
             </button>
           );
