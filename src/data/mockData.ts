@@ -16,109 +16,389 @@ import {
   UserInsights
 } from '@/types';
 
-// User Phases Configuration
-export const USER_PHASES: UserPhase[] = [
+// Mock User Profile - Alex Walker
+export const mockUser = {
+  id: 'user123',
+  displayName: 'Alex Walker',
+  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex',
+  currentTier: 1,
+  tierName: 'Paisa Phase',
+  tierSymbol: '🟡',
+  tierColor: '#FFC107',
+  joinDate: '2025-09-01',
+  streakDays: 5,
+  totalLifetimeSteps: 125000,
+  dailyGoal: 8000
+};
+
+// Mock Daily Progress
+export const mockDailyProgress = {
+  date: '2025-09-10',
+  currentSteps: 3542,
+  dailyGoal: 8000,
+  distance: 2.8, // km
+  calories: 142,
+  activeMinutes: 35,
+  coinsEarnedToday: 35,
+  coinsRedeemedToday: 0,
+  sessionsToday: 2
+};
+
+// Tier Progress Data
+export const tierProgressData = {
+  currentTier: 1,
+  currentTierSteps: 45000,
+  tierTarget: 200000,
+  tierStartDate: '2025-09-01',
+  tierDeadline: '2025-10-01',
+  daysRemaining: 21,
+  nextTierPreview: {
+    tier: 2,
+    name: 'Coin Phase',
+    symbol: '🪙',
+    requirement: '300K steps in 45 days',
+    reward: '2 paisa per 100 steps'
+  }
+};
+
+// Navigation Sections Content
+export const navigationSections = {
+  coinsEarned: {
+    title: 'Daily Earnings',
+    icon: '📊',
+    badge: null,
+    mockData: [
+      { date: '2025-09-10', steps: 3542, coins: 35 },
+      { date: '2025-09-09', steps: 7200, coins: 72 },
+      { date: '2025-09-08', steps: 5800, coins: 58 },
+      { date: '2025-09-07', steps: 6400, coins: 64 },
+      { date: '2025-09-06', steps: 4200, coins: 42 },
+      { date: '2025-09-05', steps: 8100, coins: 81 },
+      { date: '2025-09-04', steps: 5900, coins: 59 }
+    ]
+  },
+  vouchersStore: {
+    title: 'Rewards Store',
+    icon: '🎁',
+    badge: 'NEW',
+    mockData: [
+      { 
+        id: 1, 
+        title: '₹100 Amazon Voucher', 
+        cost: 10000, 
+        image: 'amazon-logo',
+        description: 'Shop anything on Amazon',
+        category: 'shopping',
+        popularity: 'high',
+        stock: 50
+      },
+      { 
+        id: 2, 
+        title: '₹50 Zomato Voucher', 
+        cost: 5000, 
+        image: 'zomato-logo',
+        description: 'Order your favorite food',
+        category: 'food',
+        popularity: 'high',
+        stock: 75
+      },
+      { 
+        id: 3, 
+        title: 'Coffee Coupon', 
+        cost: 2500, 
+        image: 'coffee-icon',
+        description: 'Free coffee at partner cafes',
+        category: 'food',
+        popularity: 'medium',
+        stock: 120
+      },
+      {
+        id: 4,
+        title: '₹200 Flipkart Voucher',
+        cost: 20000,
+        image: 'flipkart-logo',
+        description: 'Electronics & more',
+        category: 'shopping',
+        popularity: 'high',
+        stock: 25
+      },
+      {
+        id: 5,
+        title: 'Movie Ticket',
+        cost: 7500,
+        image: 'cinema-icon',
+        description: 'Latest blockbusters',
+        category: 'entertainment',
+        popularity: 'medium',
+        stock: 40
+      }
+    ]
+  },
+  spinWheel: {
+    title: 'Lucky Spin',
+    icon: '🎡',
+    badge: '1',
+    mockData: {
+      spinsAvailable: 1,
+      lastSpin: '2025-09-09',
+      rewards: ['10 coins', '25 coins', '50 coins', '100 coins', 'Better luck!', '5 coins', '75 coins', 'Jackpot!'],
+      wheelConfig: [
+        { value: 10, label: '10 coins', probability: 0.25, color: '#FFD700' },
+        { value: 25, label: '25 coins', probability: 0.20, color: '#FF6B35' },
+        { value: 50, label: '50 coins', probability: 0.15, color: '#6A4C93' },
+        { value: 100, label: '100 coins', probability: 0.10, color: '#FF0080' },
+        { value: 5, label: '5 coins', probability: 0.15, color: '#4ECDC4' },
+        { value: 75, label: '75 coins', probability: 0.08, color: '#45B7D1' },
+        { value: 0, label: 'Better luck!', probability: 0.05, color: '#95A5A6' },
+        { value: 500, label: 'Jackpot!', probability: 0.02, color: '#E74C3C' }
+      ]
+    }
+  },
+  wallet: {
+    title: 'My Wallet',
+    icon: '💰',
+    badge: null,
+    mockData: {
+      totalBalance: 1247,
+      thisWeekEarnings: 198,
+      pendingRedemptions: 2,
+      transactionHistory: [
+        { type: 'earned', amount: 35, date: '2025-09-10', source: 'Daily Steps', steps: 3542 },
+        { type: 'redeemed', amount: -100, date: '2025-09-09', item: 'Coffee Coupon' },
+        { type: 'earned', amount: 72, date: '2025-09-09', source: 'Daily Steps', steps: 7200 },
+        { type: 'bonus', amount: 50, date: '2025-09-08', source: 'Lucky Spin' },
+        { type: 'earned', amount: 58, date: '2025-09-08', source: 'Daily Steps', steps: 5800 },
+        { type: 'earned', amount: 64, date: '2025-09-07', source: 'Daily Steps', steps: 6400 },
+        { type: 'redeemed', amount: -250, date: '2025-09-06', item: 'Zomato Voucher' },
+        { type: 'earned', amount: 42, date: '2025-09-06', source: 'Daily Steps', steps: 4200 }
+      ]
+    }
+  }
+};
+
+// Ad Content Mock
+export const adContent = [
+  {
+    slot: 'header',
+    type: 'banner',
+    content: {
+      text: '🏃‍♂️ Nike Running Shoes - Special Offer!',
+      background: 'linear-gradient(45deg, #FF6B6B, #FF8E8E)',
+      cta: 'Shop Now',
+      discount: '30% OFF',
+      urgency: 'Limited Time'
+    }
+  },
+  {
+    slot: 'inline',
+    type: 'card',
+    content: {
+      title: 'Boost Your Walking',
+      subtitle: 'Premium fitness tracker',
+      image: 'fitness-tracker-icon',
+      background: 'linear-gradient(45deg, #4ECDC4, #6ED2C8)',
+      cta: 'Learn More',
+      rating: '4.8★',
+      price: '₹2,999'
+    }
+  },
+  {
+    slot: 'inline',
+    type: 'native',
+    content: {
+      title: 'Protein Supplements',
+      subtitle: 'Fuel your fitness journey',
+      image: 'protein-icon',
+      background: 'linear-gradient(45deg, #A8E6CF, #88D8A3)',
+      cta: 'Browse',
+      brand: 'FitLife',
+      offer: 'Buy 2 Get 1 Free'
+    }
+  }
+];
+
+// Countdown Timer Logic
+export const countdownTimer = {
+  targetTime: '23:59:59',
+  currentTime: 'real-time',
+  urgencyThresholds: {
+    orange: 2 * 60 * 60 * 1000, // 2 hours in milliseconds
+    red: 30 * 60 * 1000, // 30 minutes
+    flash: 5 * 60 * 1000 // 5 minutes
+  },
+  resetMessage: 'Coins reset at midnight! 🌙',
+  expiredMessage: 'TIME\'S UP! Coins have reset 🔄',
+  warningMessages: {
+    2: 'Only 2 hours left! ⚠️',
+    1: 'Last hour! Don\'t miss out! 🚨',
+    0.5: 'Final 30 minutes! ⏰',
+    0.08: 'Last 5 minutes! Hurry! 🏃‍♂️'
+  }
+};
+
+// Celebration Animations Configuration
+export const celebrationAnimations = {
+  dailyGoalAchieved: {
+    type: 'confetti',
+    colors: ['#FFC107', '#FF6B35', '#4ECDC4', '#6A4C93'],
+    duration: 3000,
+    particles: 50,
+    emoji: '🎉',
+    message: 'Daily Goal Achieved!'
+  },
+  streakMilestone: {
+    type: 'fire',
+    colors: ['#FF4444', '#FF6B35', '#FFD700'],
+    duration: 2500,
+    particles: 30,
+    emoji: '🔥',
+    message: 'Streak Milestone!'
+  },
+  coinRedemption: {
+    type: 'success',
+    colors: ['#4ECDC4', '#45B7D1'],
+    duration: 2000,
+    particles: 20,
+    emoji: '✅',
+    message: 'Redemption Success!'
+  },
+  tierProgression: {
+    type: 'glow',
+    colors: ['#FFD700', '#FFC107', '#FF8F00'],
+    duration: 4000,
+    particles: 40,
+    emoji: '⭐',
+    message: 'Tier Up!'
+  },
+  newPersonalBest: {
+    type: 'sparkles',
+    colors: ['#FFD700', '#FFC107', '#FF6B35'],
+    duration: 3500,
+    particles: 35,
+    emoji: '🏆',
+    message: 'New Personal Best!'
+  }
+};
+
+// Extended user phases for Yogic Mile
+export const yogicMilePhases = [
   {
     id: 1,
     name: "Paisa Phase",
-    emoji: "🟡",
-    minSteps: 0,
-    maxSteps: 4999,
-    color: "tier-1-paisa",
-    description: "Starting your fitness journey - every step counts!"
+    symbol: "🟡",
+    color: "#FFC107",
+    requirement: "200K steps in 30 days",
+    reward: "1 paisa per 100 steps",
+    description: "Begin your yogic journey with mindful steps"
   },
   {
     id: 2,
     name: "Coin Phase", 
-    emoji: "🥉",
-    minSteps: 5000,
-    maxSteps: 7999,
-    color: "tier-2-coin",
-    description: "Building momentum - you're getting stronger!"
+    symbol: "🪙",
+    color: "#FF8F00",
+    requirement: "300K steps in 45 days",
+    reward: "2 paisa per 100 steps",
+    description: "Build consistency in your practice"
   },
   {
     id: 3,
     name: "Token Phase",
-    emoji: "🥈", 
-    minSteps: 8000,
-    maxSteps: 9999,
-    color: "tier-3-token",
-    description: "Consistent performer - keep up the great work!"
+    symbol: "🎯",
+    color: "#2196F3", 
+    requirement: "500K steps in 60 days",
+    reward: "3 paisa per 100 steps",
+    description: "Establish deeper discipline"
   },
   {
     id: 4,
     name: "Gem Phase",
-    emoji: "💎",
-    minSteps: 10000,
-    maxSteps: 12499,
-    color: "tier-4-gem", 
-    description: "Daily goals achieved - you're a gem!"
+    symbol: "💎",
+    color: "#00BCD4",
+    requirement: "750K steps in 75 days", 
+    reward: "5 paisa per 100 steps",
+    description: "Cultivate inner strength"
   },
   {
     id: 5,
     name: "Diamond Phase",
-    emoji: "💠",
-    minSteps: 12500,
-    maxSteps: 14999,
-    color: "tier-5-diamond",
-    description: "Exceptional dedication - diamond level commitment!"
+    symbol: "💠",
+    color: "#673AB7",
+    requirement: "1M steps in 90 days",
+    reward: "8 paisa per 100 steps", 
+    description: "Develop unbreakable focus"
   },
   {
     id: 6,
     name: "Crown Phase",
-    emoji: "👑",
-    minSteps: 15000,
-    maxSteps: 17499,
-    color: "tier-6-crown",
-    description: "Royal performance - you wear the crown!"
+    symbol: "👑",
+    color: "#3F51B5",
+    requirement: "1.5M steps in 120 days",
+    reward: "12 paisa per 100 steps",
+    description: "Master of self-discipline"
   },
   {
     id: 7,
-    name: "Emperor Phase",
-    emoji: "🏆",
-    minSteps: 17500,
-    maxSteps: 19999,
-    color: "tier-7-emperor",
-    description: "Elite athlete status - commanding respect!"
+    name: "Emperor Phase", 
+    symbol: "🏆",
+    color: "#E91E63",
+    requirement: "2M steps in 150 days",
+    reward: "20 paisa per 100 steps",
+    description: "Transcend physical limitations"
   },
   {
     id: 8,
     name: "Legend Phase",
-    emoji: "⭐",
-    minSteps: 20000,
-    maxSteps: 24999,
-    color: "tier-8-legend",
-    description: "Legendary performance - inspiring others!"
+    symbol: "⭐",
+    color: "#9C27B0", 
+    requirement: "3M steps in 180 days",
+    reward: "35 paisa per 100 steps",
+    description: "Inspire others through example"
   },
   {
     id: 9,
     name: "Immortal Phase",
-    emoji: "🌟",
-    minSteps: 25000,
-    maxSteps: 999999,
-    color: "tier-9-immortal",
-    description: "Immortal dedication - beyond human limits!"
+    symbol: "🌟",
+    color: "#6A1B9A",
+    requirement: "5M+ lifetime steps",
+    reward: "50 paisa per 100 steps",
+    description: "Eternal yogic dedication"
   }
 ];
 
-// Mock User Profile
-export const MOCK_USER: UserProfile = {
-  id: "user_12345",
-  username: "Alex",
-  email: "alex.runner@steptracker.com",
-  avatarEmoji: "👟",
-  joinDate: new Date("2024-01-15"),
-  currentPhase: USER_PHASES[0], // Paisa Phase
-  streakCount: 7,
-  totalLifetimeSteps: 147892,
-  achievements: [],
-  preferences: {
-    dailyStepGoal: 10000,
-    notifications: true,
-    theme: 'auto',
-    hapticFeedback: true,
-    soundEffects: true
-  }
+// Weekly insights and analytics
+export const weeklyInsights = {
+  weekStats: {
+    totalSteps: 37742,
+    averageDaily: 5391,
+    bestDay: { date: '2025-09-09', steps: 7200 },
+    worstDay: { date: '2025-09-06', steps: 4200 },
+    consistency: 73, // percentage
+    improvement: '+12%' // vs last week
+  },
+  motivationalQuotes: [
+    "Every step is a prayer in motion 🙏",
+    "Walk your way to inner peace 🕊️",
+    "The journey of a thousand miles begins with one step 👣",
+    "Mindful walking, mindful living 🧘‍♂️"
+  ],
+  challenges: [
+    {
+      id: 1,
+      title: "Morning Walker",
+      description: "Take 2000 steps before 9 AM",
+      progress: 60,
+      reward: 100,
+      timeLeft: "2 days"
+    },
+    {
+      id: 2, 
+      title: "Weekend Warrior",
+      description: "Reach 10K steps on Saturday & Sunday",
+      progress: 0,
+      reward: 250,
+      timeLeft: "4 days"
+    }
+  ]
 };
 
 // Mock Daily Step Data (Last 7 days)
@@ -597,12 +877,10 @@ export const MOCK_USER_INSIGHTS: UserInsights = {
   ]
 };
 
-// App Configuration
-export const APP_CONFIG: AppConfig = {
-  phases: USER_PHASES,
-  spinWheelRewards: MOCK_SPIN_REWARDS,
+// App Configuration  
+export const APP_CONFIG = {
+  phases: yogicMilePhases,
   dailyResetTime: "23:59",
   maxDailySpins: 3,
-  coinToStepRatio: 0.01, // 1 coin per 100 steps
-  achievementList: MOCK_ACHIEVEMENTS
+  coinToStepRatio: 0.01, // 1 paisa per 100 steps
 };

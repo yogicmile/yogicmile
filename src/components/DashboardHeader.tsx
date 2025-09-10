@@ -14,14 +14,14 @@ export const DashboardHeader = ({
   return (
     <header className="premium-glass border-b border-border/30 px-6 py-5">
       <div className="flex items-center justify-between">
-        {/* StepTracker Brand & User */}
+        {/* Yogic Mile Brand & User */}
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-full bg-gradient-primary flex items-center justify-center shadow-premium">
-            <span className="text-xl">👟</span>
+            <span className="text-xl">🧘‍♂️</span>
           </div>
           <div>
-            <h1 className="font-display text-lg font-semibold text-primary">StepTracker</h1>
-            <p className="text-sm text-muted-foreground">Hi, {userName}!</p>
+            <h1 className="font-display text-lg font-semibold text-primary">Yogic Mile</h1>
+            <p className="text-sm text-muted-foreground">Namaste, {userName}!</p>
           </div>
         </div>
 
