@@ -90,6 +90,10 @@ export default {
         'display': ['Playfair Display', 'Georgia', 'serif'],
         'sans': ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
       },
+      boxShadow: {
+        'premium': '0 8px 25px -8px hsl(270 50% 65% / 0.3)',
+        'glow': '0 0 30px hsl(270 50% 65% / 0.25)',
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
