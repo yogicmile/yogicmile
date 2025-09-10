@@ -91,22 +91,49 @@ const Index = () => {
                   </div>
                 </div>
 
-                {/* Recent Transactions */}
+                {/* Primary Action Button */}
+                <div className="mt-6">
+                  <Button 
+                    onClick={() => navigate('/wallet')}
+                    className="w-full h-12 bg-gradient-to-r from-tier-1-paisa to-tier-2-rupaya hover:from-tier-1-paisa/90 hover:to-tier-2-rupaya/90 text-white font-semibold rounded-2xl"
+                  >
+                    <span className="mr-2">💰</span>
+                    Open Full Wallet
+                  </Button>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-3 gap-2 mt-4">
+                  <Button variant="outline" size="sm" className="text-xs p-2">
+                    <span className="mr-1">🎁</span>
+                    Vouchers
+                  </Button>
+                  <Button variant="outline" size="sm" className="text-xs p-2">
+                    <span className="mr-1">⚡</span>
+                    Bills
+                  </Button>
+                  <Button variant="outline" size="sm" className="text-xs p-2">
+                    <span className="mr-1">💵</span>
+                    Cash
+                  </Button>
+                </div>
+
+                {/* Recent Transactions Preview */}
                 <div className="mt-6">
                   <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-semibold">Recent Transactions</h3>
+                    <h3 className="font-semibold">Recent Activity</h3>
                     <Button 
-                      variant="outline" 
+                      variant="ghost" 
                       size="sm"
-                      onClick={() => navigate('/coins-history')}
+                      onClick={() => navigate('/wallet')}
                       className="text-xs"
                     >
-                      View History
+                      View All
                     </Button>
                   </div>
-                  <div className="space-y-2 max-h-40 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                  <div className="space-y-2 max-h-32 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
                     {yogicData.wallet.mockData.transactionHistory.length > 0 ? (
-                      yogicData.wallet.mockData.transactionHistory.slice(0, 5).map((transaction, index) => (
+                      yogicData.wallet.mockData.transactionHistory.slice(0, 3).map((transaction, index) => (
                         <div key={index} className="flex justify-between items-center p-2 bg-secondary/30 rounded-lg">
                           <div className="flex-1">
                             <p className="text-sm font-medium truncate">
@@ -117,14 +144,17 @@ const Index = () => {
                             </p>
                           </div>
                           <div className={`font-bold text-sm ${
-                            transaction.amount > 0 ? 'text-success' : 'text-destructive'
+                            transaction.amount > 0 ? 'text-success' : 'text-muted-foreground'
                           }`}>
                             {transaction.amount > 0 ? '+' : ''}₹{Math.abs(transaction.amount)}
                           </div>
                         </div>
                       ))
                     ) : (
-                      <NoTransactionsEmptyState />
+                      <div className="text-center py-4">
+                        <div className="text-2xl mb-2">🧘‍♀️</div>
+                        <p className="text-xs text-muted-foreground">No transactions yet</p>
+                      </div>
                     )}
                   </div>
                 </div>
