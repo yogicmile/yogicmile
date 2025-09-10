@@ -19,6 +19,26 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        surface: "hsl(var(--surface))",
+        
+        /* Tier Colors for Gamification */
+        "tier-gold": {
+          DEFAULT: "hsl(var(--tier-gold))",
+          foreground: "hsl(var(--tier-gold-foreground))",
+        },
+        "tier-blue": {
+          DEFAULT: "hsl(var(--tier-blue))",
+          foreground: "hsl(var(--tier-blue-foreground))",
+        },
+        "tier-purple": {
+          DEFAULT: "hsl(var(--tier-purple))",
+          foreground: "hsl(var(--tier-purple-foreground))",
+        },
+        "tier-green": {
+          DEFAULT: "hsl(var(--tier-green))",
+          foreground: "hsl(var(--tier-green-foreground))",
+        },
+        
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -38,6 +58,14 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
