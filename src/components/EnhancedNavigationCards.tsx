@@ -1,5 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 import { useYogicMileData } from '@/hooks/use-mock-data';
 
 interface NavigationCard {
@@ -15,6 +16,7 @@ interface NavigationCard {
 }
 
 export const EnhancedNavigationCards = () => {
+  const navigate = useNavigate();
   const mockData = useYogicMileData();
 
   const navigationCards: NavigationCard[] = [
@@ -73,11 +75,12 @@ export const EnhancedNavigationCards = () => {
 
   const handleCardClick = (cardId: string) => {
     console.log(`Navigating to: ${cardId}`);
-    // Add navigation logic here
-    // For Phase Journey, could open a modal or navigate to a dedicated page
+    
     if (cardId === 'phase-journey') {
-      // Placeholder for phase journey animation/modal
-      console.log('Opening Phase Journey view...');
+      navigate('/phase-journey');
+    } else {
+      // Add navigation logic for other cards here
+      console.log(`Opening ${cardId} view...`);
     }
   };
 
