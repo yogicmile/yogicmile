@@ -103,7 +103,7 @@ export const EnhancedCTAButton = ({
         return (
           <>
             <Gift className="w-5 h-5 mr-2" />
-            <span className="font-display">Claim Today's Karma</span>
+            <span className="font-display">Redeem Today's Coins</span>
           </>
         );
     }
@@ -174,16 +174,16 @@ export const EnhancedCTAButton = ({
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
               <Gift className="w-6 h-6 text-tier-1-paisa" />
-              Claim Your Karma
+              Redeem Your Coins
             </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
             <div className="text-center">
               <div className="text-6xl mb-4">🎁</div>
-              <p className="text-lg font-semibold mb-2">Ready to claim your daily karma?</p>
+              <p className="text-lg font-semibold mb-2">Ready to redeem your daily coins?</p>
               <p className="text-muted-foreground text-sm">
-                You'll receive <span className="font-bold text-tier-1-paisa">{rewardAmount} karma points</span>
+                You'll receive <span className="font-bold text-tier-1-paisa">{rewardAmount} coins</span>
               </p>
             </div>
             
@@ -215,7 +215,7 @@ export const EnhancedCTAButton = ({
                 onClick={handleConfirmClaim}
                 className="flex-1 bg-tier-1-paisa text-tier-1-paisa-foreground hover:bg-tier-1-paisa/90"
               >
-                Claim Now
+                Redeem Now
               </Button>
             </div>
           </div>

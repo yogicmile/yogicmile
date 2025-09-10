@@ -26,52 +26,52 @@ export const EnhancedNavigationCards = () => {
   const navigationItems: NavigationItem[] = [
     {
       icon: List,
-      title: "Karma Journal",
-      subtitle: "Track Progress",
+      title: "Coins Earned",
+      subtitle: "Track Earnings",
       gradient: "from-tier-1-paisa via-tier-1-paisa to-tier-2-coin",
       tierColor: "tier-1-paisa",
       hasNotification: true,
-      notificationText: "New entry available",
+      notificationText: "New earnings available",
       quickActions: [
-        { label: "Quick Log", action: () => console.log("Quick log") },
-        { label: "View Stats", action: () => console.log("View stats") },
+        { label: "View Daily Log", action: () => console.log("Quick log") },
+        { label: "Earning Stats", action: () => console.log("View stats") },
       ]
     },
     {
       icon: Gift,
-      title: "Wellness Store",
-      subtitle: "Mindful Rewards",
+      title: "Vouchers & Coupons",
+      subtitle: "Redeem Rewards",
       gradient: "from-tier-3-token via-tier-3-token to-tier-4-gem",
       tierColor: "tier-3-token",
       hasNotification: false,
       quickActions: [
-        { label: "Browse Rewards", action: () => console.log("Browse rewards") },
-        { label: "My Purchases", action: () => console.log("My purchases") },
+        { label: "Browse Store", action: () => console.log("Browse rewards") },
+        { label: "My Vouchers", action: () => console.log("My purchases") },
       ]
     },
     {
       icon: Disc,
-      title: "Dharma Wheel",
-      subtitle: "Daily Inspiration",
+      title: "Spin Wheel",
+      subtitle: "Bonus Coins",
       gradient: "from-tier-5-diamond via-tier-5-diamond to-tier-6-crown",
       tierColor: "tier-5-diamond",
       hasNotification: true,
-      notificationText: "New wisdom available",
+      notificationText: "Free spin available",
       quickActions: [
-        { label: "Today's Wisdom", action: () => console.log("Today's wisdom") },
-        { label: "Spin Wheel", action: () => console.log("Spin wheel") },
+        { label: "Spin Now", action: () => console.log("Spin now") },
+        { label: "Spin History", action: () => console.log("Spin history") },
       ]
     },
     {
       icon: Wallet,
-      title: "Sacred Vault",
-      subtitle: "Your Balance",
+      title: "Wallet",
+      subtitle: "Balance & History",
       gradient: "from-tier-7-emperor via-tier-7-emperor to-tier-8-legend",
       tierColor: "tier-7-emperor",
       hasNotification: false,
       quickActions: [
         { label: "View Balance", action: () => console.log("View balance") },
-        { label: "Transaction History", action: () => console.log("Transaction history") },
+        { label: "Redeem History", action: () => console.log("Transaction history") },
       ]
     }
   ];
@@ -98,7 +98,7 @@ export const EnhancedNavigationCards = () => {
   return (
     <>
       <div>
-        <h3 className="text-xl font-display font-semibold mb-6 text-foreground">Mindful Pathways</h3>
+        <h3 className="text-xl font-display font-semibold mb-6 text-foreground">Quick Actions</h3>
         <div className="grid grid-cols-2 gap-5">
           {navigationItems.map((item, index) => (
             <div 

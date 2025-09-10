@@ -12,10 +12,10 @@ export const CountdownTimer = () => {
   };
 
   const getMessage = () => {
-    if (isTimeUp) return 'Meditation time has passed - Start fresh tomorrow! 🌅';
-    if (isCritical) return 'Final moments! Claim your karma now! ⚡';
-    if (isUrgent) return 'Time is running out - Claim your karma soon! ⏰';
-    return 'Claim your karma before midnight meditation 🧘‍♂️';
+    if (isTimeUp) return 'Day ended - Start fresh tomorrow! 🌅';
+    if (isCritical) return 'Final moments! Redeem coins now! ⚡';
+    if (isUrgent) return 'Time running out - Redeem coins soon! ⏰';
+    return 'Redeem before 11:59 PM or coins reset 🕚';
   };
 
   return (

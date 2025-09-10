@@ -34,14 +34,14 @@ const Index = () => {
         return (
           <div className="p-6 animate-fade-in" role="tabpanel" id="wallet-panel">
             <div className="dashboard-card">
-              <h2 className="text-xl font-bold mb-4 font-display">Sacred Vault</h2>
+              <h2 className="text-xl font-bold mb-4 font-display">Wallet Balance</h2>
               <div className="space-y-4">
                 <div className="text-center">
                   <div className="text-6xl mb-4">🪙</div>
                   <div className="text-3xl font-bold text-tier-1-paisa mb-2">
                     {stepTracking.coinsEarnedToday}
                   </div>
-                  <p className="text-muted-foreground">Available Karma Points</p>
+                  <p className="text-muted-foreground">Available Coins</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
@@ -66,31 +66,31 @@ const Index = () => {
         return (
           <div className="p-6 animate-fade-in" role="tabpanel" id="rewards-panel">
             <div className="dashboard-card">
-              <h2 className="text-xl font-bold mb-4 font-display">Wellness Store</h2>
+              <h2 className="text-xl font-bold mb-4 font-display">Vouchers & Coupons Store</h2>
               <div className="text-center">
                 <Gift className="w-16 h-16 mx-auto text-tier-3-token mb-4" />
                 <p className="text-muted-foreground mb-6">
-                  Browse amazing wellness rewards and mindful experiences!
+                  Browse amazing vouchers and redeem coins for rewards!
                 </p>
                 
                 <div className="grid gap-3">
                   <div className="p-4 border rounded-xl hover:bg-tier-3-token-light/50 transition-colors cursor-pointer">
                     <div className="flex justify-between items-center">
                       <div>
-                        <h3 className="font-semibold text-left">Meditation Session</h3>
-                        <p className="text-sm text-muted-foreground text-left">30-minute guided session</p>
+                        <h3 className="font-semibold text-left">Amazon Gift Card</h3>
+                        <p className="text-sm text-muted-foreground text-left">$10 Amazon voucher</p>
                       </div>
-                      <div className="text-tier-3-token font-bold">50 coins</div>
+                      <div className="text-tier-3-token font-bold">500 coins</div>
                     </div>
                   </div>
                   
                   <div className="p-4 border rounded-xl hover:bg-tier-4-gem-light/50 transition-colors cursor-pointer">
                     <div className="flex justify-between items-center">
                       <div>
-                        <h3 className="font-semibold text-left">Yoga Class</h3>
-                        <p className="text-sm text-muted-foreground text-left">60-minute yoga session</p>
+                        <h3 className="font-semibold text-left">Sports Store Coupon</h3>
+                        <p className="text-sm text-muted-foreground text-left">20% off fitness gear</p>
                       </div>
-                      <div className="text-tier-4-gem font-bold">75 coins</div>
+                      <div className="text-tier-4-gem font-bold">300 coins</div>
                     </div>
                   </div>
                 </div>
@@ -110,7 +110,7 @@ const Index = () => {
                 
                 <div>
                   <h3 className="text-lg font-semibold">Alex</h3>
-                  <p className="text-muted-foreground text-sm">Mindful Journey - Day {stepTracking.streak}</p>
+                  <p className="text-muted-foreground text-sm">🟡 Paisa Phase - Day {stepTracking.streak}</p>
                 </div>
                 
                 <div className="grid grid-cols-3 gap-4 text-center">
@@ -194,8 +194,8 @@ const Index = () => {
       {/* Header */}
       <DashboardHeader 
         userName="Alex" 
-        currentPhase="Mindful Journey" 
-        phaseEmoji="🧘‍♂️" 
+        currentPhase="Paisa Phase" 
+        phaseEmoji="🟡" 
         streakCount={stepTracking.streak} 
       />
 

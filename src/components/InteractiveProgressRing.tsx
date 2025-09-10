@@ -119,13 +119,13 @@ export const InteractiveProgressRing = ({
           
           {/* Center Content */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <p className="text-sm text-muted-foreground mb-1 font-medium">Mindful Steps Today</p>
+            <p className="text-sm text-muted-foreground mb-1 font-medium">Steps Today</p>
             <p className="text-3xl font-bold text-foreground mb-2 font-display transition-all duration-300 group-hover:scale-110">
               {animatedSteps.toLocaleString()}
             </p>
             <p className="text-xs text-muted-foreground">Daily Goal: {goalSteps.toLocaleString()}</p>
             <div className={`w-10 h-0.5 bg-tier-${currentTier}-paisa rounded-full my-3 transition-all duration-500`}></div>
-            <p className="text-xs text-muted-foreground font-medium">Journey Progress</p>
+            <p className="text-xs text-muted-foreground font-medium">Lifetime Steps</p>
             <p className={`text-lg font-semibold text-tier-${currentTier}-paisa font-display`}>
               {animatedLifetime.toLocaleString()}
             </p>
@@ -152,7 +152,7 @@ export const InteractiveProgressRing = ({
           <p className={`text-3xl font-bold text-tier-${currentTier}-paisa font-display transition-all duration-500`}>
             {percentage.toFixed(0)}%
           </p>
-          <p className="text-sm text-muted-foreground font-medium">mindful progress achieved</p>
+          <p className="text-sm text-muted-foreground font-medium">daily goal progress</p>
         </div>
 
         {/* Motivational Pulse for Low Progress */}
