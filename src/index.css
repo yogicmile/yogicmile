@@ -17,7 +17,44 @@ All colors MUST be HSL for consistent theming
     --card: 0 0% 100%;
     --card-foreground: 240 15% 15%;
 
-    /* Premium Wellness Tier Colors */
+    /* 9-Tier Progression System */
+    --tier-1-paisa: 45 100% 51%;
+    --tier-1-paisa-light: 45 100% 88%;
+    --tier-1-paisa-foreground: 45 100% 15%;
+    
+    --tier-2-coin: 38 100% 50%;
+    --tier-2-coin-light: 38 100% 85%;
+    --tier-2-coin-foreground: 38 100% 15%;
+    
+    --tier-3-token: 207 90% 54%;
+    --tier-3-token-light: 207 90% 86%;
+    --tier-3-token-foreground: 207 90% 15%;
+    
+    --tier-4-gem: 187 100% 42%;
+    --tier-4-gem-light: 187 100% 85%;
+    --tier-4-gem-foreground: 187 100% 15%;
+    
+    --tier-5-diamond: 259 48% 51%;
+    --tier-5-diamond-light: 259 48% 88%;
+    --tier-5-diamond-foreground: 259 48% 15%;
+    
+    --tier-6-crown: 231 48% 48%;
+    --tier-6-crown-light: 231 48% 86%;
+    --tier-6-crown-foreground: 231 48% 15%;
+    
+    --tier-7-emperor: 340 82% 52%;
+    --tier-7-emperor-light: 340 82% 87%;
+    --tier-7-emperor-foreground: 340 82% 15%;
+    
+    --tier-8-legend: 292 69% 49%;
+    --tier-8-legend-light: 292 69% 88%;
+    --tier-8-legend-foreground: 292 69% 15%;
+    
+    --tier-9-immortal: 277 64% 42%;
+    --tier-9-immortal-light: 277 64% 88%;
+    --tier-9-immortal-foreground: 277 64% 15%;
+    
+    /* Legacy Wellness Colors (for backwards compatibility) */
     --tier-gold: 43 89% 58%;
     --tier-gold-foreground: 240 15% 15%;
     --tier-amethyst: 270 50% 65%;
@@ -92,7 +129,7 @@ All colors MUST be HSL for consistent theming
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 270 50% 65%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -110,6 +147,12 @@ All colors MUST be HSL for consistent theming
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+    
+    /* Enhanced Dark Mode Typography */
+    --text-primary: 210 40% 98%;
+    --text-secondary: 215 20.2% 65.1%;
+    --text-muted: 217.2 32.6% 45%;
+    
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -140,16 +183,32 @@ All colors MUST be HSL for consistent theming
   /* Premium Card Components */
   .dashboard-card {
     @apply bg-card rounded-2xl p-5 border border-border/30;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
   }
 
   .stat-card {
-    @apply dashboard-card hover:shadow-premium transition-all duration-500 hover:-translate-y-2 hover:scale-105;
+    @apply dashboard-card hover:shadow-premium transition-all duration-500 hover:-translate-y-1 hover:scale-[1.02];
+    border-radius: 16px;
   }
 
   .ad-banner {
     @apply dashboard-card bg-gradient-to-br from-secondary via-muted to-secondary/80 p-4;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  /* Enhanced Progress Ring */
+  .progress-ring {
+    transform-origin: center;
+    transition: stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.3));
+  }
+
+  .progress-ring-glow {
+    filter: drop-shadow(0 0 12px hsl(var(--primary) / 0.4)) 
+            drop-shadow(0 0 24px hsl(var(--primary) / 0.2));
   }
 
   /* Premium Tier Badge Styles */
@@ -200,9 +259,34 @@ All colors MUST be HSL for consistent theming
 
   /* Premium CTA Button */
   .cta-button {
-    @apply bg-gradient-primary text-primary-foreground font-semibold py-5 px-8 rounded-2xl
-           shadow-premium hover:shadow-glow transition-all duration-500
-           hover:scale-105 active:scale-95 min-h-[52px] backdrop-blur-sm;
+    @apply bg-gradient-primary text-primary-foreground font-bold py-5 px-8 rounded-2xl
+           shadow-premium hover:shadow-glow transition-all duration-300
+           hover:scale-[1.02] active:scale-[0.98] min-h-[52px] backdrop-blur-sm;
+    font-size: 1.1rem;
+    letter-spacing: 0.025em;
+  }
+
+  .cta-button:disabled {
+    @apply opacity-50 grayscale cursor-not-allowed;
+    transform: none !important;
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply border-2 border-primary text-primary bg-transparent font-semibold py-3 px-6 rounded-xl
+           hover:bg-primary hover:text-primary-foreground transition-all duration-300
+           hover:scale-[1.02] active:scale-[0.98] min-h-[44px];
+  }
+
+  /* Button Touch States */
+  @media (hover: hover) {
+    .btn-touch:hover {
+      @apply opacity-90;
+    }
+  }
+
+  .btn-touch:active {
+    @apply opacity-75;
   }
 
   /* Premium Countdown Timer */
@@ -228,6 +312,22 @@ All colors MUST be HSL for consistent theming
     box-shadow: var(--shadow-glow);
   }
 
+  /* Typography Utilities */
+  .text-heading {
+    @apply font-bold text-foreground;
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  }
+
+  .text-counter {
+    @apply font-bold text-2xl;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-small {
+    @apply text-sm;
+    color: hsl(var(--muted-foreground));
+  }
+
   /* Animation Utilities */
   .animate-pulse-slow {
     animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -235,6 +335,14 @@ All colors MUST be HSL for consistent theming
 
   .animate-bounce-subtle {
     animation: bounce 2s infinite;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* Gradient Utilities */
@@ -248,5 +356,32 @@ All colors MUST be HSL for consistent theming
 
   .bg-gradient-success {
     background: var(--gradient-success);
+  }
+
+  /* Theme Transition */
+  .theme-transition {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

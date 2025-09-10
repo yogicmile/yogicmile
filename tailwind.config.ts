@@ -21,7 +21,54 @@ export default {
         foreground: "hsl(var(--foreground))",
         surface: "hsl(var(--surface))",
         
-        /* Premium Wellness Tier Colors */
+        /* 9-Tier Progression System */
+        "tier-1-paisa": {
+          DEFAULT: "hsl(var(--tier-1-paisa))",
+          light: "hsl(var(--tier-1-paisa-light))",
+          foreground: "hsl(var(--tier-1-paisa-foreground))",
+        },
+        "tier-2-coin": {
+          DEFAULT: "hsl(var(--tier-2-coin))",
+          light: "hsl(var(--tier-2-coin-light))",
+          foreground: "hsl(var(--tier-2-coin-foreground))",
+        },
+        "tier-3-token": {
+          DEFAULT: "hsl(var(--tier-3-token))",
+          light: "hsl(var(--tier-3-token-light))",
+          foreground: "hsl(var(--tier-3-token-foreground))",
+        },
+        "tier-4-gem": {
+          DEFAULT: "hsl(var(--tier-4-gem))",
+          light: "hsl(var(--tier-4-gem-light))",
+          foreground: "hsl(var(--tier-4-gem-foreground))",
+        },
+        "tier-5-diamond": {
+          DEFAULT: "hsl(var(--tier-5-diamond))",
+          light: "hsl(var(--tier-5-diamond-light))",
+          foreground: "hsl(var(--tier-5-diamond-foreground))",
+        },
+        "tier-6-crown": {
+          DEFAULT: "hsl(var(--tier-6-crown))",
+          light: "hsl(var(--tier-6-crown-light))",
+          foreground: "hsl(var(--tier-6-crown-foreground))",
+        },
+        "tier-7-emperor": {
+          DEFAULT: "hsl(var(--tier-7-emperor))",
+          light: "hsl(var(--tier-7-emperor-light))",
+          foreground: "hsl(var(--tier-7-emperor-foreground))",
+        },
+        "tier-8-legend": {
+          DEFAULT: "hsl(var(--tier-8-legend))",
+          light: "hsl(var(--tier-8-legend-light))",
+          foreground: "hsl(var(--tier-8-legend-foreground))",
+        },
+        "tier-9-immortal": {
+          DEFAULT: "hsl(var(--tier-9-immortal))",
+          light: "hsl(var(--tier-9-immortal-light))",
+          foreground: "hsl(var(--tier-9-immortal-foreground))",
+        },
+        
+        /* Legacy Wellness Colors (for backwards compatibility) */
         "tier-gold": {
           DEFAULT: "hsl(var(--tier-gold))",
           foreground: "hsl(var(--tier-gold-foreground))",
