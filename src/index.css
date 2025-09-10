@@ -64,13 +64,29 @@ All colors MUST be HSL for consistent theming
     --tier-rose: 350 45% 65%;
     --tier-rose-foreground: 0 0% 100%;
 
-    /* Sports Performance Brand Colors */
-    --primary: 210 100% 50%;
+    /* Yogic Mile Brand Colors - Mindful & Serene */
+    --primary: 187 69% 64%; /* Serene Blue #4FC3F7 */
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 15% 92%;
-    --secondary-foreground: 240 15% 15%;
-    --accent: 200 90% 55%;
-    --accent-foreground: 0 0% 100%;
+    --secondary: 122 39% 59%; /* Sage Green #66BB6A */
+    --secondary-foreground: 0 0% 100%;
+    --accent: 54 100% 67%; /* Golden Accent #FFD54F */
+    --accent-foreground: 240 15% 15%;
+    
+    /* Yogic Color Palette */
+    --serene-blue: 187 69% 64%; /* #4FC3F7 */
+    --sage-green: 122 39% 59%; /* #66BB6A */
+    --golden-accent: 54 100% 67%; /* #FFD54F */
+    --deep-teal: 174 51% 54%; /* #26A69A */
+    --soft-lavender: 261 46% 71%; /* #B39DDB */
+    --warm-coral: 14 90% 63%; /* #FF7043 */
+    --earthy-brown: 19 21% 48%; /* #8D6E63 */
+    
+    /* Yogic Gradients */
+    --gradient-golden: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    --gradient-yogic-header: linear-gradient(135deg, #E3F2FD 0%, #E8F5E8 100%);
+    --gradient-serene: linear-gradient(135deg, hsl(var(--serene-blue)), hsl(var(--deep-teal)));
+    --gradient-sage: linear-gradient(135deg, hsl(var(--sage-green)), hsl(var(--deep-teal)));
+    --gradient-mindful: linear-gradient(135deg, hsl(var(--soft-lavender)), hsl(var(--serene-blue)));
 
     /* Premium Status Colors */
     --success: 140 35% 55%;
@@ -87,11 +103,11 @@ All colors MUST be HSL for consistent theming
     --muted: 245 15% 93%;
     --muted-foreground: 240 15% 50%;
 
-    /* Sports Performance Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(210 100% 50%), hsl(200 90% 55%));
-    --gradient-performance: linear-gradient(135deg, hsl(190 85% 50%), hsl(180 80% 55%));
-    --gradient-achievement: linear-gradient(135deg, hsl(220 70% 50%), hsl(240 65% 55%));
-    --gradient-champion: linear-gradient(135deg, hsl(260 60% 55%), hsl(280 70% 50%));
+    /* Yogic Mile Gradients */
+    --gradient-primary: var(--gradient-serene);
+    --gradient-performance: var(--gradient-sage);
+    --gradient-achievement: var(--gradient-golden);
+    --gradient-champion: var(--gradient-mindful);
 
     /* Premium Shadow System */
     --shadow-sm: 0 1px 3px 0 hsl(240 15% 15% / 0.08);

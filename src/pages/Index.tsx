@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { DashboardHeader } from '@/components/DashboardHeader';
+import { YogicMileHeader } from '@/components/YogicMileHeader';
+import { EnhancedPhaseProgress } from '@/components/EnhancedPhaseProgress';
+import { CoinRateDisplay } from '@/components/CoinRateDisplay';
+import { MotivationStreaksSection } from '@/components/MotivationStreaksSection';
+import { TodaysSummaryCard } from '@/components/TodaysSummaryCard';
 import { InteractiveProgressRing } from '@/components/InteractiveProgressRing';
 import { StatsCards } from '@/components/StatsCards';
 import { EnhancedNavigationCards } from '@/components/EnhancedNavigationCards';
@@ -252,53 +256,67 @@ const Index = () => {
       default:
         return (
           <div role="tabpanel" id="dashboard-panel" aria-labelledby="dashboard-tab" className="animate-fade-in">
-            {/* Header Banner Ad */}
+            {/* Yogic Mile Branding Header */}
+            <YogicMileHeader className="animate-fade-in" />
+
+            {/* Top Ad Slot - Wellness themed */}
             <AdBanner type="header" />
 
-            {/* Main Progress Section */}
-            <div className="px-6 py-4">
-              <ErrorBoundary>
-                {yogicData.isLoading ? (
-                  <SkeletonProgressRing />
-                ) : (
-                  <InteractiveProgressRing 
-                    dailySteps={yogicData.dailyProgress.currentSteps}
-                    lifetimeSteps={yogicData.user.totalLifetimeSteps}
-                    goalSteps={yogicData.dailyProgress.dailyGoal}
-                    currentTier={yogicData.user.currentTier}
-                    onGoalReached={handleGoalReached}
-                  />
-                )}
-              </ErrorBoundary>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="px-6 pb-4">
-              <StatsCards 
-                coinsEarnedToday={yogicData.dailyProgress.coinsEarnedToday}
-                coinsRedeemedToday={yogicData.dailyProgress.coinsRedeemedToday}
+            {/* Enhanced Phase Progress Section */}
+            <div className="px-4 py-4">
+              <EnhancedPhaseProgress
+                currentTier={yogicData.user.currentTier}
+                tierName={yogicData.user.tierName}
+                tierSymbol={yogicData.user.tierSymbol}
+                currentSteps={yogicData.tierProgress.currentTierSteps}
+                tierTarget={yogicData.tierProgress.tierTarget}
+                daysRemaining={yogicData.tierProgress.daysRemaining}
+                className="animate-fade-in"
               />
             </div>
 
-            {/* Countdown Timer */}
-            <div className="px-6 pb-4">
-              <CountdownTimer />
-            </div>
-
-            {/* Enhanced CTA Button */}
-            <div className="px-6 pb-4">
-              <EnhancedCTAButton
-                onClaim={handleClaimReward}
-                coinBalance={yogicData.wallet.mockData.totalBalance}
-                rewardAmount={10}
+            {/* Coin Rate Display Section */}
+            <div className="px-4 py-2">
+              <CoinRateDisplay
+                currentTier={yogicData.user.currentTier}
+                currentRate={1} // 1 paisa per 100 steps for Paisa Phase
+                nextTier={yogicData.tierProgress.nextTierPreview.tier}
+                nextRate={2} // 2 paisa per 100 steps for Coin Phase
+                remainingSteps={yogicData.tierProgress.tierTarget - yogicData.tierProgress.currentTierSteps}
+                progressToNext={(yogicData.tierProgress.currentTierSteps / yogicData.tierProgress.tierTarget) * 100}
+                className="animate-fade-in"
               />
             </div>
 
-            {/* Inline Banner Ad */}
+            {/* Mid-Dashboard Ad - Mindful Products */}
             <AdBanner type="inline" />
 
-            {/* Enhanced Navigation Cards */}
-            <div className="px-6 pb-6">
+            {/* Motivation & Streaks Section */}
+            <div className="px-4 py-2">
+              <MotivationStreaksSection
+                currentStreak={yogicData.user.streakDays}
+                nextStreakMilestone={7} // Next milestone at 7 days
+                streakReward={50} // 50 bonus coins
+                className="animate-fade-in"
+              />
+            </div>
+
+            {/* Today's Summary Card */}
+            <div className="px-4 py-2">
+              <TodaysSummaryCard
+                currentSteps={yogicData.dailyProgress.currentSteps}
+                dailyGoal={yogicData.dailyProgress.dailyGoal}
+                coinsEarned={yogicData.dailyProgress.coinsEarnedToday}
+                distance={yogicData.dailyProgress.distance}
+                activeMinutes={yogicData.dailyProgress.activeMinutes}
+                isGoalReached={yogicData.dailyProgress.currentSteps >= yogicData.dailyProgress.dailyGoal}
+                hasRedeemedToday={yogicData.dailyProgress.coinsRedeemedToday > 0}
+                className="animate-fade-in"
+              />
+            </div>
+
+            {/* Enhanced Navigation Cards with Phase Journey */}
+            <div className="px-4 pb-6">
               <EnhancedNavigationCards />
             </div>
           </div>
@@ -318,14 +336,6 @@ const Index = () => {
       <div className="mobile-container relative">
         {/* Offline Indicator */}
         <OfflineIndicator />
-
-        {/* Header with safe area handling */}
-        <DashboardHeader 
-          userName={yogicData.user.displayName} 
-          currentPhase={yogicData.user.tierName} 
-          phaseEmoji={yogicData.user.tierSymbol} 
-          streakCount={yogicData.user.streakDays} 
-        />
 
         {/* Content Area with smooth transitions */}
         <main className="flex-1 pb-20 transition-all duration-500">
