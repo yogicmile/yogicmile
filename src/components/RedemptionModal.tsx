@@ -352,17 +352,22 @@ export const RedemptionModal = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md mx-auto max-h-[90vh] overflow-y-auto p-6">
-        <button
-          onClick={() => onOpenChange(false)}
-          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
-        >
-          <X className="h-4 w-4" />
-        </button>
-        
-        {getContent()}
-      </DialogContent>
-    </Dialog>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md mx-auto max-h-[90vh] overflow-y-auto p-0 border-0 bg-transparent shadow-none">
+          {/* Animated Modal Container */}
+          <div className="bg-surface rounded-3xl shadow-2xl border border-border/20 overflow-hidden transform transition-all duration-300 animate-slide-up">
+            <button
+              onClick={() => onOpenChange(false)}
+              className="absolute right-4 top-4 rounded-full p-2 opacity-70 ring-offset-background transition-all hover:opacity-100 hover:bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-10"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            
+            <div className="p-6">
+              {getContent()}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
   );
 };

@@ -303,7 +303,11 @@ const Index = () => {
         return (
           <div role="tabpanel" id="dashboard-panel" aria-labelledby="dashboard-tab" className="animate-fade-in">
             {/* Yogic Mile Branding Header */}
-            <YogicMileHeader className="animate-fade-in" />
+            <YogicMileHeader 
+              className="animate-fade-in" 
+              onClick={() => setActiveTab('dashboard')}
+              size="medium"
+            />
 
             {/* Top Ad Slot - Wellness themed */}
             <AdBanner type="header" />
@@ -386,11 +390,12 @@ const Index = () => {
     }
   };
 
-  // Notification counts for bottom navigation
+  // Notification counts for bottom navigation - enhanced with dynamic content
   const notificationCounts = {
-    wallet: yogicData.wallet.mockData.pendingRedemptions > 0 ? yogicData.wallet.mockData.pendingRedemptions : 0,
+    dashboard: yogicData.dailyProgress.currentSteps >= yogicData.dailyProgress.dailyGoal ? 1 : 0,
+    wallet: yogicData.wallet.mockData.totalBalance >= 5 ? yogicData.wallet.mockData.totalBalance : (yogicData.wallet.mockData.pendingRedemptions > 0 ? 'NEW' : 0),
     rewards: yogicData.vouchersStore.badge ? 1 : 0,
-    profile: yogicData.tierProgress.daysRemaining <= 7 ? 1 : 0,
+    profile: yogicData.tierProgress.daysRemaining <= 7 ? '🏆' : 0,
   };
 
   return (
@@ -408,7 +413,13 @@ const Index = () => {
         <EnhancedBottomNavigation 
           activeTab={activeTab} 
           onTabChange={setActiveTab}
-          notificationCounts={notificationCounts}
+          notificationCounts={{
+            dashboard: yogicData.dailyProgress.currentSteps >= yogicData.dailyProgress.dailyGoal ? 1 : undefined,
+            wallet: yogicData.wallet.mockData.pendingRedemptions > 0 ? yogicData.wallet.mockData.pendingRedemptions : undefined,
+            rewards: yogicData.vouchersStore.badge ? 1 : undefined,
+            profile: yogicData.tierProgress.daysRemaining <= 7 ? 1 : undefined,
+          }}
+          walletBalance={yogicData.wallet.mockData.totalBalance}
         />
       </div>
     </ErrorBoundary>

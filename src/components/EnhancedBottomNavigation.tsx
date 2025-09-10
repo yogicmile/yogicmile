@@ -1,179 +1,237 @@
-import { Home, Wallet, Gift, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useHapticFeedback } from '@/hooks/use-animations';
+import { Home, Wallet, Gift, User, TrendingUp } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface EnhancedBottomNavigationProps {
-  activeTab: 'dashboard' | 'wallet' | 'rewards' | 'profile';
-  onTabChange: (tab: 'dashboard' | 'wallet' | 'rewards' | 'profile') => void;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
   notificationCounts?: {
+    dashboard?: number;
     wallet?: number;
     rewards?: number;
     profile?: number;
   };
+  walletBalance?: number;
 }
+
+type TabId = 'dashboard' | 'wallet' | 'rewards' | 'profile';
 
 export const EnhancedBottomNavigation = ({ 
   activeTab, 
   onTabChange, 
-  notificationCounts = {} 
+  notificationCounts = {},
+  walletBalance = 0
 }: EnhancedBottomNavigationProps) => {
-  const [indicatorPosition, setIndicatorPosition] = useState(0);
-  const { triggerHaptic } = useHapticFeedback();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [animatingTab, setAnimatingTab] = useState<string | null>(null);
+  const [coinAnimation, setCoinAnimation] = useState(false);
+
+  // Animate coin when wallet is active
+  useEffect(() => {
+    if (activeTab === 'wallet') {
+      const interval = setInterval(() => {
+        setCoinAnimation(prev => !prev);
+      }, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [activeTab]);
 
   const tabs = [
-    { id: 'dashboard' as const, icon: Home, label: 'Dashboard' },
-    { id: 'wallet' as const, icon: Wallet, label: 'Wallet' },
-    { id: 'rewards' as const, icon: Gift, label: 'Rewards' },
-    { id: 'profile' as const, icon: User, label: 'Profile' },
+    {
+      id: 'dashboard' as TabId,
+      label: 'Dashboard',
+      icon: Home,
+      emoji: '🏠',
+      gradient: 'from-serene-blue to-deep-teal',
+      badge: notificationCounts.dashboard,
+      route: '/'
+    },
+    {
+      id: 'wallet' as TabId,
+      label: 'Wallet',
+      icon: Wallet,
+      emoji: '💰',
+      gradient: 'from-tier-1-paisa to-tier-2-rupaya',
+      badge: walletBalance >= 5 ? `₹${walletBalance}` : notificationCounts.wallet,
+      route: '/wallet'
+    },
+    {
+      id: 'rewards' as TabId,
+      label: 'Rewards',
+      icon: Gift,
+      emoji: '🎁',
+      gradient: 'from-sage-green to-tier-3-token',
+      badge: notificationCounts.rewards,
+      route: '/rewards'
+    },
+    {
+      id: 'profile' as TabId,
+      label: 'Profile',
+      icon: User,
+      emoji: '👤',
+      gradient: 'from-soft-lavender to-tier-5-diamond',
+      badge: notificationCounts.profile,
+      route: '/profile'
+    }
   ];
 
-  // Update indicator position when active tab changes
-  useEffect(() => {
-    const activeIndex = tabs.findIndex(tab => tab.id === activeTab);
-    setIndicatorPosition(activeIndex * 25); // 25% per tab
-  }, [activeTab, tabs]);
-
-  const handleTabChange = (tabId: typeof activeTab) => {
-    triggerHaptic('light');
-    onTabChange(tabId);
+  const handleTabPress = (tabId: TabId) => {
+    if (tabId === activeTab) return;
     
-    // Announce tab change to screen readers
-    const announcement = document.createElement('div');
-    announcement.setAttribute('aria-live', 'polite');
-    announcement.textContent = `Switched to ${tabs.find(t => t.id === tabId)?.label} tab`;
-    announcement.className = 'sr-only';
-    document.body.appendChild(announcement);
-    setTimeout(() => document.body.removeChild(announcement), 1000);
-  };
+    setAnimatingTab(tabId);
+    
+    // Haptic feedback simulation
+    if (navigator.vibrate) {
+      navigator.vibrate(10);
+    }
+    
+    setTimeout(() => {
+      setAnimatingTab(null);
+    }, 200);
 
-  const getNotificationCount = (tabId: string) => {
-    return notificationCounts[tabId as keyof typeof notificationCounts] || 0;
-  };
-
-  // Support keyboard navigation
-  const handleKeyDown = (e: React.KeyboardEvent, tabId: typeof activeTab) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleTabChange(tabId);
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-      e.preventDefault();
-      const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
-      const nextIndex = e.key === 'ArrowLeft' 
-        ? (currentIndex - 1 + tabs.length) % tabs.length
-        : (currentIndex + 1) % tabs.length;
-      handleTabChange(tabs[nextIndex].id);
+    // Handle navigation for wallet
+    if (tabId === 'wallet') {
+      navigate('/wallet');
+    } else {
+      onTabChange(tabId);
     }
   };
 
-  // Support swipe gestures
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-
-  const minSwipeDistance = 50;
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+  const getTabAnimation = (tabId: string) => {
+    if (animatingTab === tabId) {
+      return 'scale-95 shadow-sm';
+    }
+    return 'scale-100';
   };
 
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+  const getIconAnimation = (tabId: string) => {
+    if (tabId === 'wallet' && (activeTab === 'wallet' || coinAnimation)) {
+      return 'animate-bounce';
+    }
+    return '';
   };
 
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
-    
-    if (isLeftSwipe && currentIndex < tabs.length - 1) {
-      handleTabChange(tabs[currentIndex + 1].id);
+  const isTabActive = (tabId: TabId) => {
+    if (tabId === 'wallet') {
+      return location.pathname === '/wallet';
     }
-    if (isRightSwipe && currentIndex > 0) {
-      handleTabChange(tabs[currentIndex - 1].id);
-    }
+    return activeTab === tabId;
   };
 
   return (
-    <nav 
-      className="bottom-navigation"
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      role="tablist"
-      aria-label="Main navigation"
-    >
-      {/* Sliding indicator */}
-      <div 
-        className="absolute top-0 h-1 bg-gradient-primary rounded-b-full transition-all duration-500 ease-out"
-        style={{
-          left: `${indicatorPosition}%`,
-          width: '25%',
-        }}
-        aria-hidden="true"
-      />
-      
-      <div className="flex justify-around relative">
-        {tabs.map((tab, index) => {
-          const isActive = activeTab === tab.id;
-          const notificationCount = getNotificationCount(tab.id);
-          
-          return (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              onKeyDown={(e) => handleKeyDown(e, tab.id)}
-              className={`relative tab-button ${
-                isActive ? 'tab-active' : 'tab-inactive'
-              } focus-visible`}
-              role="tab"
-              id={`${tab.id}-tab`}
-              aria-selected={isActive}
-              aria-controls={`${tab.id}-panel`}
-              aria-label={`${tab.label}${notificationCount > 0 ? ` (${notificationCount} notifications)` : ''}`}
-              tabIndex={isActive ? 0 : -1}
-            >
-              <div className="relative">
-                <tab.icon 
-                  className={`w-5 h-5 transition-all duration-300 ${
-                    isActive ? 'scale-110' : 'group-hover:scale-105'
-                  }`} 
-                  aria-hidden="true"
-                />
-                
-                {/* Notification badge */}
-                {notificationCount > 0 && (
-                  <div 
-                    className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center animate-pulse"
-                    aria-label={`${notificationCount} notifications`}
-                  >
-                    <span className="text-xs font-bold text-destructive-foreground">
-                      {notificationCount > 99 ? '99+' : notificationCount}
-                    </span>
-                  </div>
-                )}
-              </div>
-              
-              <span className={`text-xs font-medium transition-all duration-300 ${
-                isActive ? 'opacity-100' : 'opacity-75'
-              }`}>
-                {tab.label}
-              </span>
-              
-              {/* Active indicator dot */}
-              {isActive && (
-                <div 
-                  className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary-foreground rounded-full animate-scale-in" 
-                  aria-hidden="true"
-                />
-              )}
-            </button>
-          );
-        })}
+    <div className="fixed bottom-0 left-0 right-0 z-50">
+      {/* Yogic Mile Mini Header */}
+      <div className="bg-surface/95 backdrop-blur-md border-t px-4 py-2">
+        <div className="text-center">
+          <div className="text-xs text-tier-1-paisa font-medium opacity-80">
+            Walk. Earn. Evolve. 🧘‍♀️
+          </div>
+        </div>
       </div>
-    </nav>
+      
+      {/* Main Navigation */}
+      <nav 
+        className="bg-surface/95 backdrop-blur-md border-t border-border/50 px-4 py-2"
+        role="tablist"
+        aria-label="Main navigation"
+      >
+        <div className="flex items-center justify-around max-w-md mx-auto">
+          {tabs.map((tab) => {
+            const IconComponent = tab.icon;
+            const isActive = isTabActive(tab.id);
+            
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabPress(tab.id)}
+                className={cn(
+                  "relative flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-tier-1-paisa focus:ring-offset-2",
+                  getTabAnimation(tab.id),
+                  isActive 
+                    ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg` 
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+                role="tab"
+                aria-selected={isActive}
+                aria-controls={`${tab.id}-panel`}
+                tabIndex={isActive ? 0 : -1}
+              >
+                {/* Icon with animation */}
+                <div className={cn(
+                  "relative mb-1 transition-transform duration-200",
+                  getIconAnimation(tab.id)
+                )}>
+                  {isActive ? (
+                    <span className="text-xl">{tab.emoji}</span>
+                  ) : (
+                    <IconComponent className="w-5 h-5" />
+                  )}
+                  
+                  {/* Notification Badge */}
+                  {tab.badge && (
+                    <Badge 
+                      variant={isActive ? "secondary" : "default"}
+                      className={cn(
+                        "absolute -top-2 -right-2 min-w-5 h-5 text-xs px-1 rounded-full border-2 border-surface",
+                        tab.id === 'wallet' && typeof tab.badge === 'string' && tab.badge.includes('₹')
+                          ? "bg-tier-1-paisa text-tier-1-paisa-foreground animate-pulse"
+                          : isActive 
+                          ? "bg-white text-foreground" 
+                          : "bg-tier-1-paisa text-tier-1-paisa-foreground"
+                      )}
+                    >
+                      {tab.badge}
+                    </Badge>
+                  )}
+
+                  {/* Active indicator glow */}
+                  {isActive && (
+                    <div className="absolute inset-0 rounded-full animate-ping opacity-30 bg-white"></div>
+                  )}
+                </div>
+                
+                {/* Label */}
+                <span className={cn(
+                  "text-xs font-medium transition-all duration-200",
+                  isActive 
+                    ? "text-white font-semibold" 
+                    : "text-muted-foreground"
+                )}>
+                  {tab.label}
+                </span>
+
+                {/* Active tab underline */}
+                {isActive && (
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-white rounded-full"></div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Progress indicator for active tab */}
+        <div className="flex justify-center mt-2">
+          <div className="flex space-x-1">
+            {tabs.map((tab) => (
+              <div
+                key={`indicator-${tab.id}`}
+                className={cn(
+                  "w-2 h-1 rounded-full transition-all duration-300",
+                  isTabActive(tab.id)
+                    ? "bg-tier-1-paisa w-6"
+                    : "bg-border"
+                )}
+              />
+            ))}
+          </div>
+        </div>
+      </nav>
+      
+      {/* Safe area padding for devices with home indicator */}
+      <div className="h-safe-bottom bg-surface/95 backdrop-blur-md"></div>
+    </div>
   );
 };
