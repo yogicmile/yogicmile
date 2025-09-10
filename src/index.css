@@ -409,6 +409,19 @@ All colors MUST be HSL for consistent theming
     animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  /* Enhanced step tracking animations */
+  .animate-celebration {
+    animation: celebration 2s ease-out;
+  }
+
+  .animate-number-pop {
+    animation: numberPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .animate-glow-pulse {
+    animation: glowPulse 2s ease-in-out infinite;
+  }
+
   /* Gradient Utilities */
   .bg-gradient-primary {
     background: var(--gradient-primary);
@@ -447,5 +460,38 @@ All colors MUST be HSL for consistent theming
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes celebration {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes numberPop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px hsl(var(--primary) / 0.6));
   }
 }
