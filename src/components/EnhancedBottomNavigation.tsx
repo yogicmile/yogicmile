@@ -5,8 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface EnhancedBottomNavigationProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeTab: 'dashboard' | 'wallet' | 'rewards' | 'profile';
+  onTabChange: (tab: 'dashboard' | 'wallet' | 'rewards' | 'profile') => void;
   notificationCounts?: {
     dashboard?: number;
     wallet?: number;
