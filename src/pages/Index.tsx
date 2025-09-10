@@ -18,10 +18,12 @@ import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { PageLoading, SkeletonProgressRing } from '@/components/LoadingStates';
 import { NoTransactionsEmptyState } from '@/components/EmptyState';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { useYogicMileData } from '@/hooks/use-mock-data';
 import { useCoinRateSystem } from '@/hooks/use-coin-rate-system';
 
 const Index = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'wallet' | 'rewards' | 'profile'>('dashboard');
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const yogicData = useYogicMileData();
@@ -91,7 +93,17 @@ const Index = () => {
 
                 {/* Recent Transactions */}
                 <div className="mt-6">
-                  <h3 className="font-semibold mb-3">Recent Transactions</h3>
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-semibold">Recent Transactions</h3>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => navigate('/coins-history')}
+                      className="text-xs"
+                    >
+                      View History
+                    </Button>
+                  </div>
                   <div className="space-y-2 max-h-40 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
                     {yogicData.wallet.mockData.transactionHistory.length > 0 ? (
                       yogicData.wallet.mockData.transactionHistory.slice(0, 5).map((transaction, index) => (
