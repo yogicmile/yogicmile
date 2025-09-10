@@ -9,22 +9,22 @@ export const StatsCards = ({
 }: StatsCardsProps) => {
   return (
     <div className="grid grid-cols-2 gap-4">
-      {/* Coins Earned Card */}
+      {/* Karma Points Earned Card */}
       <div className="stat-card">
-        <div className="flex items-center justify-center w-12 h-12 bg-tier-gold/10 rounded-full mb-3 mx-auto">
-          <span className="text-2xl">🪙</span>
+        <div className="flex items-center justify-center w-14 h-14 bg-tier-gold/15 rounded-2xl mb-4 mx-auto shadow-sm">
+          <span className="text-2xl">✨</span>
         </div>
-        <p className="text-xs text-muted-foreground text-center mb-1">Coins Earned Today</p>
-        <p className="text-2xl font-bold text-center text-tier-gold">{coinsEarnedToday}</p>
+        <p className="text-xs text-muted-foreground text-center mb-2 font-medium">Karma Points Today</p>
+        <p className="text-2xl font-bold text-center text-tier-gold font-display">{coinsEarnedToday}</p>
       </div>
 
-      {/* Coins Redeemed Card */}
+      {/* Wellness Rewards Card */}
       <div className="stat-card">
-        <div className="flex items-center justify-center w-12 h-12 bg-tier-green/10 rounded-full mb-3 mx-auto">
-          <span className="text-2xl">✅</span>
+        <div className="flex items-center justify-center w-14 h-14 bg-tier-sage/15 rounded-2xl mb-4 mx-auto shadow-sm">
+          <span className="text-2xl">🎁</span>
         </div>
-        <p className="text-xs text-muted-foreground text-center mb-1">Coins Redeemed Today</p>
-        <p className="text-2xl font-bold text-center text-tier-green">{coinsRedeemedToday}</p>
+        <p className="text-xs text-muted-foreground text-center mb-2 font-medium">Rewards Claimed</p>
+        <p className="text-2xl font-bold text-center text-tier-sage font-display">{coinsRedeemedToday}</p>
       </div>
     </div>
   );

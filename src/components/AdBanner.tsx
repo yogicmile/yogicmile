@@ -13,12 +13,12 @@ export const AdBanner = ({ type }: AdBannerProps) => {
             <span className={`${isHeader ? 'text-sm' : 'text-lg'}`}>📱</span>
           </div>
           <div>
-            <p className={`font-semibold text-foreground ${isHeader ? 'text-xs' : 'text-sm'}`}>
-              Sponsored Content
+            <p className={`font-semibold text-foreground ${isHeader ? 'text-xs' : 'text-sm'} font-display`}>
+              Mindful Partners
             </p>
             {!isHeader && (
-              <p className="text-xs text-muted-foreground">
-                Discover amazing apps & offers
+              <p className="text-xs text-muted-foreground font-medium">
+                Wellness products curated for you
               </p>
             )}
           </div>

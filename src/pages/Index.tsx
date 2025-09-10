@@ -77,7 +77,7 @@ const Index = () => {
               <div className="countdown-urgent">
                 <div className="flex items-center gap-2 text-destructive font-medium">
                   <Clock className="w-4 h-4" />
-                  <span>Redeem before 11:59 PM or coins reset</span>
+                  <span className="font-medium">Claim your karma before midnight meditation</span>
                 </div>
               </div>
             </div>
@@ -86,7 +86,7 @@ const Index = () => {
             <div className="px-6 pb-4">
               <Button className="cta-button w-full">
                 <Gift className="w-5 h-5 mr-2" />
-                Redeem Today's Coins
+                <span className="font-display">Claim Today's Karma</span>
               </Button>
             </div>
 
@@ -107,8 +107,8 @@ const Index = () => {
       {/* Header */}
       <DashboardHeader 
         userName="Alex" 
-        currentPhase="Coin Phase" 
-        phaseEmoji="🪙" 
+        currentPhase="Mindful Journey" 
+        phaseEmoji="🧘‍♂️" 
         streakCount={7} 
       />
 

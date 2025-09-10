@@ -2,63 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Step Tracker Rewards App Design System
+/* YogicMile Premium Design System
+Sophisticated wellness-focused color palette with premium typography
 All colors MUST be HSL for consistent theming
 */
 
 @layer base {
   :root {
-    /* Base App Colors */
-    --background: 248 50% 98%;
-    --foreground: 222 47% 11%;
+    /* Base App Colors - Premium Palette */
+    --background: 245 25% 97%;
+    --foreground: 240 15% 15%;
     --surface: 0 0% 100%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 240 15% 15%;
 
-    /* Tier Colors for Gamification */
-    --tier-gold: 45 100% 51%;
-    --tier-gold-foreground: 222 47% 11%;
-    --tier-blue: 207 90% 54%;
-    --tier-blue-foreground: 0 0% 100%;
-    --tier-purple: 262 52% 47%;
-    --tier-purple-foreground: 0 0% 100%;
-    --tier-green: 142 76% 36%;
-    --tier-green-foreground: 0 0% 100%;
+    /* Premium Wellness Tier Colors */
+    --tier-gold: 43 89% 58%;
+    --tier-gold-foreground: 240 15% 15%;
+    --tier-amethyst: 270 50% 65%;
+    --tier-amethyst-foreground: 0 0% 100%;
+    --tier-sage: 140 35% 55%;
+    --tier-sage-foreground: 0 0% 100%;
+    --tier-rose: 350 45% 65%;
+    --tier-rose-foreground: 0 0% 100%;
 
-    /* App Specific Colors */
-    --primary: 207 90% 54%;
+    /* Primary Brand Colors */
+    --primary: 270 50% 65%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 217 19% 94%;
-    --secondary-foreground: 222 47% 11%;
-    --accent: 45 100% 51%;
-    --accent-foreground: 222 47% 11%;
+    --secondary: 245 20% 92%;
+    --secondary-foreground: 240 15% 15%;
+    --accent: 43 89% 58%;
+    --accent-foreground: 240 15% 15%;
 
-    /* Status Colors */
-    --success: 142 76% 36%;
+    /* Premium Status Colors */
+    --success: 140 35% 55%;
     --success-foreground: 0 0% 100%;
-    --warning: 25 95% 53%;
-    --warning-foreground: 222 47% 11%;
-    --destructive: 0 84% 60%;
+    --warning: 35 85% 60%;
+    --warning-foreground: 240 15% 15%;
+    --destructive: 350 45% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    /* UI Elements */
-    --border: 217 32% 87%;
-    --input: 217 32% 87%;
-    --ring: 207 90% 54%;
-    --muted: 217 19% 94%;
-    --muted-foreground: 215 25% 47%;
+    /* Premium UI Elements */
+    --border: 240 10% 88%;
+    --input: 240 10% 88%;
+    --ring: 270 50% 65%;
+    --muted: 245 15% 93%;
+    --muted-foreground: 240 15% 50%;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(207 90% 54%), hsl(262 52% 47%));
-    --gradient-gold: linear-gradient(135deg, hsl(45 100% 51%), hsl(35 91% 62%));
-    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%), hsl(120 61% 50%));
+    /* Premium Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(270 50% 65%), hsl(290 45% 70%));
+    --gradient-wellness: linear-gradient(135deg, hsl(140 35% 55%), hsl(160 40% 60%));
+    --gradient-premium: linear-gradient(135deg, hsl(43 89% 58%), hsl(35 80% 65%));
+    --gradient-mindful: linear-gradient(135deg, hsl(350 45% 65%), hsl(320 50% 70%));
 
-    /* Shadow System */
-    --shadow-sm: 0 1px 2px 0 hsl(222 47% 11% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(222 47% 11% / 0.1);
-    --shadow-lg: 0 10px 15px -3px hsl(222 47% 11% / 0.1);
-    --shadow-glow: 0 0 20px hsl(207 90% 54% / 0.3);
+    /* Premium Shadow System */
+    --shadow-sm: 0 1px 3px 0 hsl(240 15% 15% / 0.08);
+    --shadow-md: 0 4px 12px -2px hsl(240 15% 15% / 0.12);
+    --shadow-lg: 0 20px 25px -5px hsl(240 15% 15% / 0.15);
+    --shadow-glow: 0 0 30px hsl(270 50% 65% / 0.25);
+    --shadow-premium: 0 8px 25px -8px hsl(270 50% 65% / 0.3);
 
     --radius: 12px;
 
@@ -124,39 +127,48 @@ All colors MUST be HSL for consistent theming
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  
+  .font-display {
+    font-family: 'Playfair Display', Georgia, serif;
   }
 }
 
 @layer components {
-  /* Card Components */
+  /* Premium Card Components */
   .dashboard-card {
-    @apply bg-card rounded-xl p-4 shadow-md border border-border/50;
+    @apply bg-card rounded-2xl p-5 border border-border/30;
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(8px);
   }
 
   .stat-card {
-    @apply dashboard-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1;
+    @apply dashboard-card hover:shadow-premium transition-all duration-500 hover:-translate-y-2 hover:scale-105;
   }
 
   .ad-banner {
-    @apply dashboard-card bg-gradient-to-r from-secondary to-muted p-3;
+    @apply dashboard-card bg-gradient-to-br from-secondary via-muted to-secondary/80 p-4;
   }
 
-  /* Tier Badge Styles */
+  /* Premium Tier Badge Styles */
   .tier-badge {
-    @apply px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1;
+    @apply px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2;
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(12px);
   }
 
-  .tier-gold {
-    @apply bg-gradient-to-r from-tier-gold to-[hsl(35_91%_62%)] text-tier-gold-foreground;
+  .tier-premium {
+    @apply bg-gradient-to-r from-tier-gold via-[hsl(43_89%_58%)] to-[hsl(35_80%_65%)] text-tier-gold-foreground;
   }
 
-  .tier-blue {
-    @apply bg-gradient-to-r from-tier-blue to-[hsl(220_90%_60%)] text-tier-blue-foreground;
+  .tier-mindful {
+    @apply bg-gradient-to-r from-tier-amethyst via-[hsl(270_50%_65%)] to-[hsl(290_45%_70%)] text-tier-amethyst-foreground;
   }
 
-  .tier-purple {
-    @apply bg-gradient-to-r from-tier-purple to-[hsl(280_52%_55%)] text-tier-purple-foreground;
+  .tier-wellness {
+    @apply bg-gradient-to-r from-tier-sage via-[hsl(140_35%_55%)] to-[hsl(160_40%_60%)] text-tier-sage-foreground;
   }
 
   /* Progress Ring Animation */
@@ -165,38 +177,48 @@ All colors MUST be HSL for consistent theming
     transition: stroke-dasharray 0.5s ease-in-out;
   }
 
-  /* Navigation Cards */
+  /* Premium Navigation Cards */
   .nav-card {
-    @apply dashboard-card cursor-pointer hover:scale-105 transition-all duration-300 
-           hover:shadow-glow active:scale-95 text-center;
+    @apply dashboard-card cursor-pointer hover:scale-110 transition-all duration-500 
+           hover:shadow-premium active:scale-95 text-center;
   }
 
-  /* Bottom Tab Navigation */
+  /* Premium Bottom Tab Navigation */
   .tab-button {
-    @apply flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-lg 
-           transition-all duration-200 min-h-[44px];
+    @apply flex flex-col items-center justify-center gap-1 py-3 px-4 rounded-xl 
+           transition-all duration-300 min-h-[48px] backdrop-blur-sm;
   }
 
   .tab-active {
-    @apply bg-gradient-to-b from-primary to-primary/80 text-primary-foreground shadow-md;
+    @apply bg-gradient-primary text-primary-foreground shadow-premium;
+    box-shadow: var(--shadow-premium);
   }
 
   .tab-inactive {
-    @apply text-muted-foreground hover:text-foreground hover:bg-secondary/50;
+    @apply text-muted-foreground hover:text-foreground hover:bg-secondary/70;
   }
 
-  /* CTA Button */
+  /* Premium CTA Button */
   .cta-button {
-    @apply bg-gradient-to-r from-primary via-primary to-tier-purple 
-           text-primary-foreground font-semibold py-4 px-6 rounded-xl
-           shadow-lg hover:shadow-xl transition-all duration-300
-           hover:scale-105 active:scale-95 min-h-[44px];
+    @apply bg-gradient-primary text-primary-foreground font-semibold py-5 px-8 rounded-2xl
+           shadow-premium hover:shadow-glow transition-all duration-500
+           hover:scale-105 active:scale-95 min-h-[52px] backdrop-blur-sm;
   }
 
-  /* Countdown Timer */
+  /* Premium Countdown Timer */
   .countdown-urgent {
-    @apply bg-gradient-to-r from-destructive/10 to-warning/10 
-           border-l-4 border-destructive p-3 rounded-lg;
+    @apply bg-gradient-to-r from-destructive/10 via-warning/10 to-destructive/10 
+           border-l-4 border-destructive p-4 rounded-xl backdrop-blur-sm;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Premium Brand Styles */
+  .yogicmile-brand {
+    @apply font-display text-primary bg-gradient-primary bg-clip-text text-transparent;
+  }
+
+  .premium-glass {
+    @apply bg-white/80 backdrop-blur-md border border-white/20;
   }
 }
 

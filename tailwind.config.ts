@@ -21,22 +21,22 @@ export default {
         foreground: "hsl(var(--foreground))",
         surface: "hsl(var(--surface))",
         
-        /* Tier Colors for Gamification */
+        /* Premium Wellness Tier Colors */
         "tier-gold": {
           DEFAULT: "hsl(var(--tier-gold))",
           foreground: "hsl(var(--tier-gold-foreground))",
         },
-        "tier-blue": {
-          DEFAULT: "hsl(var(--tier-blue))",
-          foreground: "hsl(var(--tier-blue-foreground))",
+        "tier-amethyst": {
+          DEFAULT: "hsl(var(--tier-amethyst))",
+          foreground: "hsl(var(--tier-amethyst-foreground))",
         },
-        "tier-purple": {
-          DEFAULT: "hsl(var(--tier-purple))",
-          foreground: "hsl(var(--tier-purple-foreground))",
+        "tier-sage": {
+          DEFAULT: "hsl(var(--tier-sage))",
+          foreground: "hsl(var(--tier-sage-foreground))",
         },
-        "tier-green": {
-          DEFAULT: "hsl(var(--tier-green))",
-          foreground: "hsl(var(--tier-green-foreground))",
+        "tier-rose": {
+          DEFAULT: "hsl(var(--tier-rose))",
+          foreground: "hsl(var(--tier-rose-foreground))",
         },
         
         primary: {
@@ -85,6 +85,10 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+      },
+      fontFamily: {
+        'display': ['Playfair Display', 'Georgia', 'serif'],
+        'sans': ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",

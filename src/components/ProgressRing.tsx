@@ -52,19 +52,19 @@ export const ProgressRing = ({
         
         {/* Center Content */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <p className="text-sm text-muted-foreground mb-1">Today's Steps</p>
-          <p className="text-3xl font-bold text-foreground mb-2">{dailySteps.toLocaleString()}</p>
-          <p className="text-xs text-muted-foreground">Goal: {goalSteps.toLocaleString()}</p>
-          <div className="w-8 h-0.5 bg-border my-2"></div>
-          <p className="text-xs text-muted-foreground">Lifetime Steps</p>
-          <p className="text-lg font-semibold text-primary">{lifetimeSteps.toLocaleString()}</p>
+          <p className="text-sm text-muted-foreground mb-1 font-medium">Mindful Steps Today</p>
+          <p className="text-3xl font-bold text-foreground mb-2 font-display">{dailySteps.toLocaleString()}</p>
+          <p className="text-xs text-muted-foreground">Daily Goal: {goalSteps.toLocaleString()}</p>
+          <div className="w-10 h-0.5 bg-gradient-primary rounded-full my-3"></div>
+          <p className="text-xs text-muted-foreground font-medium">Journey Progress</p>
+          <p className="text-lg font-semibold text-primary font-display">{lifetimeSteps.toLocaleString()}</p>
         </div>
       </div>
 
       {/* Progress Percentage */}
       <div className="text-center">
-        <p className="text-2xl font-bold text-primary">{percentage.toFixed(0)}%</p>
-        <p className="text-sm text-muted-foreground">of daily goal completed</p>
+        <p className="text-3xl font-bold text-primary font-display">{percentage.toFixed(0)}%</p>
+        <p className="text-sm text-muted-foreground font-medium">mindful progress achieved</p>
       </div>
     </div>
   );

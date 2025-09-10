@@ -4,41 +4,41 @@ export const NavigationCards = () => {
   const navigationItems = [
     {
       icon: List,
-      title: "Coins Earned",
-      subtitle: "Daily Earnings",
-      gradient: "from-tier-gold to-tier-gold/80"
+      title: "Karma Journal",
+      subtitle: "Track Progress",
+      gradient: "from-tier-gold via-tier-gold to-[hsl(35_80%_65%)]"
     },
     {
       icon: Gift,
-      title: "Vouchers & Store",
-      subtitle: "Redeem Rewards",
-      gradient: "from-tier-blue to-tier-blue/80"
+      title: "Wellness Store",
+      subtitle: "Mindful Rewards",
+      gradient: "from-tier-amethyst via-tier-amethyst to-[hsl(290_45%_70%)]"
     },
     {
       icon: Disc,
-      title: "Spin Wheel",
-      subtitle: "Lucky Bonus",
-      gradient: "from-tier-purple to-tier-purple/80"
+      title: "Dharma Wheel",
+      subtitle: "Daily Inspiration",
+      gradient: "from-tier-sage via-tier-sage to-[hsl(160_40%_60%)]"
     },
     {
       icon: Wallet,
-      title: "Wallet",
-      subtitle: "Balance & History",
-      gradient: "from-tier-green to-tier-green/80"
+      title: "Sacred Vault",
+      subtitle: "Your Balance",
+      gradient: "from-tier-rose via-tier-rose to-[hsl(320_50%_70%)]"
     }
   ];
 
   return (
     <div>
-      <h3 className="text-lg font-semibold mb-4 text-foreground">Quick Actions</h3>
-      <div className="grid grid-cols-2 gap-4">
+      <h3 className="text-xl font-display font-semibold mb-6 text-foreground">Mindful Pathways</h3>
+      <div className="grid grid-cols-2 gap-5">
         {navigationItems.map((item, index) => (
           <div key={index} className="nav-card">
-            <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-3 mx-auto shadow-md`}>
-              <item.icon className="w-6 h-6 text-white" />
+            <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-4 mx-auto shadow-premium`}>
+              <item.icon className="w-7 h-7 text-white" />
             </div>
-            <h4 className="font-semibold text-sm text-foreground mb-1">{item.title}</h4>
-            <p className="text-xs text-muted-foreground">{item.subtitle}</p>
+            <h4 className="font-semibold text-sm text-foreground mb-2 font-display">{item.title}</h4>
+            <p className="text-xs text-muted-foreground font-medium">{item.subtitle}</p>
           </div>
         ))}
       </div>
