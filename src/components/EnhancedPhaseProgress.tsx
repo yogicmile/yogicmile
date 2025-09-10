@@ -64,7 +64,7 @@ export const EnhancedPhaseProgress = ({
 
         {/* Phase Name */}
         <h2 
-          className="text-2xl font-bold mb-1"
+          className="text-xl font-bold mb-1"
           style={{ 
             background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
             WebkitBackgroundClip: 'text',
@@ -74,7 +74,12 @@ export const EnhancedPhaseProgress = ({
         >
           {tierName}
         </h2>
-        <p className="text-sm text-muted-foreground">Phase {currentTier} of 9</p>
+        {/* Phase indicator moved here to prevent overlap */}
+        <div className="flex items-center justify-center gap-2">
+          <p className="text-xs text-muted-foreground">Phase {currentTier} of 9</p>
+          <span className="w-1 h-1 bg-golden-accent rounded-full"></span>
+          <p className="text-xs text-golden-accent font-medium">{Math.round(progressPercentage)}% Complete</p>
+        </div>
       </div>
 
       {/* Horizontal Progress Bar */}
@@ -82,7 +87,7 @@ export const EnhancedPhaseProgress = ({
         <div className="relative">
           {/* Progress Bar Background */}
           <div 
-            className="w-full h-3 rounded-full overflow-hidden"
+            className="w-full h-3 rounded-full overflow-hidden mb-4"
             style={{
               background: '#F5F5F5',
               boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
@@ -100,35 +105,44 @@ export const EnhancedPhaseProgress = ({
             />
           </div>
 
-          {/* Milestone Markers */}
-          {milestones.map((milestone, index) => (
-            <div
-              key={milestone}
-              className={`absolute top-0 w-1 h-3 rounded-full transition-colors duration-500 ${
-                progressPercentage >= milestone ? 'bg-golden-accent' : 'bg-gray-300'
-              }`}
-              style={{ left: `${milestone}%`, transform: 'translateX(-50%)' }}
-            >
-              {/* Milestone Tooltip */}
-              <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-medium text-muted-foreground whitespace-nowrap">
-                {milestone}%
+          {/* Milestone Markers - Positioned above progress bar */}
+          <div className="absolute -top-8 left-0 right-0">
+            {milestones.map((milestone, index) => (
+              <div
+                key={milestone}
+                className={`absolute flex flex-col items-center transition-colors duration-500`}
+                style={{ left: `${milestone}%`, transform: 'translateX(-50%)' }}
+              >
+                {/* Milestone Tooltip */}
+                <div className="text-xs font-medium text-muted-foreground whitespace-nowrap mb-1">
+                  {milestone}%
+                </div>
+                {/* Milestone Dot */}
+                <div
+                  className={`w-2 h-2 rounded-full transition-colors duration-500 ${
+                    progressPercentage >= milestone ? 'bg-golden-accent' : 'bg-gray-300'
+                  }`}
+                />
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        {/* Progress Percentage */}
+        {/* Progress Percentage and Phase Info - Separated */}
         <div className="flex justify-between items-center mt-2">
           <span className="text-sm text-muted-foreground">0</span>
-          <span 
-            className="text-sm font-bold px-3 py-1 rounded-full"
-            style={{
-              background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%)',
-              color: '#FFA500'
-            }}
-          >
-            {Math.round(progressPercentage)}%
-          </span>
+          <div className="flex flex-col items-center gap-1">
+            <span 
+              className="text-sm font-bold px-3 py-1 rounded-full"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%)',
+                color: '#FFA500'
+              }}
+            >
+              {Math.round(progressPercentage)}%
+            </span>
+            <p className="text-xs text-muted-foreground">Phase {currentTier} of 9</p>
+          </div>
           <span className="text-sm text-muted-foreground">{tierTarget.toLocaleString()}</span>
         </div>
       </div>
