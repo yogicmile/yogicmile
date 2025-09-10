@@ -87,7 +87,7 @@ export const EnhancedPhaseProgress = ({
         <div className="relative">
           {/* Progress Bar Background */}
           <div 
-            className="w-full h-3 rounded-full overflow-hidden mb-4"
+            className="w-full h-3 rounded-full overflow-hidden mb-5"
             style={{
               background: '#F5F5F5',
               boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
@@ -106,7 +106,7 @@ export const EnhancedPhaseProgress = ({
           </div>
 
           {/* Milestone Markers - Below the progress bar */}
-          <div className="relative h-6 mt-2">
+          <div className="relative min-h-[2rem] sm:min-h-[2.5rem] mt-3">
             {milestones.map((milestone, index) => (
               <div
                 key={milestone}
@@ -119,8 +119,8 @@ export const EnhancedPhaseProgress = ({
                     progressPercentage >= milestone ? 'bg-golden-accent' : 'bg-gray-300'
                   }`}
                 />
-                {/* Milestone Label */}
-                <div className="text-[10px] leading-none text-muted-foreground mt-1">
+                {/* Milestone Label (hidden on small screens to prevent overlap) */}
+                <div className="hidden sm:block text-[10px] leading-none text-muted-foreground mt-1">
                   {milestone}%
                 </div>
               </div>
@@ -129,7 +129,7 @@ export const EnhancedPhaseProgress = ({
         </div>
 
         {/* Progress Percentage and Phase Info - Separated */}
-        <div className="flex justify-between items-center mt-4">
+        <div className="flex justify-between items-center mt-8">
           <span className="text-sm text-muted-foreground">0</span>
           <div className="flex flex-col items-center gap-1">
             <span 
