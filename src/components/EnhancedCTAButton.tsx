@@ -2,13 +2,15 @@ import { useState } from 'react';
 import { Gift, Check, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useHapticFeedback, useCelebration } from '@/hooks/use-animations';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { RedemptionModal } from '@/components/RedemptionModal';
 
 interface EnhancedCTAButtonProps {
   onClaim: () => Promise<boolean>;
   disabled?: boolean;
   coinBalance: number;
   rewardAmount?: number;
+  todaysCoins?: number;
+  todaysSteps?: number;
 }
 
 type ButtonState = 'idle' | 'loading' | 'success' | 'error' | 'confirmation';
@@ -17,7 +19,9 @@ export const EnhancedCTAButton = ({
   onClaim, 
   disabled = false, 
   coinBalance,
-  rewardAmount = 10 
+  rewardAmount = 10,
+  todaysCoins = 10,
+  todaysSteps = 5000
 }: EnhancedCTAButtonProps) => {
   const [buttonState, setButtonState] = useState<ButtonState>('idle');
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -33,8 +37,7 @@ export const EnhancedCTAButton = ({
     setShowConfirmation(true);
   };
 
-  const handleConfirmClaim = async () => {
-    setShowConfirmation(false);
+  const handleConfirmClaim = async (): Promise<boolean> => {
     setButtonState('loading');
     triggerHaptic('light');
 
@@ -53,6 +56,7 @@ export const EnhancedCTAButton = ({
         setTimeout(() => {
           setButtonState('idle');
         }, 3000);
+        return true;
       } else {
         setButtonState('error');
         setErrorMessage('Unable to claim reward. Please try again.');
@@ -63,6 +67,7 @@ export const EnhancedCTAButton = ({
           setButtonState('idle');
           setErrorMessage('');
         }, 3000);
+        return false;
       }
     } catch (error) {
       setButtonState('error');
@@ -73,6 +78,7 @@ export const EnhancedCTAButton = ({
         setButtonState('idle');
         setErrorMessage('');
       }, 3000);
+      return false;
     }
   };
 
@@ -168,59 +174,16 @@ export const EnhancedCTAButton = ({
         )}
       </div>
 
-      {/* Confirmation Dialog */}
-      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
-        <DialogContent className="max-w-sm mx-auto">
-          <DialogHeader>
-            <DialogTitle className="font-display flex items-center gap-2">
-              <Gift className="w-6 h-6 text-tier-1-paisa" />
-              Redeem Your Coins
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="text-center">
-              <div className="text-6xl mb-4">🎁</div>
-              <p className="text-lg font-semibold mb-2">Ready to redeem your daily coins?</p>
-              <p className="text-muted-foreground text-sm">
-                You'll receive <span className="font-bold text-tier-1-paisa">{rewardAmount} coins</span>
-              </p>
-            </div>
-            
-            <div className="bg-secondary/50 rounded-lg p-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Current Balance:</span>
-                <span className="font-medium">{coinBalance} coins</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Reward Amount:</span>
-                <span className="font-medium text-tier-1-paisa">+{rewardAmount} coins</span>
-              </div>
-              <hr className="border-border/50" />
-              <div className="flex justify-between font-semibold">
-                <span>New Balance:</span>
-                <span className="text-tier-1-paisa">{coinBalance + rewardAmount} coins</span>
-              </div>
-            </div>
-            
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowConfirmation(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleConfirmClaim}
-                className="flex-1 bg-tier-1-paisa text-tier-1-paisa-foreground hover:bg-tier-1-paisa/90"
-              >
-                Redeem Now
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Redemption Modal */}
+      <RedemptionModal
+        open={showConfirmation}
+        onOpenChange={setShowConfirmation}
+        onRedeem={handleConfirmClaim}
+        coinBalance={coinBalance}
+        todaysCoins={todaysCoins}
+        todaysSteps={todaysSteps}
+        rewardAmount={rewardAmount}
+      />
     </>
   );
 };

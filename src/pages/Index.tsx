@@ -318,16 +318,18 @@ const Index = () => {
 
             {/* Today's Summary Card */}
             <div className="px-4 py-2">
-              <TodaysSummaryCard
-                currentSteps={yogicData.dailyProgress.currentSteps}
-                dailyGoal={yogicData.dailyProgress.dailyGoal}
-                coinsEarned={yogicData.dailyProgress.coinsEarnedToday}
-                distance={yogicData.dailyProgress.distance}
-                activeMinutes={yogicData.dailyProgress.activeMinutes}
-                isGoalReached={yogicData.dailyProgress.currentSteps >= yogicData.dailyProgress.dailyGoal}
-                hasRedeemedToday={yogicData.dailyProgress.coinsRedeemedToday > 0}
-                className="animate-fade-in"
-              />
+            <TodaysSummaryCard
+              currentSteps={yogicData.dailyProgress.currentSteps}
+              dailyGoal={yogicData.dailyProgress.dailyGoal}
+              coinsEarned={yogicData.dailyProgress.coinsEarnedToday}
+              distance={yogicData.dailyProgress.distance}
+              activeMinutes={yogicData.dailyProgress.activeMinutes}
+              isGoalReached={yogicData.dailyProgress.currentSteps >= yogicData.dailyProgress.dailyGoal}
+              hasRedeemedToday={yogicData.dailyProgress.coinsRedeemedToday > 0}
+              onClaimReward={handleClaimReward}
+              coinBalance={yogicData.wallet.mockData.totalBalance * 100}
+              className="animate-fade-in"
+            />
             </div>
 
             {/* Yogic Mile Inspiration & Mindful Features */}

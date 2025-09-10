@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { EnhancedCTAButton } from '@/components/EnhancedCTAButton';
+import { CountdownTimer } from '@/components/CountdownTimer';
 
 interface TodaysSummaryCardProps {
   currentSteps: number;
@@ -9,6 +11,8 @@ interface TodaysSummaryCardProps {
   isGoalReached: boolean;
   hasRedeemedToday: boolean;
   className?: string;
+  onClaimReward?: () => Promise<boolean>;
+  coinBalance?: number;
 }
 
 export const TodaysSummaryCard = ({
@@ -19,7 +23,9 @@ export const TodaysSummaryCard = ({
   activeMinutes,
   isGoalReached,
   hasRedeemedToday,
-  className = ""
+  className = "",
+  onClaimReward,
+  coinBalance = 0
 }: TodaysSummaryCardProps) => {
   const [coinAnimation, setCoinAnimation] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -135,7 +141,7 @@ export const TodaysSummaryCard = ({
         </div>
       </div>
 
-      {/* Status Banner */}
+      {/* Status Banner & Redemption Section */}
       <div className={`rounded-2xl p-4 text-center border ${
         hasRedeemedToday
           ? 'bg-gradient-to-r from-sage-green/10 to-deep-teal/10 border-sage-green/20'
@@ -143,7 +149,7 @@ export const TodaysSummaryCard = ({
           ? 'bg-gradient-to-r from-golden-accent/10 to-warm-coral/10 border-golden-accent/20'
           : 'bg-gradient-to-r from-serene-blue/10 to-soft-lavender/10 border-serene-blue/20'
       }`}>
-        <div className="flex items-center justify-center space-x-2">
+        <div className="flex items-center justify-center space-x-2 mb-4">
           <div className="text-xl">
             {hasRedeemedToday ? '✅' : isGoalReached ? '🎉' : '🎯'}
           </div>
@@ -156,6 +162,25 @@ export const TodaysSummaryCard = ({
             }
           </div>
         </div>
+        
+        {/* Countdown Timer for redemption urgency */}
+        {coinsEarned > 0 && !hasRedeemedToday && (
+          <div className="mb-4">
+            <CountdownTimer />
+          </div>
+        )}
+        
+        {/* Redemption Button */}
+        {coinsEarned > 0 && !hasRedeemedToday && onClaimReward && (
+          <EnhancedCTAButton
+            onClaim={onClaimReward}
+            coinBalance={coinBalance}
+            todaysCoins={coinsEarned}
+            todaysSteps={currentSteps}
+            rewardAmount={coinsEarned}
+            disabled={false}
+          />
+        )}
       </div>
 
       {/* Mindfulness Reminder */}
