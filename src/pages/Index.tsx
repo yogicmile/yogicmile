@@ -14,8 +14,7 @@ import { AdBanner } from '@/components/AdBanner';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { PageLoading, SkeletonProgressRing } from '@/components/LoadingStates';
-import { EmptyState, NoTransactionsEmptyState } from '@/components/EmptyState';
-import { Gift } from 'lucide-react';
+import { NoTransactionsEmptyState } from '@/components/EmptyState';
 import { useYogicMileData } from '@/hooks/use-mock-data';
 
 const Index = () => {
