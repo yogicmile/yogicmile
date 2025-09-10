@@ -21,7 +21,7 @@ export default {
         foreground: "hsl(var(--foreground))",
         surface: "hsl(var(--surface))",
         
-        /* 9-Tier Progression System */
+        /* 9-Tier Step Tracking Progression System */
         "tier-1-paisa": {
           DEFAULT: "hsl(var(--tier-1-paisa))",
           light: "hsl(var(--tier-1-paisa-light))",
