@@ -106,7 +106,7 @@ export const EnhancedPhaseProgress = ({
           </div>
 
           {/* Milestone Markers - Positioned above progress bar */}
-          <div className="absolute -top-8 left-0 right-0">
+          <div className="absolute -top-12 left-0 right-0">
             {milestones.map((milestone, index) => (
               <div
                 key={milestone}
@@ -129,7 +129,7 @@ export const EnhancedPhaseProgress = ({
         </div>
 
         {/* Progress Percentage and Phase Info - Separated */}
-        <div className="flex justify-between items-center mt-2">
+        <div className="flex justify-between items-center mt-6">
           <span className="text-sm text-muted-foreground">0</span>
           <div className="flex flex-col items-center gap-1">
             <span 
