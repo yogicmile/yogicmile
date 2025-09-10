@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { YogicMileHeader } from '@/components/YogicMileHeader';
 import { EnhancedPhaseProgress } from '@/components/EnhancedPhaseProgress';
-import { CoinRateDisplay } from '@/components/CoinRateDisplay';
+import { DynamicCoinRateDisplay } from '@/components/DynamicCoinRateDisplay';
+import { MilestoneCelebrations } from '@/components/MilestoneCelebrations';
 import { MotivationStreaksSection } from '@/components/MotivationStreaksSection';
 import { TodaysSummaryCard } from '@/components/TodaysSummaryCard';
+import { YogicMileInspiration } from '@/components/YogicMileInspiration';
 import { InteractiveProgressRing } from '@/components/InteractiveProgressRing';
 import { StatsCards } from '@/components/StatsCards';
 import { EnhancedNavigationCards } from '@/components/EnhancedNavigationCards';
@@ -15,12 +17,15 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { PageLoading, SkeletonProgressRing } from '@/components/LoadingStates';
 import { NoTransactionsEmptyState } from '@/components/EmptyState';
+import { useNavigate } from 'react-router-dom';
 import { useYogicMileData } from '@/hooks/use-mock-data';
+import { useCoinRateSystem } from '@/hooks/use-coin-rate-system';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'wallet' | 'rewards' | 'profile'>('dashboard');
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const yogicData = useYogicMileData();
+  const coinRateSystem = useCoinRateSystem();
 
   // Simulate initial app loading
   useEffect(() => {
@@ -274,15 +279,14 @@ const Index = () => {
               />
             </div>
 
-            {/* Coin Rate Display Section */}
+            {/* Dynamic Coin Rate Display Section */}
             <div className="px-4 py-2">
-              <CoinRateDisplay
-                currentTier={yogicData.user.currentTier}
-                currentRate={1} // 1 paisa per 100 steps for Paisa Phase
-                nextTier={yogicData.tierProgress.nextTierPreview.tier}
-                nextRate={2} // 2 paisa per 100 steps for Coin Phase
-                remainingSteps={yogicData.tierProgress.tierTarget - yogicData.tierProgress.currentTierSteps}
-                progressToNext={(yogicData.tierProgress.currentTierSteps / yogicData.tierProgress.tierTarget) * 100}
+              <DynamicCoinRateDisplay
+                currentRate={coinRateSystem.calculateCurrentRate()}
+                currentTier={coinRateSystem.currentTierData}
+                nextTier={coinRateSystem.nextTierData}
+                dailyPotential={coinRateSystem.getDailyPotential()}
+                tierProgress={coinRateSystem.getTierProgress()}
                 className="animate-fade-in"
               />
             </div>
@@ -314,23 +318,25 @@ const Index = () => {
               />
             </div>
 
+            {/* Yogic Mile Inspiration & Mindful Features */}
+            <div className="px-4 py-2">
+              <YogicMileInspiration
+                currentTier={coinRateSystem.currentTier}
+                currentStreak={coinRateSystem.currentStreak}
+                className="animate-fade-in"
+              />
+            </div>
+
             {/* Enhanced Navigation Cards with Phase Journey */}
             <div className="px-4 pb-6">
               <EnhancedNavigationCards />
             </div>
 
-            {/* Level Up Animation Demo - Placeholder for testing */}
-            <div className="px-4 pb-6">
-              <div className="bg-surface/80 backdrop-blur-md rounded-2xl p-4 border border-warm-coral/20">
-                <h3 className="font-semibold text-warm-coral mb-2 flex items-center gap-2">
-                  <span>🎊</span>
-                  <span>Achievement Unlocked!</span>
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Level up animations will trigger when you reach milestones ✨
-                </p>
-              </div>
-            </div>
+            {/* Milestone Celebrations Overlay */}
+            <MilestoneCelebrations
+              event={coinRateSystem.celebrationEvent}
+              onDismiss={coinRateSystem.dismissCelebration}
+            />
           </div>
         );
     }
