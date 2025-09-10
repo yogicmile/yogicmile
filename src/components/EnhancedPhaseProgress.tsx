@@ -105,31 +105,31 @@ export const EnhancedPhaseProgress = ({
             />
           </div>
 
-          {/* Milestone Markers - Positioned above progress bar */}
-          <div className="absolute -top-12 left-0 right-0">
+          {/* Milestone Markers - Below the progress bar */}
+          <div className="relative h-6 mt-2">
             {milestones.map((milestone, index) => (
               <div
                 key={milestone}
-                className={`absolute flex flex-col items-center transition-colors duration-500`}
+                className="absolute flex flex-col items-center"
                 style={{ left: `${milestone}%`, transform: 'translateX(-50%)' }}
               >
-                {/* Milestone Tooltip */}
-                <div className="text-xs font-medium text-muted-foreground whitespace-nowrap mb-1">
-                  {milestone}%
-                </div>
                 {/* Milestone Dot */}
                 <div
-                  className={`w-2 h-2 rounded-full transition-colors duration-500 ${
+                  className={`w-2 h-2 rounded-full ${
                     progressPercentage >= milestone ? 'bg-golden-accent' : 'bg-gray-300'
                   }`}
                 />
+                {/* Milestone Label */}
+                <div className="text-[10px] leading-none text-muted-foreground mt-1">
+                  {milestone}%
+                </div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Progress Percentage and Phase Info - Separated */}
-        <div className="flex justify-between items-center mt-6">
+        <div className="flex justify-between items-center mt-4">
           <span className="text-sm text-muted-foreground">0</span>
           <div className="flex flex-col items-center gap-1">
             <span 
