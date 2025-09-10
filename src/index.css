@@ -443,8 +443,6 @@ All colors MUST be HSL for consistent theming
     @apply bg-warning text-warning-foreground px-3 py-1 rounded-full text-xs font-medium
            animate-pulse;
   }
-}
-
   /* Enhanced Step Tracking Progress Ring */
   .progress-ring {
     transform-origin: center;
@@ -489,12 +487,6 @@ All colors MUST be HSL for consistent theming
 
   .tier-wellness {
     @apply bg-gradient-to-r from-tier-sage via-[hsl(140_35%_55%)] to-[hsl(160_40%_60%)] text-tier-sage-foreground;
-  }
-
-  /* Progress Ring Animation */
-  .progress-ring {
-    transform-origin: center;
-    transition: stroke-dasharray 0.5s ease-in-out;
   }
 
   /* Premium Navigation Cards */
