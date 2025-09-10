@@ -649,7 +649,7 @@ All colors MUST be HSL for consistent theming
     animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Enhanced step tracking animations */
+  /* Enhanced Yogic Mile Animations */
   .animate-celebration {
     animation: celebration 2s ease-out;
   }
@@ -660,6 +660,22 @@ All colors MUST be HSL for consistent theming
 
   .animate-glow-pulse {
     animation: glowPulse 2s ease-in-out infinite;
+  }
+
+  .animate-breathe {
+    animation: breathe 3s ease-in-out infinite;
+  }
+
+  .animate-flame {
+    animation: flame 1s ease-in-out infinite alternate;
+  }
+
+  .animate-bloom {
+    animation: bloom 3s ease-in-out infinite;
+  }
+
+  .animate-ripple {
+    animation: ripple 2s ease-out infinite;
   }
 
   /* Gradient Utilities */
@@ -733,5 +749,47 @@ All colors MUST be HSL for consistent theming
   }
   50% {
     filter: drop-shadow(0 0 16px hsl(var(--primary) / 0.6));
+  }
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes flame {
+  0% {
+    transform: scale(1) rotate(-1deg);
+    filter: drop-shadow(0 0 20px rgba(255, 112, 67, 0.6));
+  }
+  100% {
+    transform: scale(1.1) rotate(1deg);
+    filter: drop-shadow(0 0 30px rgba(255, 112, 67, 0.9));
+  }
+}
+
+@keyframes bloom {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+    opacity: 0.9;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
   }
 }

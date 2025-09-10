@@ -1,198 +1,197 @@
-import { List, Gift, Disc, Wallet, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
-import { useHapticFeedback } from '@/hooks/use-animations';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useYogicMileData } from '@/hooks/use-mock-data';
 
-interface NavigationItem {
-  icon: React.ComponentType<any>;
+interface NavigationCard {
+  id: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
+  icon: string;
+  yogicIcon: string;
+  badge?: string | number;
   gradient: string;
-  tierColor: string;
-  hasNotification?: boolean;
-  notificationText?: string;
-  quickActions?: Array<{
-    label: string;
-    action: () => void;
-  }>;
+  description: string;
+  isNew?: boolean;
 }
 
 export const EnhancedNavigationCards = () => {
-  const [selectedCard, setSelectedCard] = useState<NavigationItem | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const { triggerHaptic } = useHapticFeedback();
+  const mockData = useYogicMileData();
 
-  const navigationItems: NavigationItem[] = [
+  const navigationCards: NavigationCard[] = [
     {
-      icon: List,
-      title: "Coins Earned",
-      subtitle: "Track Earnings",
-      gradient: "from-tier-1-paisa via-tier-1-paisa to-tier-2-coin",
-      tierColor: "tier-1-paisa",
-      hasNotification: true,
-      notificationText: "New earnings available",
-      quickActions: [
-        { label: "View Daily Log", action: () => console.log("Quick log") },
-        { label: "Earning Stats", action: () => console.log("View stats") },
-      ]
+      id: 'phase-journey',
+      title: 'Phase Journey',
+      subtitle: 'Explore All 9 Tiers',
+      icon: '🗺️',
+      yogicIcon: '🕉️',
+      badge: 'Discover',
+      gradient: 'from-golden-accent/20 via-serene-blue/10 to-soft-lavender/20',
+      description: 'Discover your path through the 9 phases of transformation',
+      isNew: true
     },
     {
-      icon: Gift,
-      title: "Vouchers & Coupons",
-      subtitle: "Redeem Rewards",
-      gradient: "from-tier-3-token via-tier-3-token to-tier-4-gem",
-      tierColor: "tier-3-token",
-      hasNotification: false,
-      quickActions: [
-        { label: "Browse Store", action: () => console.log("Browse rewards") },
-        { label: "My Vouchers", action: () => console.log("My purchases") },
-      ]
+      id: 'coins-earned',
+      title: 'Daily Earnings',
+      subtitle: `${mockData.dailyProgress.coinsEarnedToday} coins today`,
+      icon: '📊',
+      yogicIcon: '🪷💰',
+      badge: mockData.dailyProgress.coinsEarnedToday > 0 ? mockData.dailyProgress.coinsEarnedToday : null,
+      gradient: 'from-sage-green/20 via-deep-teal/10 to-serene-blue/20',
+      description: 'Track your mindful earnings and coin history'
     },
     {
-      icon: Disc,
-      title: "Spin Wheel",
-      subtitle: "Bonus Coins",
-      gradient: "from-tier-5-diamond via-tier-5-diamond to-tier-6-crown",
-      tierColor: "tier-5-diamond",
-      hasNotification: true,
-      notificationText: "Free spin available",
-      quickActions: [
-        { label: "Spin Now", action: () => console.log("Spin now") },
-        { label: "Spin History", action: () => console.log("Spin history") },
-      ]
+      id: 'vouchers',
+      title: 'Rewards Store',
+      subtitle: 'Mindful Shopping',
+      icon: '🎁',
+      yogicIcon: '☮️🛍️',
+      badge: 'NEW',
+      gradient: 'from-soft-lavender/20 via-warm-coral/10 to-golden-accent/20',
+      description: 'Redeem coins for wellness and lifestyle rewards'
     },
     {
-      icon: Wallet,
-      title: "Wallet",
-      subtitle: "Balance & History",
-      gradient: "from-tier-7-emperor via-tier-7-emperor to-tier-8-legend",
-      tierColor: "tier-7-emperor",
-      hasNotification: false,
-      quickActions: [
-        { label: "View Balance", action: () => console.log("View balance") },
-        { label: "Redeem History", action: () => console.log("Transaction history") },
-      ]
+      id: 'spin-wheel',
+      title: 'Lucky Spin',
+      subtitle: 'Dharma Wheel',
+      icon: '🎡',
+      yogicIcon: '☸️',
+      badge: 1,
+      gradient: 'from-warm-coral/20 via-golden-accent/10 to-sage-green/20',
+      description: 'Spin the wheel of fortune for bonus rewards'
+    },
+    {
+      id: 'wallet',
+      title: 'My Wallet',
+      subtitle: 'Mindful Money',
+      icon: '💰',
+      yogicIcon: '🧘‍♂️💳',
+      badge: mockData.wallet.mockData.pendingRedemptions > 0 ? mockData.wallet.mockData.pendingRedemptions : null,
+      gradient: 'from-deep-teal/20 via-serene-blue/10 to-soft-lavender/20',
+      description: 'Manage your earnings and transaction history'
     }
   ];
 
-  const handleCardClick = (item: NavigationItem) => {
-    triggerHaptic('medium');
-    setSelectedCard(item);
-    setShowModal(true);
-  };
-
-  const handleQuickAction = (action: () => void) => {
-    triggerHaptic('light');
-    action();
-    setShowModal(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent, item: NavigationItem) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleCardClick(item);
+  const handleCardClick = (cardId: string) => {
+    console.log(`Navigating to: ${cardId}`);
+    // Add navigation logic here
+    // For Phase Journey, could open a modal or navigate to a dedicated page
+    if (cardId === 'phase-journey') {
+      // Placeholder for phase journey animation/modal
+      console.log('Opening Phase Journey view...');
     }
   };
 
   return (
-    <>
-      <div>
-        <h3 className="text-xl font-display font-semibold mb-6 text-foreground">Quick Actions</h3>
-        <div className="grid grid-cols-2 gap-5">
-          {navigationItems.map((item, index) => (
-            <div 
-              key={index} 
-              className="nav-card group relative overflow-hidden focus-within:ring-2 focus-within:ring-primary focus-within:ring-opacity-50"
-              onClick={() => handleCardClick(item)}
-              onKeyDown={(e) => handleKeyDown(e, item)}
-              role="button"
-              tabIndex={0}
-              aria-label={`${item.title} - ${item.subtitle}`}
-            >
-              {/* Notification badge */}
-              {item.hasNotification && (
-                <div className="absolute -top-1 -right-1 z-10">
-                  <div className="w-3 h-3 bg-destructive rounded-full animate-pulse border-2 border-surface" />
+    <div className="space-y-4">
+      {/* Phase Journey - Featured Card */}
+      <Card 
+        className={`relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-lg border-golden-accent/30 bg-gradient-to-br ${navigationCards[0].gradient}`}
+        onClick={() => handleCardClick(navigationCards[0].id)}
+      >
+        <div className="p-6">
+          {/* Background Decoration */}
+          <div className="absolute top-0 right-0 w-24 h-24 opacity-10 transform rotate-12">
+            <div className="text-6xl">{navigationCards[0].yogicIcon}</div>
+          </div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-3">
+                <div className="text-3xl">{navigationCards[0].icon}</div>
+                <div>
+                  <h3 className="font-bold text-lg text-foreground">{navigationCards[0].title}</h3>
+                  <p className="text-sm text-muted-foreground">{navigationCards[0].subtitle}</p>
                 </div>
-              )}
-              
-              {/* Icon container with enhanced animation */}
-              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-4 mx-auto shadow-premium group-hover:shadow-glow transition-all duration-500 group-hover:scale-110 group-active:scale-95`}>
-                <item.icon className="w-7 h-7 text-white transition-transform duration-300 group-hover:rotate-12" />
               </div>
-              
-              {/* Content */}
-              <h4 className="font-semibold text-sm text-foreground mb-2 font-display group-hover:text-tier-1-paisa transition-colors duration-300">
-                {item.title}
-              </h4>
-              <p className="text-xs text-muted-foreground font-medium mb-3">
-                {item.subtitle}
-              </p>
-              
-              {/* Notification text */}
-              {item.hasNotification && item.notificationText && (
-                <Badge variant="secondary" className="text-xs mb-2 animate-pulse">
-                  {item.notificationText}
+              {navigationCards[0].badge && (
+                <Badge 
+                  variant="secondary" 
+                  className="bg-golden-accent text-golden-accent-foreground animate-pulse"
+                >
+                  {navigationCards[0].badge}
                 </Badge>
               )}
-              
-              {/* Arrow indicator */}
-              <div className="flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              </div>
-              
-              {/* Hover overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Enhanced Modal with Quick Actions */}
-      <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="max-w-sm mx-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 font-display">
-              {selectedCard && (
-                <>
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${selectedCard.gradient} flex items-center justify-center`}>
-                    <selectedCard.icon className="w-5 h-5 text-white" />
-                  </div>
-                  {selectedCard.title}
-                </>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {selectedCard && (
-            <div className="space-y-4">
-              <p className="text-muted-foreground">{selectedCard.subtitle}</p>
-              
-              {selectedCard.hasNotification && selectedCard.notificationText && (
-                <div className={`p-3 bg-${selectedCard.tierColor}-light rounded-lg border-l-4 border-${selectedCard.tierColor}`}>
-                  <p className={`text-sm font-medium text-${selectedCard.tierColor}`}>
-                    {selectedCard.notificationText}
-                  </p>
-                </div>
-              )}
-              
-              <div className="space-y-2">
-                <h4 className="font-semibold text-sm">Quick Actions</h4>
-                {selectedCard.quickActions?.map((action, index) => (
-                  <button
+            
+            <p className="text-sm text-muted-foreground mb-4">
+              {navigationCards[0].description}
+            </p>
+            
+            {/* Tier Preview Icons */}
+            <div className="flex items-center space-x-2">
+              <div className="flex space-x-1">
+                {['🟡', '🪙', '🎯', '💎', '💠', '👑', '⚡', '🌟', '🔥'].map((symbol, index) => (
+                  <div 
                     key={index}
-                    onClick={() => handleQuickAction(action.action)}
-                    className={`w-full p-3 text-left bg-${selectedCard.tierColor}/10 hover:bg-${selectedCard.tierColor}/20 rounded-lg transition-colors duration-200 text-sm font-medium`}
+                    className={`w-6 h-6 text-xs flex items-center justify-center rounded-full transition-all duration-300 ${
+                      index === 0 ? 'bg-golden-accent text-white scale-110' : 'bg-gray-200 opacity-60'
+                    }`}
                   >
-                    {action.label}
-                  </button>
+                    {symbol}
+                  </div>
                 ))}
               </div>
+              <div className="text-xs text-muted-foreground ml-2">
+                Phase 1 of 9
+              </div>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
+          </div>
+        </div>
+      </Card>
+
+      {/* Other Navigation Cards */}
+      <div className="grid grid-cols-2 gap-4">
+        {navigationCards.slice(1).map((card) => (
+          <Card 
+            key={card.id}
+            className={`relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-lg bg-gradient-to-br ${card.gradient} border-border/30`}
+            onClick={() => handleCardClick(card.id)}
+          >
+            <div className="p-4">
+              {/* Yogic Icon Background */}
+              <div className="absolute top-1 right-1 text-2xl opacity-20">
+                {card.yogicIcon}
+              </div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-2xl">{card.icon}</div>
+                  {card.badge && (
+                    <Badge 
+                      variant={typeof card.badge === 'string' ? 'default' : 'secondary'} 
+                      className="text-xs"
+                    >
+                      {card.badge}
+                    </Badge>
+                  )}
+                </div>
+                
+                <h3 className="font-semibold text-sm text-foreground mb-1">
+                  {card.title}
+                </h3>
+                
+                {card.subtitle && (
+                  <p className="text-xs text-muted-foreground mb-2">
+                    {card.subtitle}
+                  </p>
+                )}
+                
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {card.description}
+                </p>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Mindfulness Message */}
+      <div className="text-center mt-6 p-4 bg-soft-lavender/10 rounded-2xl border border-soft-lavender/20">
+        <div className="text-2xl mb-2">🧘‍♀️</div>
+        <p className="text-sm text-muted-foreground italic">
+          "Every step on your journey is sacred. Walk with intention." 
+        </p>
+      </div>
+    </div>
   );
 };

@@ -318,6 +318,19 @@ const Index = () => {
             <div className="px-4 pb-6">
               <EnhancedNavigationCards />
             </div>
+
+            {/* Level Up Animation Demo - Placeholder for testing */}
+            <div className="px-4 pb-6">
+              <div className="bg-surface/80 backdrop-blur-md rounded-2xl p-4 border border-warm-coral/20">
+                <h3 className="font-semibold text-warm-coral mb-2 flex items-center gap-2">
+                  <span>🎊</span>
+                  <span>Achievement Unlocked!</span>
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Level up animations will trigger when you reach milestones ✨
+                </p>
+              </div>
+            </div>
           </div>
         );
     }
