@@ -30,7 +30,7 @@ const PhaseJourney: React.FC = () => {
   const [showTierModal, setShowTierModal] = useState(false);
   const [animatedTiers, setAnimatedTiers] = useState<number[]>([]);
 
-  // Mock tier data for all 9 phases
+  // Mock tier data for all 9 phases - Updated with correct calculations
   const allTiers: TierInfo[] = [
     {
       id: 1,
@@ -40,10 +40,10 @@ const PhaseJourney: React.FC = () => {
       stepGoal: 200000,
       timeLimit: 30,
       dailyAverage: 6667,
-      rewardRate: 1,
+      rewardRate: 1, // 1 paisa per 25 steps
       spiritualBenefit: 'Build foundation of discipline and commitment to the path',
       status: 'current',
-      coinsEarned: 1250
+      coinsEarned: 8000 // 200K steps ÷ 25 × 1 paisa = 8000 paisa
     },
     {
       id: 2,
@@ -53,19 +53,19 @@ const PhaseJourney: React.FC = () => {
       stepGoal: 300000,
       timeLimit: 45,
       dailyAverage: 6667,
-      rewardRate: 2,
+      rewardRate: 2, // 2 paisa per 25 steps
       spiritualBenefit: 'Develop consistent practice and mindful awareness',
       status: 'locked'
     },
     {
       id: 3,
-      symbol: '🎯',
+      symbol: '🎟️',
       name: 'Token Phase',
       spiritualName: 'Strengthened Willpower',
-      stepGoal: 500000,
+      stepGoal: 400000,
       timeLimit: 60,
-      dailyAverage: 8334,
-      rewardRate: 3,
+      dailyAverage: 6667,
+      rewardRate: 3, // 3 paisa per 25 steps
       spiritualBenefit: 'Strengthen willpower and mental resilience',
       status: 'locked'
     },
@@ -74,10 +74,10 @@ const PhaseJourney: React.FC = () => {
       symbol: '💎',
       name: 'Gem Phase',
       spiritualName: 'Inner Clarity',
-      stepGoal: 750000,
+      stepGoal: 500000,
       timeLimit: 75,
-      dailyAverage: 10000,
-      rewardRate: 5,
+      dailyAverage: 6667,
+      rewardRate: 5, // 5 paisa per 25 steps
       spiritualBenefit: 'Achieve inner clarity and focused intention',
       status: 'locked'
     },
@@ -86,10 +86,10 @@ const PhaseJourney: React.FC = () => {
       symbol: '💠',
       name: 'Diamond Phase',
       spiritualName: 'Unshakeable Focus',
-      stepGoal: 1000000,
-      timeLimit: 90,
-      dailyAverage: 11111,
-      rewardRate: 7,
+      stepGoal: 600000,
+      timeLimit: 80,
+      dailyAverage: 7500,
+      rewardRate: 7, // 7 paisa per 25 steps
       spiritualBenefit: 'Cultivate unshakeable focus and determination',
       status: 'locked'
     },
@@ -98,46 +98,46 @@ const PhaseJourney: React.FC = () => {
       symbol: '👑',
       name: 'Crown Phase',
       spiritualName: 'Mastery of Self',
-      stepGoal: 1500000,
+      stepGoal: 1000000,
       timeLimit: 120,
-      dailyAverage: 12500,
-      rewardRate: 10,
+      dailyAverage: 8334,
+      rewardRate: 10, // 10 paisa per 25 steps
       spiritualBenefit: 'Master self-discipline and inner sovereignty',
       status: 'locked'
     },
     {
       id: 7,
-      symbol: '⚡',
+      symbol: '🏵️',
       name: 'Emperor Phase',
       spiritualName: 'Transcendent Power',
-      stepGoal: 2000000,
-      timeLimit: 150,
-      dailyAverage: 13333,
-      rewardRate: 15,
+      stepGoal: 1700000,
+      timeLimit: 200,
+      dailyAverage: 8500,
+      rewardRate: 15, // 15 paisa per 25 steps
       spiritualBenefit: 'Access transcendent power and wisdom',
       status: 'locked'
     },
     {
       id: 8,
-      symbol: '🌟',
+      symbol: '🏅',
       name: 'Legend Phase',
       spiritualName: 'Enlightened Being',
-      stepGoal: 3000000,
-      timeLimit: 200,
-      dailyAverage: 15000,
-      rewardRate: 20,
+      stepGoal: 2000000,
+      timeLimit: 250,
+      dailyAverage: 8000,
+      rewardRate: 20, // 20 paisa per 25 steps
       spiritualBenefit: 'Become an enlightened being of pure awareness',
       status: 'locked'
     },
     {
       id: 9,
-      symbol: '🔥',
+      symbol: '🏆',
       name: 'Immortal Phase',
       spiritualName: 'Eternal Consciousness',
-      stepGoal: 5000000,
-      timeLimit: 300,
-      dailyAverage: 16667,
-      rewardRate: 30,
+      stepGoal: 3000000,
+      timeLimit: 365,
+      dailyAverage: 8219,
+      rewardRate: 30, // 30 paisa per 25 steps
       spiritualBenefit: 'Achieve eternal consciousness and cosmic unity',
       status: 'locked'
     }
@@ -284,10 +284,15 @@ const PhaseJourney: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-lg font-bold text-golden-accent">
-                      {tier.rewardRate} paisa per 100 steps
+                      {tier.rewardRate} paisa per 25 steps
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Daily potential: ₹{Math.round((tier.dailyAverage / 100) * tier.rewardRate)}
+                      Daily potential (12K cap): ₹{(() => {
+                        const dailyCappedSteps = Math.min(tier.dailyAverage, 12000);
+                        const units = Math.floor(dailyCappedSteps / 25);
+                        const paisa = units * tier.rewardRate;
+                        return (paisa / 100).toFixed(2);
+                      })()}
                     </div>
                   </div>
                   <Zap className="w-6 h-6 text-golden-accent" />
@@ -348,7 +353,7 @@ const PhaseJourney: React.FC = () => {
                     🔒 Unlock by reaching Phase {tier.id - 1}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Earn up to {Math.round(((tier.rewardRate / allTiers[0].rewardRate) - 1) * 100)}% more coins
+                    Earn up to {Math.round(((tier.rewardRate / allTiers[0].rewardRate) - 1) * 100)}% more coins per step
                   </p>
                 </div>
               )}
@@ -380,7 +385,7 @@ const PhaseJourney: React.FC = () => {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-golden-accent">
-                  ₹{yogicData.wallet.mockData.totalBalance}
+                  ₹{(yogicData.wallet.mockData.totalBalance / 100).toFixed(2)}
                 </div>
                 <div className="text-xs text-muted-foreground">Coins Earned</div>
               </div>
@@ -462,10 +467,15 @@ const PhaseJourney: React.FC = () => {
                 <div className="bg-golden-accent/10 rounded-xl p-4 border border-golden-accent/20">
                   <h4 className="font-semibold text-golden-accent mb-2">Rewards & Benefits</h4>
                   <p className="text-sm mb-2">
-                    <strong>{selectedTier.rewardRate} paisa per 100 steps</strong>
+                    <strong>{selectedTier.rewardRate} paisa per 25 steps</strong>
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Daily earning potential: ₹{Math.round((selectedTier.dailyAverage / 100) * selectedTier.rewardRate)}
+                    Daily earning potential (12K cap): ₹{(() => {
+                      const dailyCappedSteps = Math.min(selectedTier.dailyAverage, 12000);
+                      const units = Math.floor(dailyCappedSteps / 25);
+                      const paisa = units * selectedTier.rewardRate;
+                      return (paisa / 100).toFixed(2);
+                    })()}
                   </p>
                 </div>
                 
