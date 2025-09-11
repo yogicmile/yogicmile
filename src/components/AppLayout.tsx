@@ -1,0 +1,73 @@
+import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { EnhancedBottomNavigation } from '@/components/EnhancedBottomNavigation';
+
+interface AppLayoutProps {
+  children: React.ReactNode;
+}
+
+export const AppLayout = ({ children }: AppLayoutProps) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Determine active tab based on current route
+  const getActiveTab = (): 'dashboard' | 'wallet' | 'rewards' | 'profile' => {
+    switch (location.pathname) {
+      case '/wallet':
+        return 'wallet';
+      case '/rewards':
+        return 'rewards';
+      case '/profile':
+        return 'profile';
+      default:
+        return 'dashboard';
+    }
+  };
+
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'wallet' | 'rewards' | 'profile'>(getActiveTab());
+
+  const handleTabChange = (tab: 'dashboard' | 'wallet' | 'rewards' | 'profile') => {
+    setActiveTab(tab);
+    
+    // Navigate to appropriate route
+    switch (tab) {
+      case 'dashboard':
+        navigate('/');
+        break;
+      case 'wallet':
+        navigate('/wallet');
+        break;
+      case 'rewards':
+        navigate('/rewards');
+        break;
+      case 'profile':
+        navigate('/profile');
+        break;
+    }
+  };
+
+  // Mock data for navigation
+  const notificationCounts = {
+    dashboard: 2,
+    rewards: 3,
+  };
+  
+  const walletBalance = 24.50; // Example balance in rupees
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Main content */}
+      <main className="pb-32"> {/* Add bottom padding to account for fixed navigation */}
+        {children}
+      </main>
+      
+      {/* Persistent Bottom Navigation */}
+      <EnhancedBottomNavigation
+        activeTab={getActiveTab()}
+        onTabChange={handleTabChange}
+        notificationCounts={notificationCounts}
+        walletBalance={walletBalance}
+      />
+    </div>
+  );
+};
