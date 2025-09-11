@@ -60,39 +60,47 @@ const CalculationReview = () => {
     // Calculate units (every 25 steps = 1 unit)
     const units = Math.floor(cappedSteps / 25);
     
-    // Find the appropriate phase based on steps and time limits
-    let currentPhase = phases[0]; // Default to first phase
-    let phaseAchieved = false;
+    // Determine current phase based on cumulative steps and time
+    let currentPhase = phases[0]; // Start with Paisa Phase
+    let phaseAchieved = true;
 
+    // Find the highest phase the user qualifies for
     for (let i = 0; i < phases.length; i++) {
       const phase = phases[i];
-      if (inputSteps <= phase.stepRequirement && inputDays <= phase.timeLimit) {
-        currentPhase = phase;
-        phaseAchieved = true;
-        break;
-      } else if (inputSteps >= phase.stepRequirement && inputDays <= phase.timeLimit) {
-        // User has completed this phase, move to next
+      
+      // Check if user has enough steps and is within time limit for this phase
+      if (inputSteps >= phase.stepRequirement && inputDays <= phase.timeLimit) {
+        // User has completed this phase
         if (i < phases.length - 1) {
-          currentPhase = phases[i + 1];
+          // Move to next phase if available
+          const nextPhase = phases[i + 1];
+          // Check if user can progress to next phase (has time remaining)
+          if (inputDays <= nextPhase.timeLimit) {
+            currentPhase = nextPhase;
+          } else {
+            currentPhase = phase;
+          }
         } else {
-          currentPhase = phase; // Max phase reached
+          // At max phase
+          currentPhase = phase;
         }
+      } else if (inputSteps < phase.stepRequirement && inputDays <= phase.timeLimit) {
+        // User is currently working towards this phase
+        currentPhase = phase;
+        break;
+      } else if (inputDays > phase.timeLimit) {
+        // Time limit exceeded for this phase
+        phaseAchieved = false;
+        currentPhase = phase;
+        break;
       }
     }
 
-    // If no phase qualifies, user hasn't achieved any phase properly
-    if (inputSteps > phases[phases.length - 1].stepRequirement || inputDays > phases[phases.length - 1].timeLimit) {
-      phaseAchieved = false;
-    }
-
-    // Calculate earnings based on the determined phase
-    let coinsEarned = 0;
-    if (phaseAchieved) {
-      // All phases: rate paisa per 25 steps
-      coinsEarned = Math.floor(units * currentPhase.rate);
-    }
-
+    // Calculate earnings based on current phase rate
+    const coinsEarned = phaseAchieved ? Math.floor(units * currentPhase.rate) : 0;
     const rupeesEarned = coinsEarned / 100;
+    
+    // Find next phase
     const nextPhase = phases.find(p => p.tier === currentPhase.tier + 1) || null;
 
     return {
@@ -325,16 +333,34 @@ const CalculationReview = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-3 bg-muted rounded-lg">
-                    <div className="text-sm text-muted-foreground">
-                      <strong>Rate Applied:</strong> {result?.currentPhase.rate} paisa per 25 steps
-                    </div>
+                <div className="bg-white/50 dark:bg-black/50 rounded-lg p-4 border">
+                  <div className="text-sm text-muted-foreground mb-3">
+                    <strong>Calculation Details:</strong>
                   </div>
-                  <div className="p-3 bg-muted rounded-lg">
-                    <div className="text-sm text-muted-foreground">
-                      <strong>Steps Counted:</strong> {result?.cappedSteps.toLocaleString()} 
-                      {result?.dailyCapExceeded && ' (capped)'}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Steps Entered:</span>
+                      <span className="font-medium">{result.stepsEntered.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Steps Counted:</span>
+                      <span className="font-medium">{result.cappedSteps.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Units (÷25):</span>
+                      <span className="font-medium">{result.units}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Rate:</span>
+                      <span className="font-medium">{result.currentPhase.rate} paisa per 25 steps</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Paisa Earned:</span>
+                      <span className="font-medium text-green-600">{result.coinsEarned}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Rupees Equivalent:</span>
+                      <span className="font-medium text-green-600">₹{result.rupeesEarned.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

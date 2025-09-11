@@ -92,20 +92,39 @@ export const useCoinRateSystem = () => {
     };
   }, [currentTier, currentTierData, currentSteps, currentStreak]);
 
-  // Calculate earnings for given steps with daily cap
-  const calculateEarnings = useCallback((steps: number) => {
+  // Calculate base earnings for given steps with daily cap (without bonuses)
+  const calculateBaseEarnings = useCallback((steps: number) => {
     // Apply daily cap of 12,000 steps
     const cappedSteps = Math.min(steps, 12000);
+    
+    // Calculate units (every 25 steps = 1 unit)
+    const units = Math.floor(cappedSteps / 25);
+    
+    // Calculate paisa earnings (base rate: paisa per 25 steps)
+    const paisaEarned = Math.floor(units * currentTierData.rate);
+    
+    return {
+      cappedSteps,
+      units,
+      paisaEarned,
+      rupeesEarned: paisaEarned / 100,
+      wasCapExceeded: steps > 12000
+    };
+  }, [currentTierData.rate]);
+
+  // Calculate earnings with bonuses for given steps with daily cap
+  const calculateEarnings = useCallback((steps: number) => {
+    const { cappedSteps } = calculateBaseEarnings(steps);
     const { effectiveRate } = calculateCurrentRate();
     
     // Calculate units (every 25 steps = 1 unit)
     const units = Math.floor(cappedSteps / 25);
     
-    // Calculate paisa earnings (rate is paisa per 25 steps)
+    // Calculate paisa earnings with bonuses
     const paisaEarned = Math.floor(units * effectiveRate);
     
     return paisaEarned;
-  }, [calculateCurrentRate]);
+  }, [calculateBaseEarnings, calculateCurrentRate]);
 
   // Get daily earning potential
   const getDailyPotential = useCallback((targetSteps: number = 10000) => {
@@ -281,6 +300,7 @@ export const useCoinRateSystem = () => {
     
     // Rate calculations
     calculateCurrentRate,
+    calculateBaseEarnings,
     calculateEarnings,
     getDailyPotential,
     getTierProgress,

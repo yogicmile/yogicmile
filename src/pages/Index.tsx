@@ -327,14 +327,7 @@ const Index = () => {
 
             {/* Dynamic Coin Rate Display Section */}
             <div className="px-4 py-2">
-              <DynamicCoinRateDisplay
-                currentRate={coinRateSystem.calculateCurrentRate()}
-                currentTier={coinRateSystem.currentTierData}
-                nextTier={coinRateSystem.nextTierData}
-                dailyPotential={coinRateSystem.getDailyPotential()}
-                tierProgress={coinRateSystem.getTierProgress()}
-                className="animate-fade-in"
-              />
+              <DynamicCoinRateDisplay />
             </div>
 
             {/* Mid-Dashboard Ad - Mindful Products */}
