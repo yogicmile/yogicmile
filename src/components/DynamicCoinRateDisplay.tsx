@@ -54,7 +54,11 @@ export const DynamicCoinRateDisplay: React.FC<DynamicCoinRateDisplayProps> = ({
   }, []);
 
   const calculateCustomEarnings = (steps: number) => {
-    return Math.floor((steps / 100) * currentRate.effectiveRate);
+    // Apply daily cap of 12,000 steps
+    const cappedSteps = Math.min(steps, 12000);
+    // Calculate units (every 25 steps = 1 unit)
+    const units = Math.floor(cappedSteps / 25);
+    return Math.floor(units * currentRate.effectiveRate);
   };
 
   return (
@@ -83,7 +87,7 @@ export const DynamicCoinRateDisplay: React.FC<DynamicCoinRateDisplayProps> = ({
               {currentRate.effectiveRate.toFixed(1)}
               <span className="text-lg">paisa</span>
             </div>
-            <p className="text-sm text-muted-foreground">per 100 steps</p>
+            <p className="text-sm text-muted-foreground">per 25 steps</p>
             
             {currentRate.totalMultiplier > 1 && (
               <div className="mt-2">
@@ -151,7 +155,7 @@ export const DynamicCoinRateDisplay: React.FC<DynamicCoinRateDisplayProps> = ({
                   <div className="text-lg font-bold text-serene-blue">
                     {nextTier.rate} paisa
                   </div>
-                  <p className="text-xs text-muted-foreground">per 100 steps</p>
+                  <p className="text-xs text-muted-foreground">per 25 steps</p>
                 </div>
               </div>
 

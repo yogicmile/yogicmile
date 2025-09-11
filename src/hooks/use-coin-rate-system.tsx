@@ -4,7 +4,7 @@ interface TierRate {
   tier: number;
   symbol: string;
   name: string;
-  rate: number; // paisa per 10 steps (except Gem Phase which is per step)
+  rate: number; // paisa per 25 steps
   stepRequirement: number;
   timeLimit: number;
   spiritualName: string;
@@ -35,17 +35,17 @@ export const useCoinRateSystem = () => {
   const [currentStreak, setCurrentStreak] = useState(5);
   const [celebrationEvent, setCelebrationEvent] = useState<CelebrationEvent | null>(null);
 
-  // Tier rate structure - Updated with paisa per 10 steps calculation
+  // Tier rate structure - Updated with paisa per 25 steps calculation
   const tierRates: TierRate[] = [
-    { tier: 1, symbol: '🟡', name: 'Paisa Phase', rate: 10, stepRequirement: 200000, timeLimit: 30, spiritualName: 'Foundation of Discipline' }, // 1 paisa per 10 steps
-    { tier: 2, symbol: '🪙', name: 'Coin Phase', rate: 20, stepRequirement: 300000, timeLimit: 45, spiritualName: 'Consistent Practice' }, // 2 paisa per 10 steps
-    { tier: 3, symbol: '🎟️', name: 'Token Phase', rate: 30, stepRequirement: 400000, timeLimit: 60, spiritualName: 'Strengthened Willpower' }, // 3 paisa per 10 steps
-    { tier: 4, symbol: '💎', name: 'Gem Phase', rate: 500, stepRequirement: 500000, timeLimit: 75, spiritualName: 'Inner Clarity' }, // 5 paisa per step (special case)
-    { tier: 5, symbol: '💠', name: 'Diamond Phase', rate: 70, stepRequirement: 600000, timeLimit: 80, spiritualName: 'Unshakeable Focus' }, // 7 paisa per 10 steps
-    { tier: 6, symbol: '👑', name: 'Crown Phase', rate: 100, stepRequirement: 1000000, timeLimit: 120, spiritualName: 'Mastery of Self' }, // 10 paisa per 10 steps
-    { tier: 7, symbol: '🏵️', name: 'Emperor Phase', rate: 150, stepRequirement: 1700000, timeLimit: 200, spiritualName: 'Transcendent Power' }, // 15 paisa per 10 steps
-    { tier: 8, symbol: '🏅', name: 'Legend Phase', rate: 200, stepRequirement: 2000000, timeLimit: 250, spiritualName: 'Enlightened Being' }, // 20 paisa per 10 steps
-    { tier: 9, symbol: '🏆', name: 'Immortal Phase', rate: 300, stepRequirement: 3000000, timeLimit: 365, spiritualName: 'Eternal Consciousness' } // 30 paisa per 10 steps
+    { tier: 1, symbol: '🟡', name: 'Paisa Phase', rate: 1, stepRequirement: 200000, timeLimit: 30, spiritualName: 'Foundation of Discipline' }, // 1 paisa per 25 steps
+    { tier: 2, symbol: '🪙', name: 'Coin Phase', rate: 2, stepRequirement: 300000, timeLimit: 45, spiritualName: 'Consistent Practice' }, // 2 paisa per 25 steps
+    { tier: 3, symbol: '🎟️', name: 'Token Phase', rate: 3, stepRequirement: 400000, timeLimit: 60, spiritualName: 'Strengthened Willpower' }, // 3 paisa per 25 steps
+    { tier: 4, symbol: '💎', name: 'Gem Phase', rate: 5, stepRequirement: 500000, timeLimit: 75, spiritualName: 'Inner Clarity' }, // 5 paisa per 25 steps
+    { tier: 5, symbol: '💠', name: 'Diamond Phase', rate: 7, stepRequirement: 600000, timeLimit: 80, spiritualName: 'Unshakeable Focus' }, // 7 paisa per 25 steps
+    { tier: 6, symbol: '👑', name: 'Crown Phase', rate: 10, stepRequirement: 1000000, timeLimit: 120, spiritualName: 'Mastery of Self' }, // 10 paisa per 25 steps
+    { tier: 7, symbol: '🏵️', name: 'Emperor Phase', rate: 15, stepRequirement: 1700000, timeLimit: 200, spiritualName: 'Transcendent Power' }, // 15 paisa per 25 steps
+    { tier: 8, symbol: '🏅', name: 'Legend Phase', rate: 20, stepRequirement: 2000000, timeLimit: 250, spiritualName: 'Enlightened Being' }, // 20 paisa per 25 steps
+    { tier: 9, symbol: '🏆', name: 'Immortal Phase', rate: 30, stepRequirement: 3000000, timeLimit: 365, spiritualName: 'Eternal Consciousness' } // 30 paisa per 25 steps
   ];
 
   const currentTierData = tierRates[currentTier - 1];
@@ -92,18 +92,20 @@ export const useCoinRateSystem = () => {
     };
   }, [currentTier, currentTierData, currentSteps, currentStreak]);
 
-  // Calculate earnings for given steps
+  // Calculate earnings for given steps with daily cap
   const calculateEarnings = useCallback((steps: number) => {
+    // Apply daily cap of 12,000 steps
+    const cappedSteps = Math.min(steps, 12000);
     const { effectiveRate } = calculateCurrentRate();
     
-    // Special calculation for Gem Phase (tier 4) - 5 paisa per step
-    if (currentTier === 4) {
-      return Math.floor(steps * (effectiveRate / 100)); // Rate is already multiplied by 100 for gem phase
-    }
+    // Calculate units (every 25 steps = 1 unit)
+    const units = Math.floor(cappedSteps / 25);
     
-    // For all other phases - rate is paisa per 10 steps
-    return Math.floor((steps / 10) * (effectiveRate / 10));
-  }, [calculateCurrentRate, currentTier]);
+    // Calculate paisa earnings (rate is paisa per 25 steps)
+    const paisaEarned = Math.floor(units * effectiveRate);
+    
+    return paisaEarned;
+  }, [calculateCurrentRate]);
 
   // Get daily earning potential
   const getDailyPotential = useCallback((targetSteps: number = 10000) => {
@@ -130,7 +132,7 @@ export const useCoinRateSystem = () => {
         newRate: newTierData.rate,
         isVisible: true,
         message: `Welcome to ${newTierData.name}! 🎉`,
-        subMessage: `New rate: ${newTierData.tier === 4 ? '5 paisa per step' : `${newTierData.rate / 10} paisa per 10 steps`}`,
+        subMessage: `New rate: ${newTierData.rate} paisa per 25 steps`,
         icon: newTierData.symbol
       });
 
@@ -258,6 +260,16 @@ export const useCoinRateSystem = () => {
     checkStreakMilestone();
   }, [checkDailyGoal, checkStreakMilestone]);
 
+  // Check if daily cap exceeded
+  const isDailyCapExceeded = useCallback((steps: number) => {
+    return steps > 12000;
+  }, []);
+
+  // Get daily cap message
+  const getDailyCapMessage = useCallback(() => {
+    return "For your joint safety, only 12,000 steps per day are rewarded.";
+  }, []);
+
   return {
     // Current state
     currentTier,
@@ -272,6 +284,10 @@ export const useCoinRateSystem = () => {
     calculateEarnings,
     getDailyPotential,
     getTierProgress,
+    
+    // Daily cap utilities
+    isDailyCapExceeded,
+    getDailyCapMessage,
     
     // Celebrations
     celebrationEvent,

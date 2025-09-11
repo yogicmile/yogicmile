@@ -12,7 +12,7 @@ interface PhaseData {
   tier: number;
   symbol: string;
   name: string;
-  rate: number; // paisa per 10 steps (except Gem Phase)
+  rate: number; // paisa per 25 steps
   stepRequirement: number;
   timeLimit: number;
   spiritualName: string;
@@ -22,12 +22,15 @@ interface CalculationResult {
   currentPhase: PhaseData;
   nextPhase: PhaseData | null;
   stepsEntered: number;
+  cappedSteps: number;
   daysEntered: number;
+  units: number;
   coinsEarned: number;
   rupeesEarned: number;
   phaseAchieved: boolean;
   stepsProgress: number;
   daysProgress: number;
+  dailyCapExceeded: boolean;
 }
 
 const CalculationReview = () => {
@@ -50,6 +53,13 @@ const CalculationReview = () => {
   ];
 
   const calculatePhaseAndEarnings = (inputSteps: number, inputDays: number): CalculationResult => {
+    // Apply daily cap of 12,000 steps
+    const cappedSteps = Math.min(inputSteps, 12000);
+    const dailyCapExceeded = inputSteps > 12000;
+    
+    // Calculate units (every 25 steps = 1 unit)
+    const units = Math.floor(cappedSteps / 25);
+    
     // Find the appropriate phase based on steps and time limits
     let currentPhase = phases[0]; // Default to first phase
     let phaseAchieved = false;
@@ -78,13 +88,8 @@ const CalculationReview = () => {
     // Calculate earnings based on the determined phase
     let coinsEarned = 0;
     if (phaseAchieved) {
-      if (currentPhase.tier === 4) {
-        // Gem Phase: 5 paisa per step (special case)
-        coinsEarned = Math.floor(inputSteps * 5);
-      } else {
-        // All other phases: rate paisa per 10 steps
-        coinsEarned = Math.floor((inputSteps / 10) * currentPhase.rate);
-      }
+      // All phases: rate paisa per 25 steps
+      coinsEarned = Math.floor(units * currentPhase.rate);
     }
 
     const rupeesEarned = coinsEarned / 100;
@@ -94,12 +99,15 @@ const CalculationReview = () => {
       currentPhase,
       nextPhase,
       stepsEntered: inputSteps,
+      cappedSteps,
       daysEntered: inputDays,
+      units,
       coinsEarned,
       rupeesEarned,
       phaseAchieved,
       stepsProgress: (inputSteps / currentPhase.stepRequirement) * 100,
-      daysProgress: (inputDays / currentPhase.timeLimit) * 100
+      daysProgress: (inputDays / currentPhase.timeLimit) * 100,
+      dailyCapExceeded
     };
   };
 
@@ -217,6 +225,21 @@ const CalculationReview = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                {/* Daily Cap Warning */}
+                {result?.dailyCapExceeded && (
+                  <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                    <div className="flex items-center gap-2 text-orange-700">
+                      <span className="text-lg">⚠️</span>
+                      <span className="text-sm font-medium">
+                        For your joint safety, only 12,000 steps per day are rewarded.
+                      </span>
+                    </div>
+                    <div className="text-xs text-orange-600 mt-1">
+                      Steps counted: {result.cappedSteps.toLocaleString()} / {result.stepsEntered.toLocaleString()} entered
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <span className="text-4xl">{result?.currentPhase.symbol}</span>
@@ -281,27 +304,38 @@ const CalculationReview = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {result?.units.toLocaleString()}
+                    </div>
+                    <div className="text-sm text-blue-700">Units (25 steps each)</div>
+                  </div>
                   <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                    <div className="text-3xl font-bold text-yellow-600">
+                    <div className="text-2xl font-bold text-yellow-600">
                       {result?.coinsEarned.toLocaleString()}
                     </div>
                     <div className="text-sm text-yellow-700">Paisa Earned</div>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-                    <div className="text-3xl font-bold text-green-600">
+                    <div className="text-2xl font-bold text-green-600">
                       ₹{result?.rupeesEarned.toFixed(2)}
                     </div>
                     <div className="text-sm text-green-700">Rupees Equivalent</div>
                   </div>
                 </div>
                 
-                <div className="mt-4 p-3 bg-muted rounded-lg">
-                  <div className="text-sm text-muted-foreground">
-                    <strong>Rate Applied:</strong> {result?.currentPhase.tier === 4 
-                      ? '5 paisa per step (Special Gem Phase)'
-                      : `${result?.currentPhase.rate} paisa per 10 steps`
-                    }
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-3 bg-muted rounded-lg">
+                    <div className="text-sm text-muted-foreground">
+                      <strong>Rate Applied:</strong> {result?.currentPhase.rate} paisa per 25 steps
+                    </div>
+                  </div>
+                  <div className="p-3 bg-muted rounded-lg">
+                    <div className="text-sm text-muted-foreground">
+                      <strong>Steps Counted:</strong> {result?.cappedSteps.toLocaleString()} 
+                      {result?.dailyCapExceeded && ' (capped)'}
+                    </div>
                   </div>
                 </div>
               </CardContent>
