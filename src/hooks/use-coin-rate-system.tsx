@@ -64,6 +64,25 @@ export const useCoinRateSystem = () => {
       activeBonus.push('Weekend Bonus: 1.5x');
     }
 
+    // Indian Seasonal bonus
+    const currentMonth = new Date().getMonth(); // 0-11
+    let seasonalMultiplier = 1;
+    let seasonName = '';
+    
+    if ([2, 3, 4].includes(currentMonth)) { // March-May: Summer
+      seasonalMultiplier = 1.2;
+      seasonName = 'Summer';
+    } else if ([5, 6, 7, 8].includes(currentMonth)) { // June-September: Rainy
+      seasonalMultiplier = 1.3;
+      seasonName = 'Rainy';
+    } else { // October-February: Winter
+      seasonalMultiplier = 1.15;
+      seasonName = 'Winter';
+    }
+    
+    totalMultiplier *= seasonalMultiplier;
+    activeBonus.push(`${seasonName} Season: ${seasonalMultiplier}x`);
+
     // Streak bonus (increases with tier level)
     if (currentStreak >= 7) {
       const streakMultiplier = 1 + (currentTier * 0.1);
