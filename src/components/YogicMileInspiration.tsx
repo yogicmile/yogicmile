@@ -208,10 +208,29 @@ export const YogicMileInspiration: React.FC<YogicMileInspirationProps> = ({
       {/* Seasonal Challenge */}
       <Card className="bg-gradient-to-br from-golden-accent/10 to-warm-coral/10 border-golden-accent/20">
         <div className="p-4 text-center">
-          <div className="text-2xl mb-2">🍂</div>
-          <h3 className="font-semibold text-golden-accent mb-2">Autumn Mindfulness Challenge</h3>
+          <div className="text-2xl mb-2">
+            {(() => {
+              const month = new Date().getMonth(); // 0-11
+              if ([2, 3, 4].includes(month)) return "☀️"; // Summer
+              if ([5, 6, 7, 8].includes(month)) return "🌧️"; // Rainy
+              return "❄️"; // Winter
+            })()}
+          </div>
+          <h3 className="font-semibold text-golden-accent mb-2">
+            {(() => {
+              const month = new Date().getMonth(); // 0-11
+              if ([2, 3, 4].includes(month)) return "Summer Vitality Challenge";
+              if ([5, 6, 7, 8].includes(month)) return "Monsoon Mindfulness Challenge";
+              return "Winter Wellness Challenge";
+            })()}
+          </h3>
           <p className="text-xs text-muted-foreground mb-3">
-            Walk among falling leaves and practice seasonal awareness
+            {(() => {
+              const month = new Date().getMonth(); // 0-11
+              if ([2, 3, 4].includes(month)) return "Walk under the warm sun and embrace your inner energy";
+              if ([5, 6, 7, 8].includes(month)) return "Find peace in the rhythm of raindrops and fresh monsoon air";
+              return "Stay active in the cool breeze and practice winter mindfulness";
+            })()}
           </p>
           <div className="flex items-center justify-center gap-2">
             <Badge variant="outline" className="text-xs">
