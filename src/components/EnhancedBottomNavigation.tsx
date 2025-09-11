@@ -79,7 +79,7 @@ export const EnhancedBottomNavigation = ({
   ];
 
   const handleTabPress = (tabId: TabId) => {
-    if (tabId === activeTab) return;
+    if (tabId === activeTab && location.pathname !== '/wallet') return;
     
     setAnimatingTab(tabId);
     
@@ -92,9 +92,10 @@ export const EnhancedBottomNavigation = ({
       setAnimatingTab(null);
     }, 200);
 
-    // Handle navigation for wallet
-    if (tabId === 'wallet') {
-      navigate('/wallet');
+    // Navigate using tab route for consistency
+    const selected = tabs.find(t => t.id === tabId);
+    if (selected?.route) {
+      navigate(selected.route);
     } else {
       onTabChange(tabId);
     }
