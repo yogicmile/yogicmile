@@ -70,6 +70,16 @@ export const EnhancedNavigationCards = () => {
       badge: mockData.wallet.mockData.pendingRedemptions > 0 ? mockData.wallet.mockData.pendingRedemptions : null,
       gradient: 'from-deep-teal/20 via-serene-blue/10 to-soft-lavender/20',
       description: 'Manage your earnings and transaction history'
+    },
+    {
+      id: 'calculation-review',
+      title: 'Calc Review',
+      subtitle: 'Verify Logic',
+      icon: '🧮',
+      yogicIcon: '📊✨',
+      badge: 'TEST',
+      gradient: 'from-purple-100/20 via-indigo-100/10 to-blue-100/20',
+      description: 'Test coin calculations across all phases'
     }
   ];
 
@@ -78,6 +88,8 @@ export const EnhancedNavigationCards = () => {
     
     if (cardId === 'phase-journey') {
       navigate('/phase-journey');
+    } else if (cardId === 'calculation-review') {
+      navigate('/calculation-review');
     } else {
       // Add navigation logic for other cards here
       console.log(`Opening ${cardId} view...`);
