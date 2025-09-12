@@ -92,6 +92,48 @@ export type Database = {
         }
         Relationships: []
       }
+      otp_logs: {
+        Row: {
+          created_at: string | null
+          expires_at: string
+          id: string
+          is_used: boolean | null
+          otp: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          is_used?: boolean | null
+          otp: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          is_used?: boolean | null
+          otp?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "otp_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "otp_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_wallet"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       phases: {
         Row: {
           days_limit: number
