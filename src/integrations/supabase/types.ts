@@ -98,24 +98,27 @@ export type Database = {
           expires_at: string
           id: string
           is_used: boolean | null
+          mobile_number: string
           otp: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string | null
           expires_at: string
           id?: string
           is_used?: boolean | null
+          mobile_number: string
           otp: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string | null
           expires_at?: string
           id?: string
           is_used?: boolean | null
+          mobile_number?: string
           otp?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -469,31 +472,40 @@ export type Database = {
       }
       users: {
         Row: {
+          address: string
           created_at: string | null
-          email: string
+          email: string | null
           full_name: string
           id: string
           is_guest: boolean | null
+          mobile_number: string
+          password_hash: string | null
           phase: string | null
           referral_code: string | null
           referred_by: string | null
         }
         Insert: {
+          address: string
           created_at?: string | null
-          email: string
+          email?: string | null
           full_name: string
           id: string
           is_guest?: boolean | null
+          mobile_number: string
+          password_hash?: string | null
           phase?: string | null
           referral_code?: string | null
           referred_by?: string | null
         }
         Update: {
+          address?: string
           created_at?: string | null
-          email?: string
+          email?: string | null
           full_name?: string
           id?: string
           is_guest?: boolean | null
+          mobile_number?: string
+          password_hash?: string | null
           phase?: string | null
           referral_code?: string | null
           referred_by?: string | null
@@ -634,6 +646,14 @@ export type Database = {
       earn_steps: {
         Args: { p_steps: number; p_user_id: string }
         Returns: string
+      }
+      generate_otp: {
+        Args: { p_mobile_number: string }
+        Returns: string
+      }
+      verify_otp: {
+        Args: { p_mobile_number: string; p_otp: string }
+        Returns: boolean
       }
     }
     Enums: {
