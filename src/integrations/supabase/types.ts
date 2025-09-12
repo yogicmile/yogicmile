@@ -92,6 +92,33 @@ export type Database = {
         }
         Relationships: []
       }
+      phases: {
+        Row: {
+          days_limit: number
+          id: number
+          name: string
+          paisa_rate: number
+          step_goal: number
+          symbol: string | null
+        }
+        Insert: {
+          days_limit: number
+          id?: number
+          name: string
+          paisa_rate: number
+          step_goal: number
+          symbol?: string | null
+        }
+        Update: {
+          days_limit?: number
+          id?: number
+          name?: string
+          paisa_rate?: number
+          step_goal?: number
+          symbol?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -113,6 +140,138 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      redemptions: {
+        Row: {
+          coins_spent: number
+          created_at: string | null
+          id: number
+          reward_id: number | null
+          status: Database["public"]["Enums"]["redemption_status"] | null
+          user_id: string | null
+        }
+        Insert: {
+          coins_spent: number
+          created_at?: string | null
+          id?: number
+          reward_id?: number | null
+          status?: Database["public"]["Enums"]["redemption_status"] | null
+          user_id?: string | null
+        }
+        Update: {
+          coins_spent?: number
+          created_at?: string | null
+          id?: number
+          reward_id?: number | null
+          status?: Database["public"]["Enums"]["redemption_status"] | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redemptions_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "rewards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "redemptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "redemptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_wallet"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          bonus_paisa: number | null
+          created_at: string | null
+          id: number
+          referred_id: string | null
+          referrer_id: string | null
+        }
+        Insert: {
+          bonus_paisa?: number | null
+          created_at?: string | null
+          id?: number
+          referred_id?: string | null
+          referrer_id?: string | null
+        }
+        Update: {
+          bonus_paisa?: number | null
+          created_at?: string | null
+          id?: number
+          referred_id?: string | null
+          referrer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_id_fkey"
+            columns: ["referred_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referred_id_fkey"
+            columns: ["referred_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_wallet"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_wallet"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      rewards: {
+        Row: {
+          created_at: string | null
+          expiry_date: string | null
+          id: number
+          is_active: boolean | null
+          name: string
+          required_paisa: number
+          type: Database["public"]["Enums"]["reward_type"]
+        }
+        Insert: {
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: number
+          is_active?: boolean | null
+          name: string
+          required_paisa: number
+          type: Database["public"]["Enums"]["reward_type"]
+        }
+        Update: {
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: number
+          is_active?: boolean | null
+          name?: string
+          required_paisa?: number
+          type?: Database["public"]["Enums"]["reward_type"]
         }
         Relationships: []
       }
@@ -145,6 +304,51 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      step_logs: {
+        Row: {
+          coins_earned: number
+          created_at: string | null
+          date: string
+          id: number
+          steps: number
+          user_id: string | null
+          validated: boolean | null
+        }
+        Insert: {
+          coins_earned?: number
+          created_at?: string | null
+          date: string
+          id?: number
+          steps: number
+          user_id?: string | null
+          validated?: boolean | null
+        }
+        Update: {
+          coins_earned?: number
+          created_at?: string | null
+          date?: string
+          id?: number
+          steps?: number
+          user_id?: string | null
+          validated?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "step_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "step_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_wallet"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       transactions: {
         Row: {
@@ -221,6 +425,39 @@ export type Database = {
         }
         Relationships: []
       }
+      users: {
+        Row: {
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          is_guest: boolean | null
+          phase: string | null
+          referral_code: string | null
+          referred_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          full_name: string
+          id: string
+          is_guest?: boolean | null
+          phase?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          is_guest?: boolean | null
+          phase?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
+        }
+        Relationships: []
+      }
       wallet_balances: {
         Row: {
           id: string
@@ -248,15 +485,119 @@ export type Database = {
         }
         Relationships: []
       }
+      wallets: {
+        Row: {
+          balance_paisa: number
+          balance_rupees: number | null
+          id: number
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          balance_paisa?: number
+          balance_rupees?: number | null
+          id?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          balance_paisa?: number
+          balance_rupees?: number | null
+          id?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_user_wallet"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      v_daily_summary: {
+        Row: {
+          daily_coins: number | null
+          daily_steps: number | null
+          date: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "step_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "step_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_wallet"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      v_redemption_history: {
+        Row: {
+          coins_spent: number | null
+          created_at: string | null
+          redemption_id: number | null
+          reward_name: string | null
+          status: Database["public"]["Enums"]["redemption_status"] | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redemptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "redemptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_wallet"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      v_user_wallet: {
+        Row: {
+          balance_paisa: number | null
+          balance_rupees: number | null
+          full_name: string | null
+          phase: string | null
+          total_steps: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      earn_steps: {
+        Args: { p_steps: number; p_user_id: string }
+        Returns: string
+      }
     }
     Enums: {
-      [_ in never]: never
+      redemption_status: "pending" | "completed" | "failed"
+      reward_type: "voucher" | "coupon" | "bill_payment" | "cashout" | "special"
+      transaction_type: "earning" | "redeem" | "bonus" | "refund"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -383,6 +724,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      redemption_status: ["pending", "completed", "failed"],
+      reward_type: ["voucher", "coupon", "bill_payment", "cashout", "special"],
+      transaction_type: ["earning", "redeem", "bonus", "refund"],
+    },
   },
 } as const
