@@ -8,11 +8,24 @@ interface AuthContextType {
   session: Session | null;
   isLoading: boolean;
   isGuest: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (formData: SignUpData) => Promise<{ error: any }>;
+  signIn: (mobileNumber: string, password?: string, otp?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   enterGuestMode: () => void;
   exitGuestMode: () => void;
+  generateOTP: (mobileNumber: string) => Promise<{ error: any; otp?: string }>;
+  verifyOTP: (mobileNumber: string, otp: string) => Promise<{ error: any }>;
+}
+
+interface SignUpData {
+  fullName: string;
+  mobileNumber: string;
+  email?: string;
+  password?: string;
+  address: string;
+  age?: number;
+  gender?: string;
+  referralCode?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -65,65 +78,226 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (formData: SignUpData) => {
     setIsLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            full_name: fullName
-          }
-        }
-      });
+      // Check if user exists in our custom users table by mobile number
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('mobile_number', formData.mobileNumber)
+        .single();
 
-      if (error) {
+      if (existingUser) {
         toast({
-          title: "Sign up failed",
-          description: error.message,
+          title: "User already exists",
+          description: "A user with this mobile number already exists. Please try logging in.",
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: "Check your email",
-          description: "We've sent you a confirmation link to complete your registration.",
-        });
+        return { error: { message: "User already exists" } };
       }
 
-      return { error };
+      let authError = null;
+      let authUser = null;
+
+      // If email and password provided, create Supabase auth user
+      if (formData.email && formData.password) {
+        const redirectUrl = `${window.location.origin}/`;
+        
+        const { data, error } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            emailRedirectTo: redirectUrl,
+            data: {
+              full_name: formData.fullName,
+              mobile_number: formData.mobileNumber
+            }
+          }
+        });
+        
+        authError = error;
+        authUser = data.user;
+      } else {
+        // Create a temporary user ID for mobile-only users
+        authUser = { id: crypto.randomUUID() } as User;
+      }
+
+      if (authError) {
+        toast({
+          title: "Sign up failed",
+          description: authError.message,
+          variant: "destructive",
+        });
+        return { error: authError };
+      }
+
+      // Store user data in our custom users table
+      const { error: dbError } = await supabase
+        .from('users')
+        .insert({
+          id: authUser!.id,
+          mobile_number: formData.mobileNumber,
+          email: formData.email || null,
+          full_name: formData.fullName,
+          password_hash: formData.password ? 'hashed_by_supabase' : null,
+          address: formData.address,
+          age: formData.age || null,
+          gender: formData.gender || null,
+          referred_by: formData.referralCode || null,
+          referral_code: formData.mobileNumber // Mobile number acts as referral code
+        });
+
+      if (dbError) {
+        toast({
+          title: "Registration failed",
+          description: dbError.message,
+          variant: "destructive",
+        });
+        return { error: dbError };
+      }
+
+      toast({
+        title: "Registration successful!",
+        description: formData.email && formData.password 
+          ? "Please check your email for verification." 
+          : "You can now log in with your mobile number.",
+      });
+
+      return { error: null };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (mobileNumber: string, password?: string, otp?: string) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Check if user exists in our users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('mobile_number', mobileNumber)
+        .single();
 
-      if (error) {
+      if (userError || !userData) {
         toast({
-          title: "Sign in failed",
-          description: error.message,
+          title: "User not found",
+          description: "No account found with this mobile number. Please sign up first.",
           variant: "destructive",
         });
-      } else {
+        return { error: { message: "User not found" } };
+      }
+
+      if (otp) {
+        // OTP-based login
+        const { data: isValid } = await supabase.rpc('verify_otp', {
+          p_mobile_number: mobileNumber,
+          p_otp: otp
+        });
+
+        if (!isValid) {
+          toast({
+            title: "Invalid OTP",
+            description: "The OTP you entered is invalid or has expired.",
+            variant: "destructive",
+          });
+          return { error: { message: "Invalid OTP" } };
+        }
+
+        // Create a session manually for OTP users
+        setUser({ id: userData.id, email: userData.email } as User);
+        setSession({ user: { id: userData.id, email: userData.email } } as Session);
+        
+        toast({
+          title: "Welcome back!",
+          description: "You've successfully signed in with OTP.",
+        });
+        
+        return { error: null };
+      } else if (password && userData.email) {
+        // Email/password login through Supabase Auth
+        const { error } = await supabase.auth.signInWithPassword({
+          email: userData.email,
+          password,
+        });
+
+        if (error) {
+          toast({
+            title: "Sign in failed",
+            description: error.message,
+            variant: "destructive",
+          });
+          return { error };
+        }
+
         toast({
           title: "Welcome back!",
           description: "You've successfully signed in.",
         });
+        
+        return { error: null };
+      } else {
+        toast({
+          title: "Invalid login method",
+          description: "Please provide either password or OTP for login.",
+          variant: "destructive",
+        });
+        return { error: { message: "Invalid login method" } };
       }
-
-      return { error };
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const generateOTP = async (mobileNumber: string) => {
+    try {
+      const { data, error } = await supabase.rpc('generate_otp', {
+        p_mobile_number: mobileNumber
+      });
+
+      if (error) {
+        toast({
+          title: "Failed to generate OTP",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
+
+      // In real implementation, OTP would be sent via SMS
+      // For now, we'll show it in the toast for testing
+      toast({
+        title: "OTP Generated",
+        description: `Your OTP is: ${data} (This is for testing - in production this would be sent via SMS)`,
+      });
+
+      return { error: null, otp: data };
+    } catch (err) {
+      const error = err as any;
+      toast({
+        title: "Error generating OTP",
+        description: error.message,
+        variant: "destructive",
+      });
+      return { error };
+    }
+  };
+
+  const verifyOTP = async (mobileNumber: string, otp: string) => {
+    try {
+      const { data: isValid, error } = await supabase.rpc('verify_otp', {
+        p_mobile_number: mobileNumber,
+        p_otp: otp
+      });
+
+      if (error) {
+        return { error };
+      }
+
+      return { error: isValid ? null : { message: "Invalid OTP" } };
+    } catch (err) {
+      return { error: err };
     }
   };
 
@@ -161,6 +335,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
     enterGuestMode,
     exitGuestMode,
+    generateOTP,
+    verifyOTP,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

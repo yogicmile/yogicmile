@@ -4,39 +4,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Eye, EyeOff, Phone, Lock, AlertCircle, CheckCircle2, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { signIn, enterGuestMode } = useAuth();
+  const { signIn, enterGuestMode, generateOTP } = useAuth();
   
   const [formData, setFormData] = useState({
-    email: "",
-    password: ""
+    mobileNumber: "",
+    password: "",
+    otp: ""
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOTPSent, setIsOTPSent] = useState(false);
+  const [activeTab, setActiveTab] = useState("password");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  // Email validation
-  const validateEmail = (email: string) => {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailPattern.test(email);
+  // Mobile number validation
+  const validateMobileNumber = (mobile: string) => {
+    const mobilePattern = /^[6-9]\d{9}$/; // Indian mobile number pattern
+    return mobilePattern.test(mobile.replace(/\s+/g, ''));
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Handle password login
+  const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form
     const newErrors: { [key: string]: string } = {};
     
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!validateEmail(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+    if (!formData.mobileNumber) {
+      newErrors.mobileNumber = "Mobile number is required";
+    } else if (!validateMobileNumber(formData.mobileNumber)) {
+      newErrors.mobileNumber = "Please enter a valid 10-digit mobile number";
     }
     
     if (!formData.password) {
@@ -49,13 +52,82 @@ export default function LoginPage() {
       setIsLoading(true);
       
       try {
-        const { error } = await signIn(formData.email, formData.password);
+        const { error } = await signIn(formData.mobileNumber, formData.password);
         
         if (!error) {
           navigate('/');
         }
       } catch (err) {
         console.error('Login error:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  // Handle OTP request
+  const handleRequestOTP = async () => {
+    if (!formData.mobileNumber) {
+      setErrors({ mobileNumber: "Mobile number is required" });
+      return;
+    }
+    
+    if (!validateMobileNumber(formData.mobileNumber)) {
+      setErrors({ mobileNumber: "Please enter a valid 10-digit mobile number" });
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      const { error } = await generateOTP(formData.mobileNumber);
+      
+      if (!error) {
+        setIsOTPSent(true);
+        setErrors({});
+        toast({
+          title: "OTP Sent",
+          description: "Please check the OTP displayed above (in production, this would be sent via SMS)",
+        });
+      }
+    } catch (err) {
+      console.error('OTP generation error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle OTP login
+  const handleOTPLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const newErrors: { [key: string]: string } = {};
+    
+    if (!formData.mobileNumber) {
+      newErrors.mobileNumber = "Mobile number is required";
+    } else if (!validateMobileNumber(formData.mobileNumber)) {
+      newErrors.mobileNumber = "Please enter a valid 10-digit mobile number";
+    }
+    
+    if (!formData.otp) {
+      newErrors.otp = "OTP is required";
+    } else if (formData.otp.length !== 6) {
+      newErrors.otp = "OTP must be 6 digits";
+    }
+    
+    setErrors(newErrors);
+    
+    if (Object.keys(newErrors).length === 0) {
+      setIsLoading(true);
+      
+      try {
+        const { error } = await signIn(formData.mobileNumber, undefined, formData.otp);
+        
+        if (!error) {
+          navigate('/');
+        }
+      } catch (err) {
+        console.error('OTP Login error:', err);
       } finally {
         setIsLoading(false);
       }
@@ -69,7 +141,24 @@ export default function LoginPage() {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === 'mobileNumber') {
+      // Only allow numbers for mobile number
+      const numericValue = value.replace(/\D/g, '');
+      if (numericValue.length <= 10) {
+        setFormData(prev => ({ ...prev, [field]: numericValue }));
+        if (isOTPSent) {
+          setIsOTPSent(false); // Reset OTP state when mobile number changes
+        }
+      }
+    } else if (field === 'otp') {
+      // Only allow numbers for OTP, max 6 digits
+      const numericValue = value.replace(/\D/g, '');
+      if (numericValue.length <= 6) {
+        setFormData(prev => ({ ...prev, [field]: numericValue }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
     
     // Clear error when user starts typing
     if (errors[field]) {
@@ -92,107 +181,211 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
 
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            {/* Email Field */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  className={`pl-10 ${errors.email ? 'border-destructive' : ''}`}
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                />
-                {validateEmail(formData.email) && formData.email && (
-                  <CheckCircle2 className="absolute right-3 top-3 h-4 w-4 text-green-500" />
-                )}
-              </div>
-              {errors.email && (
-                <div className="flex items-center gap-2 text-sm text-destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  {errors.email}
+        <CardContent className="space-y-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="password">Mobile + Password</TabsTrigger>
+              <TabsTrigger value="otp">Mobile + OTP</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="password" className="space-y-4 mt-4">
+              <form onSubmit={handlePasswordLogin}>
+                {/* Mobile Number Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="mobile-password">Mobile Number</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="mobile-password"
+                      type="tel"
+                      placeholder="Enter your mobile number"
+                      className={`pl-10 ${errors.mobileNumber ? 'border-destructive' : ''}`}
+                      value={formData.mobileNumber}
+                      onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
+                    />
+                    {validateMobileNumber(formData.mobileNumber) && formData.mobileNumber && (
+                      <CheckCircle2 className="absolute right-3 top-3 h-4 w-4 text-green-500" />
+                    )}
+                  </div>
+                  {errors.mobileNumber && (
+                    <div className="flex items-center gap-2 text-sm text-destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      {errors.mobileNumber}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  className={`pl-10 pr-10 ${errors.password ? 'border-destructive' : ''}`}
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
+                {/* Password Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      className={`pl-10 pr-10 ${errors.password ? 'border-destructive' : ''}`}
+                      value={formData.password}
+                      onChange={(e) => handleInputChange('password', e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {errors.password && (
+                    <div className="flex items-center gap-2 text-sm text-destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      {errors.password}
+                    </div>
+                  )}
+                </div>
+
+                <Button 
+                  type="submit" 
+                  className="w-full mt-4" 
+                  disabled={isLoading}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Signing In...
+                    </div>
+                  ) : (
+                    "Sign In with Password"
+                  )}
                 </Button>
-              </div>
-              {errors.password && (
-                <div className="flex items-center gap-2 text-sm text-destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  {errors.password}
-                </div>
-              )}
-            </div>
-
-            {/* Forgot Password Link */}
-            <div className="text-right">
-              <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                Forgot password?
-              </Link>
-            </div>
-
-          </CardContent>
-
-          <CardFooter className="flex flex-col space-y-4">
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Signing In...
-                </div>
-              ) : (
-                "Sign In"
-              )}
-            </Button>
+              </form>
+            </TabsContent>
             
-            <Button 
-              type="button" 
-              variant="outline" 
-              className="w-full" 
-              onClick={handleGuestMode}
-              disabled={isLoading}
-            >
-              Continue as Guest
-            </Button>
-            
-            <div className="text-center text-sm">
-              Don't have an account?{" "}
-              <Link to="/signup" className="text-primary hover:underline font-medium">
-                Sign up here
-              </Link>
-            </div>
-          </CardFooter>
-        </form>
+            <TabsContent value="otp" className="space-y-4 mt-4">
+              <form onSubmit={handleOTPLogin}>
+                {/* Mobile Number Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="mobile-otp">Mobile Number</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="mobile-otp"
+                      type="tel"
+                      placeholder="Enter your mobile number"
+                      className={`pl-10 ${errors.mobileNumber ? 'border-destructive' : ''}`}
+                      value={formData.mobileNumber}
+                      onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
+                    />
+                    {validateMobileNumber(formData.mobileNumber) && formData.mobileNumber && (
+                      <CheckCircle2 className="absolute right-3 top-3 h-4 w-4 text-green-500" />
+                    )}
+                  </div>
+                  {errors.mobileNumber && (
+                    <div className="flex items-center gap-2 text-sm text-destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      {errors.mobileNumber}
+                    </div>
+                  )}
+                </div>
+
+                {/* OTP Request Button */}
+                {!isOTPSent && (
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleRequestOTP}
+                    disabled={isLoading || !validateMobileNumber(formData.mobileNumber)}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    {isLoading ? "Sending OTP..." : "Send OTP"}
+                  </Button>
+                )}
+
+                {/* OTP Field */}
+                {isOTPSent && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="otp">Enter OTP</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="otp"
+                          type="text"
+                          placeholder="Enter 6-digit OTP"
+                          className={`pl-10 ${errors.otp ? 'border-destructive' : ''}`}
+                          value={formData.otp}
+                          onChange={(e) => handleInputChange('otp', e.target.value)}
+                          maxLength={6}
+                        />
+                        {formData.otp.length === 6 && (
+                          <CheckCircle2 className="absolute right-3 top-3 h-4 w-4 text-green-500" />
+                        )}
+                      </div>
+                      {errors.otp && (
+                        <div className="flex items-center gap-2 text-sm text-destructive">
+                          <AlertCircle className="h-4 w-4" />
+                          {errors.otp}
+                        </div>
+                      )}
+                      <div className="text-xs text-muted-foreground">
+                        OTP expires in 5 minutes
+                      </div>
+                    </div>
+
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={isLoading || formData.otp.length !== 6}
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Verifying OTP...
+                        </div>
+                      ) : (
+                        "Verify OTP & Sign In"
+                      )}
+                    </Button>
+
+                    <Button 
+                      type="button"
+                      variant="ghost"
+                      className="w-full text-sm"
+                      onClick={() => {
+                        setIsOTPSent(false);
+                        setFormData(prev => ({ ...prev, otp: "" }));
+                      }}
+                    >
+                      Resend OTP
+                    </Button>
+                  </>
+                )}
+              </form>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+
+        <CardFooter className="flex flex-col space-y-4">
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="w-full" 
+            onClick={handleGuestMode}
+            disabled={isLoading}
+          >
+            Continue as Guest
+          </Button>
+          
+          <div className="text-center text-sm">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-primary hover:underline font-medium">
+              Sign up here
+            </Link>
+          </div>
+        </CardFooter>
       </Card>
     </div>
   );

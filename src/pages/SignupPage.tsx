@@ -5,9 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Mail, Lock, User, AlertCircle, CheckCircle2, X, MapPin, Calendar } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, AlertCircle, CheckCircle2, Phone, MapPin, Calendar, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
@@ -16,13 +15,15 @@ export default function SignupPage() {
   const { signUp, enterGuestMode } = useAuth();
   
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
+    mobileNumber: "",
     email: "",
     password: "",
     confirmPassword: "",
+    address: "",
     age: "",
     gender: "",
-    location: ""
+    referralCode: ""
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -45,8 +46,15 @@ export default function SignupPage() {
     return { score, checks };
   };
 
+  // Mobile number validation
+  const validateMobileNumber = useCallback((mobile: string) => {
+    const mobilePattern = /^[6-9]\d{9}$/; // Indian mobile number pattern
+    return mobilePattern.test(mobile.replace(/\s+/g, ''));
+  }, []);
+
   // Email validation with debouncing
   const validateEmail = useCallback((email: string) => {
+    if (!email) return true; // Email is now optional
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailPattern.test(email);
   }, []);
@@ -69,27 +77,33 @@ export default function SignupPage() {
     // Validate form
     const newErrors: { [key: string]: string } = {};
     
-    if (!formData.name.trim()) {
-      newErrors.name = "Full name is required";
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = "Full name is required";
     }
     
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!validateEmail(formData.email)) {
+    if (!formData.mobileNumber) {
+      newErrors.mobileNumber = "Mobile number is required";
+    } else if (!validateMobileNumber(formData.mobileNumber)) {
+      newErrors.mobileNumber = "Please enter a valid 10-digit mobile number";
+    }
+    
+    if (formData.email && !validateEmail(formData.email)) {
       newErrors.email = "Please enter a valid email address";
+    }
+    
+    if (!formData.address.trim()) {
+      newErrors.address = "Address is required";
     }
     
     if (formData.age && !validateAge(formData.age)) {
       newErrors.age = "Please enter a valid age between 13 and 120";
     }
     
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
+    if (formData.password && formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
     
-    if (formData.password !== formData.confirmPassword) {
+    if (formData.password && formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
     
@@ -103,11 +117,19 @@ export default function SignupPage() {
       setIsLoading(true);
       
       try {
-        const { error } = await signUp(formData.email, formData.password, formData.name);
+        const { error } = await signUp({
+          fullName: formData.fullName,
+          mobileNumber: formData.mobileNumber,
+          email: formData.email || undefined,
+          password: formData.password || undefined,
+          address: formData.address,
+          age: formData.age ? parseInt(formData.age) : undefined,
+          gender: formData.gender || undefined,
+          referralCode: formData.referralCode || undefined
+        });
         
         if (!error) {
-          // TODO: Store additional profile data (age, gender, location) in profiles table
-          navigate('/');
+          navigate('/login');
         }
       } catch (err) {
         console.error('Signup error:', err);
@@ -130,6 +152,12 @@ export default function SignupPage() {
       if (numericValue.length <= 3) {
         setFormData(prev => ({ ...prev, [field]: numericValue }));
       }
+    } else if (field === 'mobileNumber') {
+      // Only allow numbers for mobile number
+      const numericValue = value.replace(/\D/g, '');
+      if (numericValue.length <= 10) {
+        setFormData(prev => ({ ...prev, [field]: numericValue }));
+      }
     } else {
       setFormData(prev => ({ ...prev, [field]: value }));
     }
@@ -149,9 +177,9 @@ export default function SignupPage() {
               <span className="text-xl font-bold text-white">Y</span>
             </div>
           </div>
-          <CardTitle className="text-2xl text-center">Join Yogic Mile</CardTitle>
+          <CardTitle className="text-2xl text-center">Create Your Account</CardTitle>
           <CardDescription className="text-center">
-            Create your account to start your wellness journey
+            Join Yogic Mile and start your wellness journey
           </CardDescription>
         </CardHeader>
 
@@ -159,29 +187,57 @@ export default function SignupPage() {
           <CardContent className="space-y-4">
             {/* Full Name Field */}
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="fullName">Full Name</Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="name"
+                  id="fullName"
                   type="text"
                   placeholder="Enter your full name"
-                  className={`pl-10 ${errors.name ? 'border-destructive' : ''}`}
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  className={`pl-10 ${errors.fullName ? 'border-destructive' : ''}`}
+                  value={formData.fullName}
+                  onChange={(e) => handleInputChange('fullName', e.target.value)}
                 />
               </div>
-              {errors.name && (
+              {errors.fullName && (
                 <div className="flex items-center gap-2 text-sm text-destructive">
                   <AlertCircle className="h-4 w-4" />
-                  {errors.name}
+                  {errors.fullName}
                 </div>
               )}
             </div>
 
+            {/* Mobile Number Field */}
+            <div className="space-y-2">
+              <Label htmlFor="mobileNumber">Mobile Number</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="mobileNumber"
+                  type="tel"
+                  placeholder="Enter 10-digit mobile number"
+                  className={`pl-10 ${errors.mobileNumber ? 'border-destructive' : ''}`}
+                  value={formData.mobileNumber}
+                  onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
+                />
+                {validateMobileNumber(formData.mobileNumber) && formData.mobileNumber && (
+                  <CheckCircle2 className="absolute right-3 top-3 h-4 w-4 text-green-500" />
+                )}
+              </div>
+              {errors.mobileNumber && (
+                <div className="flex items-center gap-2 text-sm text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  {errors.mobileNumber}
+                </div>
+              )}
+              <div className="text-xs text-muted-foreground">
+                This will be your unique ID and referral code
+              </div>
+            </div>
+
             {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email">Email Address (optional)</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -202,6 +258,34 @@ export default function SignupPage() {
                   {errors.email}
                 </div>
               )}
+              <div className="text-xs text-muted-foreground">
+                Optional: For password recovery and notifications
+              </div>
+            </div>
+
+            {/* Address Field */}
+            <div className="space-y-2">
+              <Label htmlFor="address">Address</Label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="address"
+                  type="text"
+                  placeholder="Enter your full address"
+                  className={`pl-10 ${errors.address ? 'border-destructive' : ''}`}
+                  value={formData.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                />
+              </div>
+              {errors.address && (
+                <div className="flex items-center gap-2 text-sm text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  {errors.address}
+                </div>
+              )}
+              <div className="text-xs text-muted-foreground">
+                Required: For location-based offers and delivery
+              </div>
             </div>
 
             {/* Age Field */}
@@ -231,7 +315,7 @@ export default function SignupPage() {
 
             {/* Gender Field */}
             <div className="space-y-2">
-              <Label htmlFor="gender">Gender</Label>
+              <Label htmlFor="gender">Gender (optional)</Label>
               <Select value={formData.gender} onValueChange={(value) => handleInputChange('gender', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select your gender" />
@@ -245,34 +329,34 @@ export default function SignupPage() {
               </Select>
             </div>
 
-            {/* Location Field */}
+            {/* Referral Code Field */}
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="referralCode">Referral Code (optional)</Label>
               <div className="relative">
-                <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Users className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="location"
-                  type="text"
-                  placeholder="City, State, Country"
+                  id="referralCode"
+                  type="tel"
+                  placeholder="Enter referrer's mobile number"
                   className="pl-10"
-                  value={formData.location}
-                  onChange={(e) => handleInputChange('location', e.target.value)}
+                  value={formData.referralCode}
+                  onChange={(e) => handleInputChange('referralCode', e.target.value)}
                 />
               </div>
               <div className="text-xs text-muted-foreground">
-                Optional: Help us personalize your experience
+                Optional: Enter a friend's mobile number to get bonus rewards
               </div>
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Password (optional)</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Create a strong password"
+                  placeholder="Create a password (leave empty for OTP-only login)"
                   className={`pl-10 pr-10 ${errors.password ? 'border-destructive' : ''}`}
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
@@ -294,6 +378,9 @@ export default function SignupPage() {
                 Password must be at least 6 characters long
               </div>
             )}
+            <div className="text-xs text-muted-foreground">
+              Optional: Set a password for email login, or use OTP-only login
+            </div>
               
               {errors.password && (
                 <div className="flex items-center gap-2 text-sm text-destructive">
@@ -304,38 +391,40 @@ export default function SignupPage() {
             </div>
 
             {/* Confirm Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  className={`pl-10 pr-10 ${errors.confirmPassword ? 'border-destructive' : ''}`}
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-                {formData.confirmPassword && formData.password === formData.confirmPassword && (
-                  <CheckCircle2 className="absolute right-10 top-3 h-4 w-4 text-green-500" />
+            {formData.password && (
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm your password"
+                    className={`pl-10 pr-10 ${errors.confirmPassword ? 'border-destructive' : ''}`}
+                    value={formData.confirmPassword}
+                    onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                  {formData.confirmPassword && formData.password === formData.confirmPassword && (
+                    <CheckCircle2 className="absolute right-10 top-3 h-4 w-4 text-green-500" />
+                  )}
+                </div>
+                {errors.confirmPassword && (
+                  <div className="flex items-center gap-2 text-sm text-destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.confirmPassword}
+                  </div>
                 )}
               </div>
-              {errors.confirmPassword && (
-                <div className="flex items-center gap-2 text-sm text-destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  {errors.confirmPassword}
-                </div>
-              )}
-            </div>
+            )}
 
             {/* Terms and Conditions */}
             <div className="space-y-2">
