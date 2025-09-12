@@ -1,22 +1,28 @@
 import { useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Mail, Lock, Phone, User, AlertCircle, CheckCircle2, X } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, AlertCircle, CheckCircle2, X, MapPin, Calendar } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 export default function SignupPage() {
+  const navigate = useNavigate();
+  const { signUp, enterGuestMode } = useAuth();
+  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    age: "",
+    gender: "",
+    location: ""
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -45,21 +51,11 @@ export default function SignupPage() {
     return emailPattern.test(email);
   }, []);
 
-  // Phone validation for Indian format
-  const validatePhone = (phone: string) => {
-    const phonePattern = /^[6-9]\d{9}$/;
-    const cleanPhone = phone.replace(/\D/g, '').slice(-10);
-    return phonePattern.test(cleanPhone);
-  };
-
-  // Format phone number
-  const formatPhoneNumber = (phone: string) => {
-    const cleaned = phone.replace(/\D/g, '');
-    const match = cleaned.match(/^(\d{5})(\d{5})$/);
-    if (match) {
-      return `+91 ${match[1]} ${match[2]}`;
-    }
-    return phone;
+  // Age validation
+  const validateAge = (age: string) => {
+    if (!age) return true; // Optional field
+    const ageNum = parseInt(age);
+    return ageNum >= 13 && ageNum <= 120;
   };
 
   const { score, checks } = calculatePasswordStrength(formData.password);
@@ -83,16 +79,14 @@ export default function SignupPage() {
       newErrors.email = "Please enter a valid email address";
     }
     
-    if (!formData.phone) {
-      newErrors.phone = "Phone number is required";
-    } else if (!validatePhone(formData.phone)) {
-      newErrors.phone = "Please enter a valid mobile number";
+    if (formData.age && !validateAge(formData.age)) {
+      newErrors.age = "Please enter a valid age between 13 and 120";
     }
     
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (score < 3) {
-      newErrors.password = "Password is too weak";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
     }
     
     if (formData.password !== formData.confirmPassword) {
@@ -108,24 +102,33 @@ export default function SignupPage() {
     if (Object.keys(newErrors).length === 0) {
       setIsLoading(true);
       
-      // Simulate API call
-      setTimeout(() => {
+      try {
+        const { error } = await signUp(formData.email, formData.password, formData.name);
+        
+        if (!error) {
+          // TODO: Store additional profile data (age, gender, location) in profiles table
+          navigate('/');
+        }
+      } catch (err) {
+        console.error('Signup error:', err);
+      } finally {
         setIsLoading(false);
-        toast({
-          title: "Authentication Required",
-          description: "Please connect to Supabase to enable registration functionality.",
-          variant: "destructive"
-        });
-      }, 2000);
+      }
     }
   };
 
+  // Handle guest mode
+  const handleGuestMode = () => {
+    enterGuestMode();
+    navigate('/');
+  };
+
   const handleInputChange = (field: string, value: string) => {
-    if (field === 'phone') {
-      // Auto-format phone number
-      const cleaned = value.replace(/\D/g, '');
-      if (cleaned.length <= 10) {
-        setFormData(prev => ({ ...prev, [field]: cleaned }));
+    if (field === 'age') {
+      // Only allow numbers for age
+      const numericValue = value.replace(/\D/g, '');
+      if (numericValue.length <= 3) {
+        setFormData(prev => ({ ...prev, [field]: numericValue }));
       }
     } else {
       setFormData(prev => ({ ...prev, [field]: value }));
@@ -201,34 +204,64 @@ export default function SignupPage() {
               )}
             </div>
 
-            {/* Phone Number Field */}
+            {/* Age Field */}
             <div className="space-y-2">
-              <Label htmlFor="phone">Mobile Number</Label>
+              <Label htmlFor="age">Age (optional)</Label>
               <div className="relative">
-                <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="Enter 10-digit mobile number"
-                  className={`pl-10 ${errors.phone ? 'border-destructive' : ''}`}
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  id="age"
+                  type="text"
+                  placeholder="Enter your age"
+                  className={`pl-10 ${errors.age ? 'border-destructive' : ''}`}
+                  value={formData.age}
+                  onChange={(e) => handleInputChange('age', e.target.value)}
                 />
-                {validatePhone(formData.phone) && (
+                {formData.age && validateAge(formData.age) && (
                   <CheckCircle2 className="absolute right-3 top-3 h-4 w-4 text-green-500" />
                 )}
               </div>
-              {formData.phone && (
-                <div className="text-sm text-muted-foreground">
-                  Format: {formatPhoneNumber(formData.phone)}
-                </div>
-              )}
-              {errors.phone && (
+              {errors.age && (
                 <div className="flex items-center gap-2 text-sm text-destructive">
                   <AlertCircle className="h-4 w-4" />
-                  {errors.phone}
+                  {errors.age}
                 </div>
               )}
+            </div>
+
+            {/* Gender Field */}
+            <div className="space-y-2">
+              <Label htmlFor="gender">Gender</Label>
+              <Select value={formData.gender} onValueChange={(value) => handleInputChange('gender', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Location Field */}
+            <div className="space-y-2">
+              <Label htmlFor="location">Location</Label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="location"
+                  type="text"
+                  placeholder="City, State, Country"
+                  className="pl-10"
+                  value={formData.location}
+                  onChange={(e) => handleInputChange('location', e.target.value)}
+                />
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Optional: Help us personalize your experience
+              </div>
             </div>
 
             {/* Password Field */}
@@ -255,37 +288,12 @@ export default function SignupPage() {
                 </Button>
               </div>
               
-              {/* Password Strength Indicator */}
-              {formData.password && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Progress value={passwordStrengthPercentage} className="flex-1 h-2" />
-                    <span className="text-xs text-muted-foreground">
-                      {score < 3 ? 'Weak' : score < 4 ? 'Good' : 'Strong'}
-                    </span>
-                  </div>
-                  
-                  {/* Requirements Checklist */}
-                  <div className="grid grid-cols-1 gap-1 text-xs">
-                    {Object.entries(checks).map(([key, passed]) => (
-                      <div key={key} className="flex items-center gap-2">
-                        {passed ? (
-                          <CheckCircle2 className="h-3 w-3 text-green-500" />
-                        ) : (
-                          <X className="h-3 w-3 text-muted-foreground" />
-                        )}
-                        <span className={passed ? 'text-green-600' : 'text-muted-foreground'}>
-                          {key === 'length' && 'At least 8 characters'}
-                          {key === 'uppercase' && 'One uppercase letter'}
-                          {key === 'lowercase' && 'One lowercase letter'}
-                          {key === 'number' && 'One number'}
-                          {key === 'special' && 'One special character'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+            {/* Password Requirements */}
+            {formData.password && (
+              <div className="text-xs text-muted-foreground">
+                Password must be at least 6 characters long
+              </div>
+            )}
               
               {errors.password && (
                 <div className="flex items-center gap-2 text-sm text-destructive">
@@ -356,13 +364,6 @@ export default function SignupPage() {
               )}
             </div>
 
-            {/* Authentication Notice */}
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Connect to Supabase to enable registration functionality.
-              </AlertDescription>
-            </Alert>
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4">
@@ -379,6 +380,16 @@ export default function SignupPage() {
               ) : (
                 "Create Account"
               )}
+            </Button>
+            
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full" 
+              onClick={handleGuestMode}
+              disabled={isLoading}
+            >
+              Continue as Guest
             </Button>
             
             <div className="text-center text-sm">

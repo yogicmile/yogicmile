@@ -10,6 +10,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   
+  // Hide bottom navigation on auth pages
+  const hideBottomNav = ['/welcome', '/login', '/signup'].includes(location.pathname);
+  
   // Determine active tab based on current route
   const getActiveTab = (): 'dashboard' | 'wallet' | 'rewards' | 'profile' => {
     switch (location.pathname) {
@@ -57,17 +60,19 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Main content */}
-      <main className="pb-32"> {/* Add bottom padding to account for fixed navigation */}
+      <main className={hideBottomNav ? "" : "pb-32"}> {/* Add bottom padding only when nav is shown */}
         {children}
       </main>
       
-      {/* Persistent Bottom Navigation */}
-      <EnhancedBottomNavigation
-        activeTab={getActiveTab()}
-        onTabChange={handleTabChange}
-        notificationCounts={notificationCounts}
-        walletBalance={walletBalance}
-      />
+      {/* Persistent Bottom Navigation - hidden on auth pages */}
+      {!hideBottomNav && (
+        <EnhancedBottomNavigation
+          activeTab={getActiveTab()}
+          onTabChange={handleTabChange}
+          notificationCounts={notificationCounts}
+          walletBalance={walletBalance}
+        />
+      )}
     </div>
   );
 };

@@ -4,11 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, Mail, Lock, AlertCircle, CheckCircle2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const { signIn, enterGuestMode } = useAuth();
+  
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -16,7 +19,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const navigate = useNavigate();
 
   // Email validation
   const validateEmail = (email: string) => {
@@ -46,16 +48,24 @@ export default function LoginPage() {
     if (Object.keys(newErrors).length === 0) {
       setIsLoading(true);
       
-      // Simulate API call
-      setTimeout(() => {
+      try {
+        const { error } = await signIn(formData.email, formData.password);
+        
+        if (!error) {
+          navigate('/');
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+      } finally {
         setIsLoading(false);
-        toast({
-          title: "Authentication Required",
-          description: "Please connect to Supabase to enable login functionality.",
-          variant: "destructive"
-        });
-      }, 2000);
+      }
     }
+  };
+
+  // Handle guest mode
+  const handleGuestMode = () => {
+    enterGuestMode();
+    navigate('/');
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -147,13 +157,6 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            {/* Authentication Notice */}
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Connect to Supabase to enable authentication functionality.
-              </AlertDescription>
-            </Alert>
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4">
@@ -170,6 +173,16 @@ export default function LoginPage() {
               ) : (
                 "Sign In"
               )}
+            </Button>
+            
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full" 
+              onClick={handleGuestMode}
+              disabled={isLoading}
+            >
+              Continue as Guest
             </Button>
             
             <div className="text-center text-sm">
