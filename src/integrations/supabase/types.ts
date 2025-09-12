@@ -14,7 +14,240 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      achievements: {
+        Row: {
+          achievement_name: string
+          achievement_type: string
+          description: string
+          emoji: string
+          id: string
+          progress_data: Json | null
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_name: string
+          achievement_type: string
+          description: string
+          emoji: string
+          id?: string
+          progress_data?: Json | null
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_name?: string
+          achievement_type?: string
+          description?: string
+          emoji?: string
+          id?: string
+          progress_data?: Json | null
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      daily_steps: {
+        Row: {
+          capped_steps: number
+          created_at: string
+          date: string
+          id: string
+          is_redeemed: boolean | null
+          paisa_earned: number
+          phase_id: number
+          phase_rate: number
+          redeemed_at: string | null
+          steps: number
+          units_earned: number
+          user_id: string
+        }
+        Insert: {
+          capped_steps?: number
+          created_at?: string
+          date: string
+          id?: string
+          is_redeemed?: boolean | null
+          paisa_earned?: number
+          phase_id?: number
+          phase_rate?: number
+          redeemed_at?: string | null
+          steps?: number
+          units_earned?: number
+          user_id: string
+        }
+        Update: {
+          capped_steps?: number
+          created_at?: string
+          date?: string
+          id?: string
+          is_redeemed?: boolean | null
+          paisa_earned?: number
+          phase_id?: number
+          phase_rate?: number
+          redeemed_at?: string | null
+          steps?: number
+          units_earned?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      spin_results: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          reward_amount: number | null
+          reward_description: string
+          reward_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          reward_amount?: number | null
+          reward_description: string
+          reward_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          reward_amount?: number | null
+          reward_description?: string
+          reward_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          id: string
+          item_name: string | null
+          metadata: Json | null
+          status: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description: string
+          id?: string
+          item_name?: string | null
+          metadata?: Json | null
+          status?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          item_name?: string | null
+          metadata?: Json | null
+          status?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_phases: {
+        Row: {
+          created_at: string
+          current_phase: number
+          current_phase_steps: number
+          current_streak: number
+          id: string
+          longest_streak: number
+          phase_start_date: string
+          total_lifetime_steps: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_phase?: number
+          current_phase_steps?: number
+          current_streak?: number
+          id?: string
+          longest_streak?: number
+          phase_start_date?: string
+          total_lifetime_steps?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_phase?: number
+          current_phase_steps?: number
+          current_streak?: number
+          id?: string
+          longest_streak?: number
+          phase_start_date?: string
+          total_lifetime_steps?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallet_balances: {
+        Row: {
+          id: string
+          last_updated: string
+          total_balance: number
+          total_earned: number
+          total_redeemed: number
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          last_updated?: string
+          total_balance?: number
+          total_earned?: number
+          total_redeemed?: number
+          user_id: string
+        }
+        Update: {
+          id?: string
+          last_updated?: string
+          total_balance?: number
+          total_earned?: number
+          total_redeemed?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
