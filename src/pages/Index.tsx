@@ -16,16 +16,19 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { PageLoading, SkeletonProgressRing } from '@/components/LoadingStates';
 import { NoTransactionsEmptyState } from '@/components/EmptyState';
+import { NativeStepDisplay } from '@/components/NativeStepDisplay';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useYogicMileData } from '@/hooks/use-mock-data';
 import { useCoinRateSystem } from '@/hooks/use-coin-rate-system';
+import { useNativeStepTracking } from '@/hooks/use-native-step-tracking';
 
 const Index = () => {
   const navigate = useNavigate();
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const yogicData = useYogicMileData();
   const coinRateSystem = useCoinRateSystem();
+  const nativeSteps = useNativeStepTracking();
 
   // Simulate initial app loading
   useEffect(() => {
@@ -87,11 +90,16 @@ const Index = () => {
             />
           </div>
 
+          {/* Native Step Tracking Display */}
+          <div className="px-4 pb-4">
+            <NativeStepDisplay className="animate-fade-in" />
+          </div>
+
           {/* Interactive Progress Ring */}
           <div className="px-4 pb-4">
             <InteractiveProgressRing
-              dailySteps={yogicData.dailyProgress.currentSteps}
-              lifetimeSteps={yogicData.user.totalLifetimeSteps}
+              dailySteps={nativeSteps.stepData.dailySteps || yogicData.dailyProgress.currentSteps}
+              lifetimeSteps={nativeSteps.stepData.lifetimeSteps || yogicData.user.totalLifetimeSteps}
               goalSteps={yogicData.dailyProgress.dailyGoal}
               currentTier={yogicData.user.currentTier}
               onGoalReached={handleGoalReached}

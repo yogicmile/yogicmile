@@ -16,6 +16,25 @@ const config: CapacitorConfig = {
     },
     StatusBar: {
       style: 'light'
+    },
+    Geolocation: {
+      permissions: {
+        location: "always"
+      }
+    },
+    LocalNotifications: {
+      smallIcon: "ic_stat_icon_config_sample",
+      iconColor: "#488AFF",
+      sound: "beep.wav"
+    },
+    Preferences: {
+      group: "YogicMileGroup"
+    },
+    Haptics: {
+      enabled: true
+    },
+    App: {
+      backgroundColor: "#f5f5f5"
     }
   }
 };
