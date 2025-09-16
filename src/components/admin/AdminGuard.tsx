@@ -51,8 +51,8 @@ export const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
     );
   }
 
-  // Show loading if user exists but role check is pending
-  if (user && !role) {
+  // Show loading if user exists but role check is pending (except on login page)
+  if (user && !role && location.pathname !== '/admin/login') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">

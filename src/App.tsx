@@ -35,7 +35,7 @@ const App = () => (
           <AdminAuthProvider>
             <Routes>
               {/* Admin Routes */}
-              <Route path="/admin/login" element={<AdminGuard><AdminLogin /></AdminGuard>} />
+              <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin" element={
                 <AdminGuard>
                   <AdminLayout />
