@@ -190,37 +190,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (otp) {
-        // OTP-based login
-        const { data: isValid } = await supabase.rpc('verify_otp', {
-          p_mobile_number: mobileNumber,
-          p_otp: otp
+        // Use Supabase's native phone authentication with OTP verification
+        const { error } = await supabase.auth.verifyOtp({
+          phone: mobileNumber,
+          token: otp,
+          type: 'sms'
         });
 
-        if (!isValid) {
+        if (error) {
           toast({
             title: "Invalid OTP",
             description: "The OTP you entered is invalid or has expired.",
             variant: "destructive",
           });
-          return { error: { message: "Invalid OTP" } };
+          return { error };
         }
 
-        // SECURITY FIX: This is a temporary workaround 
-        // TODO: Implement proper Supabase phone authentication
-        // For now, we'll use the existing flow but without fake sessions
-        
-        // The user has been verified via OTP, but we need proper Supabase auth
-        // This should be replaced with actual phone auth when implemented
-        toast({
-          title: "OTP Verified Successfully",
-          description: "Please implement proper authentication for production use.",
-          variant: "default",
-        });
-        
-        // For demo purposes, allow the user to proceed
-        // but do not set fake session data
-        return { error: null };
-        
         toast({
           title: "Welcome back!",
           description: "You've successfully signed in with OTP.",
@@ -264,14 +249,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const generateOTP = async (mobileNumber: string) => {
     try {
-      // Get client info for security logging
-      const clientIP = null; // Browser doesn't expose real IP
-      const userAgent = navigator.userAgent;
-
-      const { data, error } = await supabase.rpc('generate_otp_with_rate_limit', {
-        p_mobile_number: mobileNumber,
-        p_ip_address: clientIP,
-        p_user_agent: userAgent
+      // Use Supabase's native phone authentication
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: mobileNumber,
+        options: {
+          // Add custom data for user identification
+          data: {
+            source: 'mobile_login'
+          }
+        }
       });
 
       if (error) {
@@ -283,20 +269,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error };
       }
 
-      const response = data as { success: boolean; error?: string; message?: string };
-
-      if (!response.success) {
-        toast({
-          title: "Failed to send OTP",
-          description: response.error,
-          variant: "destructive",
-        });
-        return { error: { message: response.error } };
-      }
-
       toast({
         title: "OTP sent successfully",
-        description: response.message || "Please check your SMS for the OTP code.",
+        description: "Please check your SMS for the OTP code.",
       });
 
       return { error: null };
@@ -312,15 +287,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const verifyOTP = async (mobileNumber: string, otp: string) => {
     try {
-      // Get client info for security logging
-      const clientIP = null; // Browser doesn't expose real IP
-      const userAgent = navigator.userAgent;
-
-      const { data, error } = await supabase.rpc('verify_otp_with_audit', {
-        p_mobile_number: mobileNumber,
-        p_otp: otp,
-        p_ip_address: clientIP,
-        p_user_agent: userAgent
+      // Use Supabase's native OTP verification
+      const { error } = await supabase.auth.verifyOtp({
+        phone: mobileNumber,
+        token: otp,
+        type: 'sms'
       });
 
       if (error) {
@@ -330,17 +301,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           variant: "destructive",
         });
         return { error };
-      }
-
-      const response = data as { success: boolean; error?: string; verified?: boolean };
-
-      if (!response.success) {
-        toast({
-          title: "Invalid OTP",
-          description: response.error || "The OTP you entered is invalid or has expired.",
-          variant: "destructive",
-        });
-        return { error: { message: response.error || "Invalid OTP" } };
       }
 
       toast({
