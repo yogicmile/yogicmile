@@ -40,11 +40,15 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
   // Fetch user role from database
   const fetchUserRole = async (userId: string) => {
     try {
+      console.log('Fetching role for user:', userId);
+      
       const { data, error } = await supabase
         .from('users')
         .select('role')
         .eq('id', userId)
         .single();
+      
+      console.log('Role fetch result:', { data, error: error?.message });
       
       if (error) throw error;
       setRole(data?.role || null);
@@ -56,12 +60,19 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
 
   const signIn = async (email: string, password: string, rememberMe = false): Promise<{ error: any }> => {
     try {
+      console.log('Admin login attempt:', { email, timestamp: new Date().toISOString() });
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      console.log('Supabase auth response:', { data: data?.user?.id, error: error?.message });
+
+      if (error) {
+        console.error('Auth error details:', error);
+        throw error;
+      }
 
       if (data.user) {
         await fetchUserRole(data.user.id);
