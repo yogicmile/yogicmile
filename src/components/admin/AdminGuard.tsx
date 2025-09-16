@@ -24,8 +24,8 @@ export const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
       return;
     }
 
-    // If user exists but is not admin, redirect to main app
-    if (user && !isAdmin) {
+    // If user exists but is not admin and trying to access protected admin pages (not login), redirect to main app
+    if (user && !isAdmin && location.pathname !== '/admin/login') {
       navigate('/');
       return;
     }
@@ -62,8 +62,8 @@ export const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
     );
   }
 
-  // If user is not admin, show access denied
-  if (user && !isAdmin) {
+  // If user is not admin and not on the admin login page, show access denied
+  if (user && !isAdmin && location.pathname !== '/admin/login') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center max-w-md p-6">
