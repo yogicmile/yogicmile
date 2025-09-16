@@ -11,7 +11,7 @@ import { StatsCards } from '@/components/StatsCards';
 import { EnhancedNavigationCards } from '@/components/EnhancedNavigationCards';
 import { CountdownTimer } from '@/components/CountdownTimer';
 import { EnhancedCTAButton } from '@/components/EnhancedCTAButton';
-import { AdBanner } from '@/components/AdBanner';
+import { DynamicAdBanner } from '@/components/DynamicAdBanner';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { PageLoading, SkeletonProgressRing } from '@/components/LoadingStates';
@@ -75,7 +75,9 @@ const Index = () => {
           />
 
           {/* Top Ad Slot - Wellness themed */}
-          <AdBanner type="header" />
+          <div className="px-4">
+            <DynamicAdBanner position="top" page="home" />
+          </div>
 
           {/* Enhanced Phase Progress Section */}
           <div className="px-4 py-4">
@@ -180,7 +182,7 @@ const Index = () => {
 
           {/* Bottom Ad Slot */}
           <div className="px-4 pb-6">
-            <AdBanner type="footer" />
+            <DynamicAdBanner position="bottom" page="home" />
           </div>
         </main>
       </div>

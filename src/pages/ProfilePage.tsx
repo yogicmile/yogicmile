@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { DynamicAdBanner } from '@/components/DynamicAdBanner';
 
 export const ProfilePage = () => {
   const userStats = {
@@ -40,6 +41,17 @@ export const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-background p-4 pb-32">
       <div className="max-w-md mx-auto space-y-6">
+        {/* Header */}
+        <div className="text-center">
+          <h1 className="text-xl font-semibold mb-4 flex items-center justify-center gap-2">
+            <span className="text-2xl">👤</span>
+            Profile
+          </h1>
+        </div>
+
+        {/* Top Ad Banner */}
+        <DynamicAdBanner position="top" page="profile" />
+
         {/* Profile Header */}
         <div className="text-center space-y-4">
           <Avatar className="w-24 h-24 mx-auto">
@@ -111,6 +123,9 @@ export const ProfilePage = () => {
           <LogOut className="w-4 h-4 mr-2" />
           Sign Out
         </Button>
+        
+        {/* Bottom Ad Banner */}
+        <DynamicAdBanner position="bottom" page="profile" />
       </div>
     </div>
   );

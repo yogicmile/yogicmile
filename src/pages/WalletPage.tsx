@@ -9,7 +9,7 @@ import { TransactionHistory } from '@/components/TransactionHistory';
 import { WalletAnalytics } from '@/components/WalletAnalytics';
 import { useYogicData } from '@/hooks/use-yogic-data';
 import { CountdownTimer } from '@/components/CountdownTimer';
-import { AdBanner } from '@/components/AdBanner';
+import { DynamicAdBanner } from '@/components/DynamicAdBanner';
 import { DailyRedeemModal } from '@/components/DailyRedeemModal';
 
 export const WalletPage = () => {
@@ -75,10 +75,9 @@ export const WalletPage = () => {
         </div>
       </div>
 
-      {/* Ad Slots */}
-      <div className="px-4 py-2 space-y-2">
-        <AdBanner type="header" />
-        <AdBanner type="inline" />
+      {/* Top Ad Banner */}
+      <div className="px-4 py-2">
+        <DynamicAdBanner position="top" page="wallet" />
       </div>
 
       {/* Content */}
@@ -178,6 +177,9 @@ export const WalletPage = () => {
             Download your complete transaction history as CSV
           </p>
         </div>
+
+        {/* Bottom Ad Banner */}
+        <DynamicAdBanner position="bottom" page="wallet" />
       </div>
 
       {/* Daily Redeem Modal */}

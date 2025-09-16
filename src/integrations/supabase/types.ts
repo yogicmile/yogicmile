@@ -47,6 +47,92 @@ export type Database = {
         }
         Relationships: []
       }
+      ad_logs: {
+        Row: {
+          ad_id: string
+          created_at: string
+          id: string
+          location: Json | null
+          page: string
+          session_id: string | null
+          timestamp: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          ad_id: string
+          created_at?: string
+          id?: string
+          location?: Json | null
+          page: string
+          session_id?: string | null
+          timestamp?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          ad_id?: string
+          created_at?: string
+          id?: string
+          location?: Json | null
+          page?: string
+          session_id?: string | null
+          timestamp?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_logs_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ads: {
+        Row: {
+          active_from: string
+          active_to: string
+          advertiser: string
+          created_at: string
+          id: string
+          image_url: string
+          link_url: string
+          regions: string[]
+          status: string
+          text: string
+          updated_at: string
+        }
+        Insert: {
+          active_from?: string
+          active_to?: string
+          advertiser: string
+          created_at?: string
+          id?: string
+          image_url: string
+          link_url: string
+          regions?: string[]
+          status?: string
+          text: string
+          updated_at?: string
+        }
+        Update: {
+          active_from?: string
+          active_to?: string
+          advertiser?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          link_url?: string
+          regions?: string[]
+          status?: string
+          text?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -74,6 +160,92 @@ export type Database = {
           ip_address?: unknown | null
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      coupon_redemptions: {
+        Row: {
+          coupon_id: string
+          created_at: string
+          id: string
+          redemption_code: string | null
+          status: string
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          coupon_id: string
+          created_at?: string
+          id?: string
+          redemption_code?: string | null
+          status?: string
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          coupon_id?: string
+          created_at?: string
+          id?: string
+          redemption_code?: string | null
+          status?: string
+          timestamp?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_redemptions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupons: {
+        Row: {
+          created_at: string
+          description: string
+          discount_percent: number
+          expiry_date: string
+          id: string
+          image_url: string | null
+          merchant_name: string
+          min_steps_required: number
+          regions: string[]
+          status: string
+          terms: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          discount_percent: number
+          expiry_date: string
+          id?: string
+          image_url?: string | null
+          merchant_name: string
+          min_steps_required?: number
+          regions?: string[]
+          status?: string
+          terms?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          discount_percent?: number
+          expiry_date?: string
+          id?: string
+          image_url?: string | null
+          merchant_name?: string
+          min_steps_required?: number
+          regions?: string[]
+          status?: string
+          terms?: string | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }

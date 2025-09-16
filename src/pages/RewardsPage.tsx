@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AdBanner } from '@/components/AdBanner';
+import { DynamicAdBanner } from '@/components/DynamicAdBanner';
+import { LocalDeals } from '@/components/LocalDeals';
 import { SpinWheel } from '@/components/SpinWheel';
 import { useToast } from '@/hooks/use-toast';
 
@@ -91,11 +92,8 @@ export const RewardsPage = () => {
           </div>
         </div>
 
-        {/* Ad Slots */}
-        <div className="space-y-2">
-          <AdBanner type="header" />
-          <AdBanner type="inline" />
-        </div>
+        {/* Top Ad Banner */}
+        <DynamicAdBanner position="top" page="rewards" />
 
         {/* Balance Display */}
         <Card className={`p-4 ${canRedeem ? 'bg-success/10 border-success/20' : 'bg-warning/10 border-warning/20'}`}>
@@ -121,17 +119,26 @@ export const RewardsPage = () => {
           </div>
         </Card>
 
-        {/* Spin Wheel */}
-        <SpinWheel 
-          dailySteps={dailySteps}
-          canSpin={canSpin && !canSpin} // Mock: already spun today
-          onSpinComplete={(reward) => {
-            toast({
-              title: "Spin complete!",
-              description: `You won: ${reward.description}`,
-            });
-          }}
-        />
+        {/* Spin Wheel Section */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-2xl">🎡</span>
+            <h2 className="text-lg font-semibold">Spin & Win</h2>
+          </div>
+          <SpinWheel 
+            dailySteps={dailySteps}
+            canSpin={canSpin && !canSpin} // Mock: already spun today
+            onSpinComplete={(reward) => {
+              toast({
+                title: "Spin complete!",
+                description: `You won: ${reward.description}`,
+              });
+            }}
+          />
+        </div>
+
+        {/* Local Deals & Coupons Section */}
+        <LocalDeals />
 
         {/* Category Tabs */}
         <Tabs defaultValue="vouchers" className="space-y-4">
@@ -187,6 +194,9 @@ export const RewardsPage = () => {
             ))}
           </TabsContent>
         </Tabs>
+        
+        {/* Bottom Ad Banner */}
+        <DynamicAdBanner position="bottom" page="rewards" />
       </div>
 
       {/* Redemption Confirmation Modal */}
