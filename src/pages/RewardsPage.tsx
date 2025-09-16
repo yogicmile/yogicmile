@@ -93,8 +93,8 @@ export const RewardsPage = () => {
 
         {/* Ad Slots */}
         <div className="space-y-2">
-          <AdBanner type="banner" />
-          <AdBanner type="native" />
+          <AdBanner type="header" />
+          <AdBanner type="inline" />
         </div>
 
         {/* Balance Display */}

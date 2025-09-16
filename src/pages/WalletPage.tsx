@@ -77,8 +77,8 @@ export const WalletPage = () => {
 
       {/* Ad Slots */}
       <div className="px-4 py-2 space-y-2">
-        <AdBanner type="banner" />
-        <AdBanner type="native" />
+        <AdBanner type="header" />
+        <AdBanner type="inline" />
       </div>
 
       {/* Content */}
