@@ -49,8 +49,11 @@ export const AdminLogin: React.FC = () => {
         return;
       }
 
-      // Check if user has admin role after successful login
-      // Note: The auth context will handle the redirect if user is admin
+      // Explicitly redirect to admin dashboard after successful login
+      if (!error) {
+        console.log('Login successful, redirecting to /admin');
+        navigate('/admin');
+      }
       
     } catch (error: any) {
       toast({

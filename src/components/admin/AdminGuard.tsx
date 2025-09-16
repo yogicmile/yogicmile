@@ -12,32 +12,28 @@ export const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Always allow the admin login page to render (avoid spinner lock)
-  if (useLocation().pathname === '/admin/login') {
-    return <>{children}</>;
-  }
-
   useEffect(() => {
     // Don't redirect if still loading
     if (isLoading) return;
 
-    // If no user, redirect to admin login
-    if (!user) {
-      if (location.pathname !== '/admin/login') {
-        navigate('/admin/login');
+    // Special handling for admin login page
+    if (location.pathname === '/admin/login') {
+      // If already authenticated as admin, redirect to dashboard
+      if (user && isAdmin) {
+        navigate('/admin');
       }
       return;
     }
 
-    // If user exists but is not admin and trying to access protected admin pages (not login), redirect to main app
-    if (user && !isAdmin && location.pathname !== '/admin/login') {
-      navigate('/');
+    // If no user, redirect to admin login
+    if (!user) {
+      navigate('/admin/login');
       return;
     }
 
-    // If on login page but already authenticated as admin, redirect to dashboard
-    if (user && isAdmin && location.pathname === '/admin/login') {
-      navigate('/admin');
+    // If user exists but is not admin and trying to access protected admin pages, redirect to main app
+    if (user && !isAdmin) {
+      navigate('/');
       return;
     }
 
