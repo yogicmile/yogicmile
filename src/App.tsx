@@ -22,6 +22,12 @@ import WelcomePage from "./pages/WelcomePage";
 import NotFound from "./pages/NotFound";
 import { AdminLogin } from "./pages/admin/AdminLogin";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
+import { AdminUsers } from "./pages/admin/AdminUsers";
+import { AdminAdsCoupons } from "./pages/admin/AdminAdsCoupons";
+import { AdminRewards } from "./pages/admin/AdminRewards";
+import { AdminModeration } from "./pages/admin/AdminModeration";
+import { AdminAnalytics } from "./pages/admin/AdminAnalytics";
+import { AdminSettings } from "./pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
@@ -43,7 +49,12 @@ const App = () => (
               }>
                 <Route index element={<AdminDashboard />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
-                {/* Additional admin routes will be added here */}
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="ads" element={<AdminAdsCoupons />} />
+                <Route path="rewards" element={<AdminRewards />} />
+                <Route path="moderation" element={<AdminModeration />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="settings" element={<AdminSettings />} />
               </Route>
               
               {/* Main App Routes */}
