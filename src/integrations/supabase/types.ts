@@ -91,6 +91,45 @@ export type Database = {
           },
         ]
       }
+      admin_audit_logs: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       ads: {
         Row: {
           active_from: string
@@ -321,6 +360,63 @@ export type Database = {
           steps?: number
           units_earned?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      marketing_campaigns: {
+        Row: {
+          clicked_count: number | null
+          conversion_count: number | null
+          created_at: string
+          created_by: string
+          delivered_count: number | null
+          id: string
+          message: string
+          name: string
+          opened_count: number | null
+          scheduled_at: string | null
+          sent_count: number | null
+          status: string
+          target_audience: Json | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          clicked_count?: number | null
+          conversion_count?: number | null
+          created_at?: string
+          created_by: string
+          delivered_count?: number | null
+          id?: string
+          message: string
+          name: string
+          opened_count?: number | null
+          scheduled_at?: string | null
+          sent_count?: number | null
+          status?: string
+          target_audience?: Json | null
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          clicked_count?: number | null
+          conversion_count?: number | null
+          created_at?: string
+          created_by?: string
+          delivered_count?: number | null
+          id?: string
+          message?: string
+          name?: string
+          opened_count?: number | null
+          scheduled_at?: string | null
+          sent_count?: number | null
+          status?: string
+          target_audience?: Json | null
+          title?: string
+          type?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -762,6 +858,131 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          admin_notes: string | null
+          assigned_to: string | null
+          attachments: Json | null
+          category: string
+          created_at: string
+          description: string
+          id: string
+          priority: string
+          resolved_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          assigned_to?: string | null
+          attachments?: Json | null
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          priority?: string
+          resolved_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          assigned_to?: string | null
+          attachments?: Json | null
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          priority?: string
+          resolved_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      system_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          resolved: boolean | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          title: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      ticket_responses: {
+        Row: {
+          attachments: Json | null
+          created_at: string
+          id: string
+          message: string
+          responder_id: string
+          responder_type: string
+          ticket_id: string
+        }
+        Insert: {
+          attachments?: Json | null
+          created_at?: string
+          id?: string
+          message: string
+          responder_id: string
+          responder_type: string
+          ticket_id: string
+        }
+        Update: {
+          attachments?: Json | null
+          created_at?: string
+          id?: string
+          message?: string
+          responder_id?: string
+          responder_type?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_responses_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
@@ -850,6 +1071,7 @@ export type Database = {
           phase: string | null
           referral_code: string | null
           referred_by: string | null
+          role: string | null
           used_referral_code: string | null
         }
         Insert: {
@@ -864,6 +1086,7 @@ export type Database = {
           phase?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          role?: string | null
           used_referral_code?: string | null
         }
         Update: {
@@ -878,6 +1101,7 @@ export type Database = {
           phase?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          role?: string | null
           used_referral_code?: string | null
         }
         Relationships: []
@@ -1032,6 +1256,16 @@ export type Database = {
       hash_otp: {
         Args: { plain_otp: string }
         Returns: string
+      }
+      log_admin_action: {
+        Args: {
+          p_action: string
+          p_new_values?: Json
+          p_old_values?: Json
+          p_record_id?: string
+          p_table_name?: string
+        }
+        Returns: undefined
       }
       verify_hashed_otp: {
         Args: { hashed_otp: string; plain_otp: string }
