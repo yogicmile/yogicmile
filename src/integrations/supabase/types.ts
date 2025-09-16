@@ -651,6 +651,14 @@ export type Database = {
         Args: { p_mobile_number: string }
         Returns: string
       }
+      hash_otp: {
+        Args: { plain_otp: string }
+        Returns: string
+      }
+      verify_hashed_otp: {
+        Args: { hashed_otp: string; plain_otp: string }
+        Returns: boolean
+      }
       verify_otp: {
         Args: { p_mobile_number: string; p_otp: string }
         Returns: boolean
