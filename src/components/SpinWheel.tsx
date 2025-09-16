@@ -16,14 +16,12 @@ interface SpinReward {
 }
 
 const spinRewards: SpinReward[] = [
-  { type: 'paisa', amount: 10, description: '+10 paisa', probability: 30, color: 'hsl(var(--tier-1-paisa))' },
-  { type: 'paisa', amount: 25, description: '+25 paisa', probability: 25, color: 'hsl(var(--tier-2-coin))' },
-  { type: 'paisa', amount: 50, description: '+50 paisa', probability: 20, color: 'hsl(var(--tier-3-token))' },
-  { type: 'paisa', amount: 100, description: '+100 paisa', probability: 10, color: 'hsl(var(--tier-4-gem))' },
-  { type: 'phase_bonus', amount: 100, description: '+100 steps to phase', probability: 5, color: 'hsl(var(--tier-5-diamond))' },
-  { type: 'double_coins', amount: 100, description: 'Double next 100 steps', probability: 5, color: 'hsl(var(--tier-6-crown))' },
-  { type: 'try_again', amount: 0, description: 'Try Again', probability: 3, color: 'hsl(var(--muted))' },
-  { type: 'better_luck', amount: 0, description: 'Better Luck Tomorrow', probability: 2, color: 'hsl(var(--muted-foreground))' },
+  { type: 'paisa', amount: 25, description: '+25 paisa', probability: 30, color: 'hsl(var(--tier-1-paisa))' },
+  { type: 'paisa', amount: 50, description: '+50 paisa', probability: 25, color: 'hsl(var(--tier-2-rupaya))' },
+  { type: 'paisa', amount: 100, description: '+100 paisa', probability: 20, color: 'hsl(var(--tier-3-token))' },
+  { type: 'paisa', amount: 200, description: '+200 paisa', probability: 15, color: 'hsl(var(--tier-4-gem))' },
+  { type: 'coupon', amount: 0, description: 'Discount Coupon', probability: 5, color: 'hsl(var(--tier-5-diamond))' },
+  { type: 'better_luck', amount: 0, description: 'Better Luck', probability: 5, color: 'hsl(var(--muted))' },
 ];
 
 interface SpinWheelProps {
@@ -54,7 +52,7 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ dailySteps, canSpin, onSpi
   }, []);
 
   const handleSpin = async () => {
-    if (!canSpin || isSpinning || dailySteps < 5000) return;
+    if (!canSpin || isSpinning || dailySteps < 2000) return;
 
     if (isGuest) {
       toast({
@@ -131,21 +129,21 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ dailySteps, canSpin, onSpi
     }, 3000);
   };
 
-  const canSpinToday = canSpin && dailySteps >= 5000;
+  const canSpinToday = canSpin && dailySteps >= 2000;
 
   return (
     <Card className="p-6">
       <div className="text-center mb-4">
         <h3 className="text-xl font-bold mb-2">🎡 Daily Spin Wheel</h3>
         <p className="text-sm text-muted-foreground">
-          Walk 5,000+ steps to unlock your daily spin!
+          Walk 2,000+ steps to unlock your daily spin!
         </p>
       </div>
 
       {/* Requirements Badge */}
       <div className="flex justify-center mb-4">
         <Badge variant={canSpinToday ? "default" : "secondary"}>
-          {dailySteps >= 5000 ? `✅ ${dailySteps.toLocaleString()} steps` : `${dailySteps.toLocaleString()}/5,000 steps`}
+          {dailySteps >= 2000 ? `✅ ${dailySteps.toLocaleString()} steps` : `${dailySteps.toLocaleString()}/2,000 steps`}
         </Badge>
       </div>
 
@@ -199,8 +197,9 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ dailySteps, canSpin, onSpi
             >
               {isSpinning ? '🎰 Spinning...' : 
                isGuest ? '🔒 Sign up to spin' :
-               !canSpinToday ? '🚶‍♀️ Walk more to unlock' : 
-               '🎰 Spin Now!'}
+               !canSpin ? 'Come back tomorrow!' :
+               !canSpinToday ? 'Walk 2,000+ steps to unlock' : 
+               'Free Spin Available!'}
             </Button>
           </DialogTrigger>
           
