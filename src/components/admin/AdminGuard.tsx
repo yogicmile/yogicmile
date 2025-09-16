@@ -16,6 +16,12 @@ export const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
     // Don't redirect if still loading
     if (isLoading) return;
 
+    // Wait for role resolution on protected admin pages (avoid premature redirects)
+    const onAdminProtected = location.pathname.startsWith('/admin') && location.pathname !== '/admin/login';
+    if (onAdminProtected && user && role === null) {
+      return; // keep showing verifying state until role fetched
+    }
+
     // Special handling for admin login page
     if (location.pathname === '/admin/login') {
       // If already authenticated as admin, redirect to dashboard

@@ -37,21 +37,51 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
 
   const isAdmin = role ? ['admin', 'super_admin', 'content_admin'].includes(role) : false;
 
-  // Fetch user role from database
+  // Fetch user role from database (and ensure user row exists if missing)
   const fetchUserRole = async (userId: string) => {
     try {
       console.log('Fetching role for user:', userId);
-      
+
       const { data, error } = await supabase
         .from('users')
         .select('role')
         .eq('id', userId)
-        .single();
-      
-      console.log('Role fetch result:', { data, error: error?.message });
-      
-      if (error) throw error;
-      setRole(data?.role || null);
+        .maybeSingle();
+
+      if (error) {
+        console.error('Role fetch error:', error);
+      }
+
+      let roleValue = data?.role as string | null;
+
+      // If no row exists, create a minimal user row so role queries work
+      if (!roleValue) {
+        const { data: userInfo } = await supabase.auth.getUser();
+        const email = userInfo.user?.email || 'admin@yogicmile.com';
+        const fullName = email.split('@')[0] || 'Admin User';
+
+        // Upsert user's row with safe defaults (RLS requires id = auth.uid())
+        const { error: upsertErr } = await supabase
+          .from('users')
+          .insert({
+            id: userId,
+            mobile_number: '0000000000',
+            full_name: fullName,
+            email,
+            address: 'N/A',
+            role: 'user',
+          })
+          .select()
+          .single();
+
+        if (upsertErr) {
+          console.error('User upsert failed:', upsertErr);
+        } else {
+          roleValue = 'user';
+        }
+      }
+
+      setRole(roleValue);
     } catch (error) {
       console.error('Error fetching user role:', error);
       setRole(null);
