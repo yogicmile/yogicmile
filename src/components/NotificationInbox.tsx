@@ -3,8 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useNotificationInbox } from '@/hooks/use-notification-inbox';
-import { Bell, BellRing, Trash2, MarkAsRead, MarkAsUnread, Plus, Loader2 } from 'lucide-react';
+import { useNotificationInbox, NotificationFilter } from '@/hooks/use-notification-inbox';
+import { Bell, BellRing, Trash2, Check, X, Plus, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export const NotificationInbox: React.FC = () => {
@@ -55,7 +55,7 @@ export const NotificationInbox: React.FC = () => {
                 {unreadCount} unread
               </Badge>
               <Button size="sm" variant="outline" onClick={markAllAsRead} disabled={unreadCount === 0}>
-                <MarkAsRead className="h-3 w-3 mr-1" />
+                <Check className="h-3 w-3 mr-1" />
                 Mark All Read
               </Button>
             </div>
@@ -64,7 +64,7 @@ export const NotificationInbox: React.FC = () => {
       </Card>
 
       {/* Filters */}
-      <Tabs value={filter} onValueChange={setFilter}>
+      <Tabs value={filter} onValueChange={(value) => setFilter(value as NotificationFilter)}>
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="unread">Unread ({unreadCount})</TabsTrigger>
@@ -140,9 +140,9 @@ export const NotificationInbox: React.FC = () => {
                         }}
                       >
                         {notification.read_status ? (
-                          <MarkAsUnread className="h-3 w-3" />
+                          <X className="h-3 w-3" />
                         ) : (
-                          <MarkAsRead className="h-3 w-3" />
+                          <Check className="h-3 w-3" />
                         )}
                       </Button>
                       <Button
