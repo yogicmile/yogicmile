@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { useYogicMileData } from '@/hooks/use-mock-data';
 import { useCoinRateSystem } from '@/hooks/use-coin-rate-system';
 import { useNativeStepTracking } from '@/hooks/use-native-step-tracking';
+import { DynamicAdBanner } from '@/components/DynamicAdBanner';
 
 const Index = () => {
   const navigate = useNavigate();
