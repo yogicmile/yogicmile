@@ -158,47 +158,6 @@ export const NativeStepDisplay: React.FC<NativeStepDisplayProps> = ({ className 
         </CardContent>
       </Card>
 
-      {/* Permission Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Permissions & Status</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-2 text-xs">
-            <div className="text-center space-y-1">
-              <MapPin className={cn(
-                "h-4 w-4 mx-auto",
-                permissions.location ? "text-green-500" : "text-red-500"
-              )} />
-              <div>Location</div>
-              <Badge variant={permissions.location ? "default" : "destructive"} className="text-xs">
-                {permissions.location ? "✓" : "✗"}
-              </Badge>
-            </div>
-            <div className="text-center space-y-1">
-              <Smartphone className={cn(
-                "h-4 w-4 mx-auto",
-                permissions.notifications ? "text-green-500" : "text-red-500"
-              )} />
-              <div>Notifications</div>
-              <Badge variant={permissions.notifications ? "default" : "destructive"} className="text-xs">
-                {permissions.notifications ? "✓" : "✗"}
-              </Badge>
-            </div>
-            <div className="text-center space-y-1">
-              <Activity className={cn(
-                "h-4 w-4 mx-auto",
-                permissions.motion ? "text-green-500" : "text-red-500"
-              )} />
-              <div>Motion</div>
-              <Badge variant={permissions.motion ? "default" : "destructive"} className="text-xs">
-                {permissions.motion ? "✓" : "✗"}
-              </Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Controls */}
       <div className="grid grid-cols-2 gap-2">
         <Button
