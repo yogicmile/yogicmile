@@ -81,87 +81,63 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (formData: SignUpData) => {
     setIsLoading(true);
     try {
-      // Check if user exists in our custom users table by mobile number
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('id')
-        .eq('mobile_number', formData.mobileNumber)
-        .single();
-
-      if (existingUser) {
-        toast({
-          title: "User already exists",
-          description: "A user with this mobile number already exists. Please try logging in.",
-          variant: "destructive",
-        });
-        return { error: { message: "User already exists" } };
-      }
-
-      let authError = null;
-      let authUser = null;
-
-      // If email and password provided, create Supabase auth user
+      let authResult;
+      
+      // Always use Supabase authentication - no custom users table approach
       if (formData.email && formData.password) {
+        // Email/password signup
         const redirectUrl = `${window.location.origin}/`;
         
-        const { data, error } = await supabase.auth.signUp({
+        authResult = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
           options: {
             emailRedirectTo: redirectUrl,
             data: {
               full_name: formData.fullName,
-              mobile_number: formData.mobileNumber
+              mobile_number: formData.mobileNumber,
+              address: formData.address,
+              age: formData.age,
+              gender: formData.gender,
+              referral_code: formData.referralCode
             }
           }
         });
-        
-        authError = error;
-        authUser = data.user;
       } else {
-        // Create a temporary user ID for mobile-only users
-        authUser = { id: crypto.randomUUID() } as User;
+        // Mobile-only signup - use phone authentication
+        const formattedNumber = formData.mobileNumber.startsWith('+91') 
+          ? formData.mobileNumber 
+          : `+91${formData.mobileNumber}`;
+          
+        authResult = await supabase.auth.signInWithOtp({
+          phone: formattedNumber,
+          options: {
+            shouldCreateUser: true,
+            data: {
+              full_name: formData.fullName,
+              address: formData.address,
+              age: formData.age,
+              gender: formData.gender,
+              referral_code: formData.referralCode
+            }
+          }
+        });
       }
 
-      if (authError) {
+      if (authResult.error) {
         toast({
           title: "Sign up failed",
-          description: authError.message,
+          description: authResult.error.message,
           variant: "destructive",
         });
-        return { error: authError };
-      }
-
-      // Store user data in our custom users table
-      const { error: dbError } = await supabase
-        .from('users')
-        .insert({
-          id: authUser!.id,
-          mobile_number: formData.mobileNumber,
-          email: formData.email || null,
-          full_name: formData.fullName,
-          password_hash: formData.password ? 'hashed_by_supabase' : null,
-          address: formData.address,
-          age: formData.age || null,
-          gender: formData.gender || null,
-          referred_by: formData.referralCode || null,
-          referral_code: formData.mobileNumber // Mobile number acts as referral code
-        });
-
-      if (dbError) {
-        toast({
-          title: "Registration failed",
-          description: dbError.message,
-          variant: "destructive",
-        });
-        return { error: dbError };
+        return { error: authResult.error };
       }
 
       toast({
         title: "Registration successful!",
         description: formData.email && formData.password 
           ? "Please check your email for verification." 
-          : "You can now log in with your mobile number.",
+          : "Please check your SMS for the OTP to complete registration.",
       });
 
       return { error: null };
@@ -173,26 +149,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (mobileNumber: string, password?: string, otp?: string) => {
     setIsLoading(true);
     try {
-      // Check if user exists in our users table
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('mobile_number', mobileNumber)
-        .single();
-
-      if (userError || !userData) {
-        toast({
-          title: "User not found",
-          description: "No account found with this mobile number. Please sign up first.",
-          variant: "destructive",
-        });
-        return { error: { message: "User not found" } };
-      }
-
       if (otp) {
-        // Use Supabase's native phone authentication with OTP verification
+        // Phone/OTP authentication
+        const formattedNumber = mobileNumber.startsWith('+91') 
+          ? mobileNumber 
+          : `+91${mobileNumber}`;
+          
         const { error } = await supabase.auth.verifyOtp({
-          phone: mobileNumber,
+          phone: formattedNumber,
           token: otp,
           type: 'sms'
         });
@@ -212,10 +176,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         
         return { error: null };
-      } else if (password && userData.email) {
+      } else if (password) {
+        // For password login, we need an email. Check if user provided email format
+        const isEmail = mobileNumber.includes('@');
+        
+        if (!isEmail) {
+          toast({
+            title: "Password login requires email",
+            description: "Please use your email address for password login, or use OTP with your mobile number.",
+            variant: "destructive",
+          });
+          return { error: { message: "Email required for password login" } };
+        }
+        
         // Email/password login through Supabase Auth
         const { error } = await supabase.auth.signInWithPassword({
-          email: userData.email,
+          email: mobileNumber, // This is actually an email in this case
           password,
         });
 
@@ -249,14 +225,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const generateOTP = async (mobileNumber: string) => {
     try {
+      const formattedNumber = mobileNumber.startsWith('+91') 
+        ? mobileNumber 
+        : `+91${mobileNumber}`;
+        
       // Use Supabase's native phone authentication
       const { error } = await supabase.auth.signInWithOtp({
-        phone: mobileNumber,
+        phone: formattedNumber,
         options: {
-          // Add custom data for user identification
-          data: {
-            source: 'mobile_login'
-          }
+          shouldCreateUser: true
         }
       });
 
@@ -287,9 +264,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const verifyOTP = async (mobileNumber: string, otp: string) => {
     try {
+      const formattedNumber = mobileNumber.startsWith('+91') 
+        ? mobileNumber 
+        : `+91${mobileNumber}`;
+        
       // Use Supabase's native OTP verification
       const { error } = await supabase.auth.verifyOtp({
-        phone: mobileNumber,
+        phone: formattedNumber,
         token: otp,
         type: 'sms'
       });
@@ -305,7 +286,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       toast({
         title: "OTP verified successfully",
-        description: "You can now access your account.",
+        description: "Welcome to Yogic Mile!",
       });
 
       return { error: null };
