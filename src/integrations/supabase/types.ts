@@ -420,6 +420,196 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_logs: {
+        Row: {
+          created_at: string | null
+          delivered_at: string | null
+          error_message: string | null
+          fcm_token: string
+          id: string
+          notification_id: string
+          opened_at: string | null
+          sent_at: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          delivered_at?: string | null
+          error_message?: string | null
+          fcm_token: string
+          id?: string
+          notification_id: string
+          opened_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          delivered_at?: string | null
+          error_message?: string | null
+          fcm_token?: string
+          id?: string
+          notification_id?: string
+          opened_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_logs_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_settings: {
+        Row: {
+          achievement_notifications: boolean | null
+          coin_expiry_alerts: boolean | null
+          created_at: string | null
+          fcm_token: string | null
+          id: string
+          location_deals_enabled: boolean | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          reminder_frequency: string | null
+          timezone: string | null
+          updated_at: string | null
+          user_id: string
+          walking_reminders_enabled: boolean | null
+        }
+        Insert: {
+          achievement_notifications?: boolean | null
+          coin_expiry_alerts?: boolean | null
+          created_at?: string | null
+          fcm_token?: string | null
+          id?: string
+          location_deals_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          reminder_frequency?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_id: string
+          walking_reminders_enabled?: boolean | null
+        }
+        Update: {
+          achievement_notifications?: boolean | null
+          coin_expiry_alerts?: boolean | null
+          created_at?: string | null
+          fcm_token?: string | null
+          id?: string
+          location_deals_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          reminder_frequency?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_id?: string
+          walking_reminders_enabled?: boolean | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          created_by_admin: string
+          deep_link: string | null
+          id: string
+          image_url: string | null
+          message: string
+          schedule_time: string | null
+          status: string | null
+          target_criteria: Json | null
+          title: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by_admin: string
+          deep_link?: string | null
+          id?: string
+          image_url?: string | null
+          message: string
+          schedule_time?: string | null
+          status?: string | null
+          target_criteria?: Json | null
+          title: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by_admin?: string
+          deep_link?: string | null
+          id?: string
+          image_url?: string | null
+          message?: string
+          schedule_time?: string | null
+          status?: string | null
+          target_criteria?: Json | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      notifications_inbox: {
+        Row: {
+          created_at: string | null
+          deep_link: string | null
+          id: string
+          image_url: string | null
+          message: string
+          notification_id: string | null
+          read_status: boolean | null
+          title: string
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          deep_link?: string | null
+          id?: string
+          image_url?: string | null
+          message: string
+          notification_id?: string | null
+          read_status?: boolean | null
+          title: string
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          deep_link?: string | null
+          id?: string
+          image_url?: string | null
+          message?: string
+          notification_id?: string | null
+          read_status?: boolean | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_inbox_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       otp_logs: {
         Row: {
           created_at: string | null
