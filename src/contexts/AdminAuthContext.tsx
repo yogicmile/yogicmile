@@ -155,44 +155,37 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
   };
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          await fetchUserRole(session.user.id);
-          
-          // Log admin login
-          if (event === 'SIGNED_IN') {
-            setTimeout(() => {
-              supabase.rpc('log_admin_action', {
-                p_action: 'admin_login'
-              });
-            }, 0);
-          }
-        } else {
-          setRole(null);
-        }
-        
-        setIsLoading(false);
-      }
-    );
+    // Set up auth state listener FIRST (sync callback only)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
 
-    // Get initial session
+      if (session?.user) {
+        // Defer Supabase calls to avoid deadlocks inside the callback
+        setTimeout(() => {
+          fetchUserRole(session.user!.id);
+          if (event === 'SIGNED_IN') {
+            supabase.rpc('log_admin_action', { p_action: 'admin_login' });
+          }
+        }, 0);
+      } else {
+        setRole(null);
+      }
+
+      setIsLoading(false);
+    });
+
+    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
-        setTimeout(() => {
-          fetchUserRole(session.user.id);
-        }, 0);
+        setTimeout(() => fetchUserRole(session.user!.id), 0);
       }
-      
+
       setIsLoading(false);
-    });
+    }).catch(() => setIsLoading(false));
 
     return () => subscription.unsubscribe();
   }, []);

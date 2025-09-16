@@ -12,6 +12,11 @@ export const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Always allow the admin login page to render (avoid spinner lock)
+  if (useLocation().pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
   useEffect(() => {
     // Don't redirect if still loading
     if (isLoading) return;
