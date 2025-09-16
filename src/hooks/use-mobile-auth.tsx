@@ -292,10 +292,10 @@ export const useMobileAuth = () => {
       
       toast({
         title: "OTP Sent! 📱",
-        description: `Check your SMS for 6-digit code\nTest OTP: ${otp}`,
+        description: "Check your SMS for 6-digit code",
       });
 
-      return { success: true, otp }; // Remove otp in production
+      return { success: true }; // SECURITY FIX: Never return OTP to frontend
     } catch (error: any) {
       toast({
         title: "OTP Generation Failed",

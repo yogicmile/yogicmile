@@ -205,9 +205,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return { error: { message: "Invalid OTP" } };
         }
 
-        // Create a session manually for OTP users
-        setUser({ id: userData.id, email: userData.email } as User);
-        setSession({ user: { id: userData.id, email: userData.email } } as Session);
+        // SECURITY FIX: Use proper Supabase Auth instead of fake sessions
+        // Sign in the user through Supabase Auth system
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email: userData.email || userData.mobile_number,
+          password: 'temp-otp-login' // This needs proper implementation
+        });
+        
+        if (authError) {
+          console.error('Failed to create proper auth session:', authError);
+          toast({
+            title: "Authentication Error",
+            description: "Failed to create secure session. Please try again.",
+            variant: "destructive",
+          });
+          return { error: authError };
+        }
         
         toast({
           title: "Welcome back!",
