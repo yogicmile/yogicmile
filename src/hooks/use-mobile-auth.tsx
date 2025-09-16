@@ -12,6 +12,7 @@ export interface MobileAuthState {
   canResend: boolean;
   biometricEnabled: boolean;
   sessionSecure: boolean;
+  failedAttempts: number;
 }
 
 export interface SignUpFormData {
@@ -44,6 +45,7 @@ export const useMobileAuth = () => {
     canResend: true,
     biometricEnabled: false,
     sessionSecure: false,
+    failedAttempts: 0,
   });
 
   const resendInterval = useRef<NodeJS.Timeout | null>(null);
@@ -408,58 +410,6 @@ export const useMobileAuth = () => {
       setState(prev => ({ ...prev, isLoading: false }));
     }
   };
-      
-      // Get user data for session
-      const { data: user } = await supabase
-        .from('users')
-        .select('*')
-        .eq('mobile_number', formatted)
-        .single();
-
-      if (user) {
-        // Store secure session
-        const session = {
-          userId: user.id,
-          mobileNumber: formatted,
-          expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 days
-          createdAt: Date.now(),
-        };
-
-        await Preferences.set({
-          key: SECURE_STORAGE_KEY,
-          value: JSON.stringify(session),
-        });
-
-        setState(prev => ({ 
-          ...prev, 
-          sessionSecure: true,
-          otpSent: false,
-        }));
-      }
-
-      await Haptics.impact({ style: ImpactStyle.Light });
-      
-      toast({
-        title: "OTP Verified! ✅",
-        description: "Login successful",
-      });
-
-      return { success: true };
-    }
-
-    throw new Error('User not found');
-  } catch (error: any) {
-    console.error('OTP verification error:', error);
-    toast({
-      title: "Verification Failed",
-      description: error.message || "Please try again",
-      variant: "destructive",
-    });
-    return { success: false, error: error.message };
-  } finally {
-    setState(prev => ({ ...prev, isLoading: false }));
-  }
-};
 
   const startResendTimer = () => {
     setState(prev => ({ ...prev, otpResendTimer: OTP_RESEND_INTERVAL }));

@@ -264,31 +264,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const generateOTP = async (mobileNumber: string) => {
     try {
-      const { data, error } = await supabase.rpc('generate_otp', {
-        p_mobile_number: mobileNumber
+      // Get client info for security logging
+      const clientIP = null; // Browser doesn't expose real IP
+      const userAgent = navigator.userAgent;
+
+      const { data, error } = await supabase.rpc('generate_otp_with_rate_limit', {
+        p_mobile_number: mobileNumber,
+        p_ip_address: clientIP,
+        p_user_agent: userAgent
       });
 
       if (error) {
         toast({
-          title: "Failed to generate OTP",
+          title: "Failed to send OTP",
           description: error.message,
           variant: "destructive",
         });
         return { error };
       }
 
-      // In real implementation, OTP would be sent via SMS
-      // For now, we'll show it in the toast for testing
+      const response = data as { success: boolean; error?: string; message?: string };
+
+      if (!response.success) {
+        toast({
+          title: "Failed to send OTP",
+          description: response.error,
+          variant: "destructive",
+        });
+        return { error: { message: response.error } };
+      }
+
       toast({
-        title: "OTP Generated",
-        description: `Your OTP is: ${data} (This is for testing - in production this would be sent via SMS)`,
+        title: "OTP sent successfully",
+        description: response.message || "Please check your SMS for the OTP code.",
       });
 
-      return { error: null, otp: data };
-    } catch (err) {
-      const error = err as any;
+      return { error: null };
+    } catch (error: any) {
       toast({
-        title: "Error generating OTP",
+        title: "Failed to send OTP", 
         description: error.message,
         variant: "destructive",
       });
@@ -298,18 +312,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const verifyOTP = async (mobileNumber: string, otp: string) => {
     try {
-      const { data: isValid, error } = await supabase.rpc('verify_otp', {
+      // Get client info for security logging
+      const clientIP = null; // Browser doesn't expose real IP
+      const userAgent = navigator.userAgent;
+
+      const { data, error } = await supabase.rpc('verify_otp_with_audit', {
         p_mobile_number: mobileNumber,
-        p_otp: otp
+        p_otp: otp,
+        p_ip_address: clientIP,
+        p_user_agent: userAgent
       });
 
       if (error) {
+        toast({
+          title: "Verification failed",
+          description: error.message,
+          variant: "destructive",
+        });
         return { error };
       }
 
-      return { error: isValid ? null : { message: "Invalid OTP" } };
-    } catch (err) {
-      return { error: err };
+      const response = data as { success: boolean; error?: string; verified?: boolean };
+
+      if (!response.success) {
+        toast({
+          title: "Invalid OTP",
+          description: response.error || "The OTP you entered is invalid or has expired.",
+          variant: "destructive",
+        });
+        return { error: { message: response.error || "Invalid OTP" } };
+      }
+
+      toast({
+        title: "OTP verified successfully",
+        description: "You can now access your account.",
+      });
+
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Verification failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      return { error };
     }
   };
 
