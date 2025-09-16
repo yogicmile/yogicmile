@@ -267,23 +267,24 @@ export const useMobileAuth = () => {
 
       const formatted = formatMobileNumber(mobileNumber);
       
-      // Check if user exists
-      const { data: user } = await supabase
-        .from('users')
-        .select('id')
-        .eq('mobile_number', formatted)
-        .single();
+      // Get client IP and user agent for security logging
+      const clientIP = null; // Browser doesn't expose real IP
+      const userAgent = navigator.userAgent;
 
-      if (!user) {
-        throw new Error('No account found with this mobile number');
-      }
-
-      // Generate OTP
-      const { data: otp, error } = await supabase.rpc('generate_otp', {
-        p_mobile_number: formatted
+      // Generate OTP with rate limiting and audit logging
+      const { data, error } = await supabase.rpc('generate_otp_with_rate_limit', {
+        p_mobile_number: formatted,
+        p_ip_address: clientIP,
+        p_user_agent: userAgent
       });
 
       if (error) throw error;
+
+      const response = data as { success: boolean; error?: string; message?: string };
+
+      if (!response.success) {
+        throw new Error(response.error);
+      }
 
       setState(prev => ({ ...prev, otpSent: true, canResend: false }));
       startResendTimer();
@@ -292,10 +293,10 @@ export const useMobileAuth = () => {
       
       toast({
         title: "OTP Sent! 📱",
-        description: "Check your SMS for 6-digit code",
+        description: response.message || "Check your SMS for 6-digit code",
       });
 
-      return { success: true }; // SECURITY FIX: Never return OTP to frontend
+      return { success: true };
     } catch (error: any) {
       toast({
         title: "OTP Generation Failed",
@@ -314,39 +315,99 @@ export const useMobileAuth = () => {
     try {
       const formatted = formatMobileNumber(mobileNumber);
       
-      const { data: isValid, error } = await supabase.rpc('verify_otp', {
+      // Validate OTP format
+      if (!/^\d{6}$/.test(otp)) {
+        throw new Error('OTP must be exactly 6 digits');
+      }
+
+      // Get client IP and user agent for security logging
+      const clientIP = null; // Browser doesn't expose real IP
+      const userAgent = navigator.userAgent;
+
+      // Verify OTP with audit logging
+      const { data, error } = await supabase.rpc('verify_otp_with_audit', {
         p_mobile_number: formatted,
-        p_otp: otp
+        p_otp: otp,
+        p_ip_address: clientIP,
+        p_user_agent: userAgent
       });
 
       if (error) throw error;
 
-      if (!isValid) {
-        otpAttempts.current++;
+      const response = data as { success: boolean; error?: string; verified?: boolean };
+
+      if (!response.success) {
+        // Add progressive delay for failed attempts
+        const attemptCount = (state.failedAttempts || 0) + 1;
+        setState(prev => ({ ...prev, failedAttempts: attemptCount }));
         
-        if (otpAttempts.current >= MAX_OTP_ATTEMPTS) {
-          setState(prev => ({ ...prev, otpSent: false, canResend: true }));
-          otpAttempts.current = 0;
-          
+        const delay = Math.min(attemptCount * 2000, 30000); // Max 30 second delay
+        if (attemptCount > 1) {
           toast({
-            title: "Too Many Attempts",
-            description: "Please request a new OTP",
+            title: "Too Many Failed Attempts",
+            description: `Please wait ${delay/1000} seconds before trying again`,
             variant: "destructive",
           });
-          return { success: false, error: 'Too many attempts' };
+          
+          setTimeout(() => {
+            setState(prev => ({ ...prev, isLoading: false }));
+          }, delay);
+          
+          return { success: false, error: response.error };
         }
-
-        await Haptics.impact({ style: ImpactStyle.Heavy });
-        toast({
-          title: "Invalid OTP",
-          description: `Wrong code. ${MAX_OTP_ATTEMPTS - otpAttempts.current} attempts left`,
-          variant: "destructive",
-        });
-        return { success: false, error: 'Invalid OTP' };
+        
+        throw new Error(response.error || 'Invalid OTP code. Please try again.');
       }
 
-      // OTP verified successfully
-      otpAttempts.current = 0;
+      // Reset failed attempts on success
+      setState(prev => ({ ...prev, failedAttempts: 0, otpSent: false }));
+
+      // Get user data for session
+      const { data: user } = await supabase
+        .from('users')
+        .select('*')
+        .eq('mobile_number', formatted)
+        .single();
+
+      if (user) {
+        // Store secure session
+        const sessionData = {
+          mobileNumber: formatted,
+          verifiedAt: new Date().toISOString(),
+          deviceId: crypto.randomUUID(),
+        };
+
+        await Preferences.set({
+          key: 'yogic_mile_secure_session',
+          value: JSON.stringify(sessionData),
+        });
+
+        // Enable biometric for faster future access
+        setState(prev => ({ ...prev, biometricEnabled: true }));
+
+        await Haptics.impact({ style: ImpactStyle.Light });
+        
+        toast({
+          title: "OTP Verified! ✅",
+          description: "Login successful",
+        });
+
+        return { success: true };
+      }
+
+      throw new Error('User not found');
+    } catch (error: any) {
+      console.error('OTP verification error:', error);
+      toast({
+        title: "Verification Failed",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      });
+      return { success: false, error: error.message };
+    } finally {
+      setState(prev => ({ ...prev, isLoading: false }));
+    }
+  };
       
       // Get user data for session
       const { data: user } = await supabase
@@ -376,25 +437,29 @@ export const useMobileAuth = () => {
         }));
       }
 
-      await Haptics.impact({ style: ImpactStyle.Medium });
+      await Haptics.impact({ style: ImpactStyle.Light });
       
       toast({
-        title: "Welcome Back! 🎉",
-        description: "Successfully logged in",
+        title: "OTP Verified! ✅",
+        description: "Login successful",
       });
 
-      return { success: true, user };
-    } catch (error: any) {
-      toast({
-        title: "Verification Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-      return { success: false, error: error.message };
-    } finally {
-      setState(prev => ({ ...prev, isLoading: false }));
+      return { success: true };
     }
-  };
+
+    throw new Error('User not found');
+  } catch (error: any) {
+    console.error('OTP verification error:', error);
+    toast({
+      title: "Verification Failed",
+      description: error.message || "Please try again",
+      variant: "destructive",
+    });
+    return { success: false, error: error.message };
+  } finally {
+    setState(prev => ({ ...prev, isLoading: false }));
+  }
+};
 
   const startResendTimer = () => {
     setState(prev => ({ ...prev, otpResendTimer: OTP_RESEND_INTERVAL }));

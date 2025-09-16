@@ -1,1 +1,23 @@
 project_id = "rwymfvfaiqvtiqjfmejv"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[auth]
+enabled = true
+port = 54324
+external_url = "https://rwymfvfaiqvtiqjfmejv.supabase.co/auth/v1"
+jwt_expiry = 3600
+enable_signup = true
+site_url = "https://4741923f-866e-4468-918a-6e7c1c4ebf2e.lovableproject.com"
+additional_redirect_urls = ["https://4741923f-866e-4468-918a-6e7c1c4ebf2e.lovableproject.com"]
+
+[db]
+port = 54322
+
+[functions.security-headers]
+verify_jwt = false

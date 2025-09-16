@@ -47,6 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       daily_steps: {
         Row: {
           capped_steps: number
@@ -136,6 +166,36 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      otp_rate_limits: {
+        Row: {
+          attempts: number
+          blocked_until: string | null
+          created_at: string
+          id: string
+          mobile_number: string
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          attempts?: number
+          blocked_until?: string | null
+          created_at?: string
+          id?: string
+          mobile_number: string
+          updated_at?: string
+          window_start?: string
+        }
+        Update: {
+          attempts?: number
+          blocked_until?: string | null
+          created_at?: string
+          id?: string
+          mobile_number?: string
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
       }
       phases: {
         Row: {
@@ -651,6 +711,14 @@ export type Database = {
         Args: { p_mobile_number: string }
         Returns: string
       }
+      generate_otp_with_rate_limit: {
+        Args: {
+          p_ip_address?: unknown
+          p_mobile_number: string
+          p_user_agent?: string
+        }
+        Returns: Json
+      }
       hash_otp: {
         Args: { plain_otp: string }
         Returns: string
@@ -662,6 +730,15 @@ export type Database = {
       verify_otp: {
         Args: { p_mobile_number: string; p_otp: string }
         Returns: boolean
+      }
+      verify_otp_with_audit: {
+        Args: {
+          p_ip_address?: unknown
+          p_mobile_number: string
+          p_otp: string
+          p_user_agent?: string
+        }
+        Returns: Json
       }
     }
     Enums: {
