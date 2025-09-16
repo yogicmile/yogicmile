@@ -384,16 +384,17 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
               <Label htmlFor="referral" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 Referral Code <span className="text-muted-foreground">(optional)</span>
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Get ₹1 bonus!</span>
               </Label>
               <Input
                 id="referral"
-                type="tel"
-                placeholder="Friend's mobile number for bonus"
+                type="text"
+                placeholder="YM1234 (Optional)"
                 value={formData.referralCode}
-                onChange={(e) => handleInputChange('referralCode', e.target.value)}
+                onChange={(e) => handleInputChange('referralCode', e.target.value.toUpperCase())}
               />
               <p className="text-xs text-muted-foreground">
-                🎁 Get bonus coins when your friend joins!
+                🎁 Enter a friend's referral code to get ₹1 welcome bonus!
               </p>
             </div>
 

@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { DynamicAdBanner } from '@/components/DynamicAdBanner';
+import { ReferralCard } from '@/components/ReferralCard';
 
 export const ProfilePage = () => {
   const userStats = {
@@ -98,6 +98,9 @@ export const ProfilePage = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Referral Section */}
+        <ReferralCard />
 
         {/* Menu Items */}
         <div className="space-y-3">

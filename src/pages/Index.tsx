@@ -11,7 +11,8 @@ import { StatsCards } from '@/components/StatsCards';
 import { EnhancedNavigationCards } from '@/components/EnhancedNavigationCards';
 import { CountdownTimer } from '@/components/CountdownTimer';
 import { EnhancedCTAButton } from '@/components/EnhancedCTAButton';
-import { DynamicAdBanner } from '@/components/DynamicAdBanner';
+import { BonusRewards } from '@/components/BonusRewards';
+import { StreakTracker } from '@/components/StreakTracker';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { PageLoading, SkeletonProgressRing } from '@/components/LoadingStates';
@@ -168,6 +169,12 @@ const Index = () => {
               currentStreak={yogicData.user.streakDays}
               className="animate-fade-in"
             />
+          </div>
+
+          {/* Bonus Rewards Section */}
+          <div className="px-4 pb-4 space-y-4">
+            <BonusRewards />
+            <StreakTracker />
           </div>
 
           {/* Countdown Timer - Simplified */}

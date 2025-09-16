@@ -163,6 +163,36 @@ export type Database = {
         }
         Relationships: []
       }
+      bonus_logs: {
+        Row: {
+          amount_paisa: number
+          bonus_type: string
+          created_at: string
+          date_earned: string
+          description: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          amount_paisa: number
+          bonus_type: string
+          created_at?: string
+          date_earned?: string
+          description?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          amount_paisa?: number
+          bonus_type?: string
+          created_at?: string
+          date_earned?: string
+          description?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       coupon_redemptions: {
         Row: {
           coupon_id: string
@@ -522,6 +552,39 @@ export type Database = {
           },
         ]
       }
+      referrals_new: {
+        Row: {
+          created_at: string
+          id: string
+          referee_bonus_paisa: number
+          referee_mobile: string
+          referrer_bonus_paisa: number
+          referrer_mobile: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referee_bonus_paisa?: number
+          referee_mobile: string
+          referrer_bonus_paisa?: number
+          referrer_mobile: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referee_bonus_paisa?: number
+          referee_mobile?: string
+          referrer_bonus_paisa?: number
+          referrer_mobile?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rewards: {
         Row: {
           created_at: string | null
@@ -549,6 +612,39 @@ export type Database = {
           name?: string
           required_paisa?: number
           type?: Database["public"]["Enums"]["reward_type"]
+        }
+        Relationships: []
+      }
+      share_logs: {
+        Row: {
+          content_shared: string | null
+          created_at: string
+          id: string
+          platform: string | null
+          share_context: string | null
+          share_type: string
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          content_shared?: string | null
+          created_at?: string
+          id?: string
+          platform?: string | null
+          share_context?: string | null
+          share_type: string
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          content_shared?: string | null
+          created_at?: string
+          id?: string
+          platform?: string | null
+          share_context?: string | null
+          share_type?: string
+          timestamp?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -626,6 +722,45 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      streaks: {
+        Row: {
+          bonus_eligibility: boolean
+          created_at: string
+          current_streak_days: number
+          id: string
+          last_5k_steps_date: string | null
+          last_activity_date: string | null
+          longest_streak: number
+          streak_bonus_earned_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bonus_eligibility?: boolean
+          created_at?: string
+          current_streak_days?: number
+          id?: string
+          last_5k_steps_date?: string | null
+          last_activity_date?: string | null
+          longest_streak?: number
+          streak_bonus_earned_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bonus_eligibility?: boolean
+          created_at?: string
+          current_streak_days?: number
+          id?: string
+          last_5k_steps_date?: string | null
+          last_activity_date?: string | null
+          longest_streak?: number
+          streak_bonus_earned_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       transactions: {
         Row: {
@@ -715,6 +850,7 @@ export type Database = {
           phase: string | null
           referral_code: string | null
           referred_by: string | null
+          used_referral_code: string | null
         }
         Insert: {
           address: string
@@ -728,6 +864,7 @@ export type Database = {
           phase?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          used_referral_code?: string | null
         }
         Update: {
           address?: string
@@ -741,6 +878,7 @@ export type Database = {
           phase?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          used_referral_code?: string | null
         }
         Relationships: []
       }
