@@ -363,6 +363,80 @@ export type Database = {
         }
         Relationships: []
       }
+      faq_votes: {
+        Row: {
+          created_at: string
+          faq_id: string
+          id: string
+          user_id: string
+          vote_type: string
+        }
+        Insert: {
+          created_at?: string
+          faq_id: string
+          id?: string
+          user_id: string
+          vote_type: string
+        }
+        Update: {
+          created_at?: string
+          faq_id?: string
+          id?: string
+          user_id?: string
+          vote_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_faq_votes_faq_id"
+            columns: ["faq_id"]
+            isOneToOne: false
+            referencedRelation: "faqs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      faqs: {
+        Row: {
+          answer: string
+          category: string
+          created_at: string
+          helpful_votes: number | null
+          id: string
+          is_published: boolean | null
+          question: string
+          search_keywords: string[] | null
+          unhelpful_votes: number | null
+          updated_at: string
+          views_count: number | null
+        }
+        Insert: {
+          answer: string
+          category: string
+          created_at?: string
+          helpful_votes?: number | null
+          id?: string
+          is_published?: boolean | null
+          question: string
+          search_keywords?: string[] | null
+          unhelpful_votes?: number | null
+          updated_at?: string
+          views_count?: number | null
+        }
+        Update: {
+          answer?: string
+          category?: string
+          created_at?: string
+          helpful_votes?: number | null
+          id?: string
+          is_published?: boolean | null
+          question?: string
+          search_keywords?: string[] | null
+          unhelpful_votes?: number | null
+          updated_at?: string
+          views_count?: number | null
+        }
+        Relationships: []
+      }
       marketing_campaigns: {
         Row: {
           clicked_count: number | null
@@ -1048,6 +1122,72 @@ export type Database = {
         }
         Relationships: []
       }
+      support_analytics: {
+        Row: {
+          avg_response_time: number | null
+          created_at: string
+          date: string
+          id: string
+          resolved_tickets: number | null
+          satisfaction_score: number | null
+          total_tickets: number | null
+        }
+        Insert: {
+          avg_response_time?: number | null
+          created_at?: string
+          date: string
+          id?: string
+          resolved_tickets?: number | null
+          satisfaction_score?: number | null
+          total_tickets?: number | null
+        }
+        Update: {
+          avg_response_time?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          resolved_tickets?: number | null
+          satisfaction_score?: number | null
+          total_tickets?: number | null
+        }
+        Relationships: []
+      }
+      support_chats: {
+        Row: {
+          admin_id: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          priority: string | null
+          sender_type: string
+          status: string | null
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          admin_id?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          priority?: string | null
+          sender_type: string
+          status?: string | null
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          admin_id?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          priority?: string | null
+          sender_type?: string
+          status?: string | null
+          timestamp?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       support_tickets: {
         Row: {
           admin_notes: string | null
@@ -1209,6 +1349,38 @@ export type Database = {
         }
         Relationships: []
       }
+      tutorial_views: {
+        Row: {
+          completed: boolean | null
+          id: string
+          tutorial_id: string
+          user_id: string | null
+          viewed_at: string
+        }
+        Insert: {
+          completed?: boolean | null
+          id?: string
+          tutorial_id: string
+          user_id?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          completed?: boolean | null
+          id?: string
+          tutorial_id?: string
+          user_id?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_tutorial_views_tutorial_id"
+            columns: ["tutorial_id"]
+            isOneToOne: false
+            referencedRelation: "video_tutorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_phases: {
         Row: {
           created_at: string
@@ -1293,6 +1465,54 @@ export type Database = {
           referred_by?: string | null
           role?: string | null
           used_referral_code?: string | null
+        }
+        Relationships: []
+      }
+      video_tutorials: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          duration: number | null
+          embed_code: string
+          helpful_votes: number | null
+          id: string
+          is_published: boolean | null
+          thumbnail_url: string | null
+          title: string
+          unhelpful_votes: number | null
+          updated_at: string
+          views_count: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          duration?: number | null
+          embed_code: string
+          helpful_votes?: number | null
+          id?: string
+          is_published?: boolean | null
+          thumbnail_url?: string | null
+          title: string
+          unhelpful_votes?: number | null
+          updated_at?: string
+          views_count?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          duration?: number | null
+          embed_code?: string
+          helpful_votes?: number | null
+          id?: string
+          is_published?: boolean | null
+          thumbnail_url?: string | null
+          title?: string
+          unhelpful_votes?: number | null
+          updated_at?: string
+          views_count?: number | null
         }
         Relationships: []
       }
