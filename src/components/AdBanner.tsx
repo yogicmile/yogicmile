@@ -26,25 +26,25 @@ export const AdBanner = ({ type, className = "" }: AdBannerProps) => {
       // Mock ad content based on type
       const mockAds = {
         header: {
-          title: "Mindful Meditation",
-          subtitle: "7-day free trial",
-          brand: "Calm",
-          cta: "Try Now",
-          bgColor: "from-blue-50 to-purple-50"
+          title: "Yoga & Wellness",
+          subtitle: "Start your mindful journey",
+          brand: "MindfulLife",
+          cta: "Join Now",
+          bgColor: "from-olive-light to-golden-light"
         },
         inline: {
-          title: "Premium Yoga Mat",
-          subtitle: "30% off for walkers",
-          brand: "YogaFlow",
+          title: "Organic Health Foods",
+          subtitle: "Fuel your daily walks",
+          brand: "GreenEats",
           cta: "Shop Now",
-          bgColor: "from-green-50 to-blue-50"
+          bgColor: "from-white to-olive-light"
         },
         footer: {
-          title: "Healthy Snacks",
-          subtitle: "Fuel your journey",
-          brand: "NutriWalk",
-          cta: "Order",
-          bgColor: "from-orange-50 to-yellow-50"
+          title: "Meditation Apps",
+          subtitle: "Inner peace & focus",
+          brand: "ZenPath",
+          cta: "Download",
+          bgColor: "from-golden-light to-white"
         }
       };
       setAdContent(mockAds[type]);
@@ -67,17 +67,20 @@ export const AdBanner = ({ type, className = "" }: AdBannerProps) => {
   if (isLoading) {
     return (
       <div className={cn(
-        "rounded-2xl border border-border/50 p-4 animate-pulse",
+        "rounded-2xl border animate-pulse",
         type === 'header' ? 'h-16' : type === 'inline' ? 'h-24' : 'h-20',
         className
-      )}>
-        <div className="flex items-center space-x-4">
-          <div className="rounded-full bg-secondary/50 h-10 w-10"></div>
+      )} style={{ 
+        borderColor: 'hsl(76 47% 36% / 0.2)', 
+        backgroundColor: 'hsl(0 0% 98%)'
+      }}>
+        <div className="flex items-center space-x-4 p-4">
+          <div className="rounded-full h-10 w-10" style={{ backgroundColor: 'hsl(76 47% 85%)' }}></div>
           <div className="flex-1 space-y-2">
-            <div className="h-4 bg-secondary/50 rounded w-3/4"></div>
-            <div className="h-3 bg-secondary/30 rounded w-1/2"></div>
+            <div className="h-4 rounded w-3/4" style={{ backgroundColor: 'hsl(76 47% 85%)' }}></div>
+            <div className="h-3 rounded w-1/2" style={{ backgroundColor: 'hsl(76 47% 90%)' }}></div>
           </div>
-          <div className="h-8 bg-secondary/50 rounded w-16"></div>
+          <div className="h-8 rounded w-16" style={{ backgroundColor: 'hsl(76 47% 85%)' }}></div>
         </div>
       </div>
     );
@@ -87,22 +90,21 @@ export const AdBanner = ({ type, className = "" }: AdBannerProps) => {
 
   return (
     <div className={cn(
-      "relative rounded-2xl border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-md",
-      `bg-gradient-to-r ${adContent.bgColor}`,
+      "relative rounded-2xl border overflow-hidden transition-all duration-300 hover:shadow-md bg-white",
       className
-    )}>
+    )} style={{ borderColor: 'hsl(76 47% 36% / 0.2)' }}>
       {/* Ad Label */}
-      <div className="absolute top-2 left-2 text-xs bg-secondary/80 text-muted-foreground px-2 py-1 rounded-md">
+      <div className="absolute top-2 left-2 text-xs px-2 py-1 rounded-md text-white" style={{ backgroundColor: 'hsl(76 47% 36% / 0.8)' }}>
         Ad
       </div>
       
       {/* Dismiss Button */}
       <button
         onClick={handleDismiss}
-        className="absolute top-2 right-2 p-1 rounded-full hover:bg-secondary/50 transition-colors"
+        className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
         aria-label="Close ad"
       >
-        <X className="w-3 h-3 text-muted-foreground" />
+        <X className="w-3 h-3" style={{ color: 'hsl(76 47% 36%)' }} />
       </button>
 
       {/* Ad Content */}
@@ -112,29 +114,30 @@ export const AdBanner = ({ type, className = "" }: AdBannerProps) => {
       >
         <div className="flex items-center space-x-4">
           {/* Brand Logo Placeholder */}
-          <div className="flex-shrink-0 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
-            <span className="text-lg font-bold text-tier-1-paisa">
+          <div className="flex-shrink-0 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border" style={{ borderColor: 'hsl(76 47% 36% / 0.2)' }}>
+            <span className="text-lg font-bold" style={{ color: 'hsl(76 47% 36%)' }}>
               {adContent.brand.charAt(0)}
             </span>
           </div>
           
           {/* Ad Text */}
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground truncate">
+            <h3 className="font-semibold truncate" style={{ color: 'hsl(76 47% 16%)' }}>
               {adContent.title}
             </h3>
-            <p className="text-sm text-muted-foreground truncate">
+            <p className="text-sm text-gray-600 truncate">
               {adContent.subtitle}
             </p>
-            <p className="text-xs text-tier-1-paisa font-medium">
+            <p className="text-xs font-medium" style={{ color: 'hsl(76 47% 36%)' }}>
               by {adContent.brand}
             </p>
           </div>
           
-          {/* CTA Button */}
+          {/* CTA Button - Golden Yellow */}
           <Button 
             size="sm"
-            className="flex-shrink-0 bg-tier-1-paisa hover:bg-tier-1-paisa/90 text-tier-1-paisa-foreground"
+            className="flex-shrink-0 hover:opacity-90 text-white"
+            style={{ backgroundColor: 'hsl(51 100% 50%)' }}
           >
             <ExternalLink className="w-3 h-3 mr-1" />
             {adContent.cta}
@@ -143,7 +146,7 @@ export const AdBanner = ({ type, className = "" }: AdBannerProps) => {
       </div>
 
       {/* Decorative element */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-tier-1-paisa/30 to-transparent"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(90deg, transparent, hsl(76 47% 36% / 0.3), transparent)' }}></div>
     </div>
   );
 };

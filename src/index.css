@@ -9,186 +9,176 @@ All colors MUST be HSL for consistent theming
 
 @layer base {
   :root {
-    /* Base App Colors - Premium Palette */
-    --background: 245 25% 97%;
-    --foreground: 240 15% 15%;
-    --surface: 0 0% 100%;
+    /* Yogic Mile Olive Green + White + Golden Yellow Theme */
+    --background: 0 0% 100%; /* Pure White #FFFFFF */
+    --foreground: 76 47% 16%; /* Dark Olive #2E3D14 */
+    --surface: 0 0% 100%; /* Pure White */
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 15% 15%;
+    --card: 0 0% 100%; /* White cards */
+    --card-foreground: 76 47% 16%; /* Dark olive text */
 
-    /* 9-Tier Progression System - Step Tracking Rewards */
-    --tier-1-paisa: 210 100% 50%;
-    --tier-1-paisa-light: 210 100% 90%;
+    /* Primary Yogic Mile Theme Colors */
+    --primary: 76 47% 36%; /* Olive Green #708238 */
+    --primary-foreground: 0 0% 100%; /* White text on olive */
+    --secondary: 0 0% 95%; /* Light gray for subtle elements */
+    --secondary-foreground: 76 47% 16%; /* Dark olive on light */
+    --accent: 51 100% 50%; /* Golden Yellow #FFD700 */
+    --accent-foreground: 76 47% 16%; /* Dark olive on golden */
+    
+    /* Olive Theme Color Variations */
+    --olive-primary: 76 47% 36%; /* Main Olive #708238 */
+    --olive-light: 76 47% 85%; /* Light olive for backgrounds */
+    --olive-dark: 76 47% 16%; /* Dark olive for text #2E3D14 */
+    --golden-yellow: 51 100% 50%; /* Accent Golden Yellow #FFD700 */
+    --golden-light: 51 100% 85%; /* Light golden */
+    
+    /* Progress System with Olive → Golden Gradient */
+    --tier-1-paisa: 76 47% 36%; /* Olive base */
+    --tier-1-paisa-light: 76 47% 85%;
     --tier-1-paisa-foreground: 0 0% 100%;
     
-    --tier-2-coin: 200 100% 45%;
-    --tier-2-coin-light: 200 100% 85%;
+    --tier-2-coin: 76 47% 42%; /* Slightly lighter olive */
+    --tier-2-coin-light: 76 47% 88%;
     --tier-2-coin-foreground: 0 0% 100%;
     
-    --tier-3-token: 190 90% 50%;
-    --tier-3-token-light: 190 90% 88%;
+    --tier-3-token: 70 50% 45%; /* Transitioning to golden */
+    --tier-3-token-light: 70 50% 88%;
     --tier-3-token-foreground: 0 0% 100%;
     
-    --tier-4-gem: 180 85% 45%;
-    --tier-4-gem-light: 180 85% 87%;
+    --tier-4-gem: 60 70% 48%; /* More golden */
+    --tier-4-gem-light: 60 70% 85%;
     --tier-4-gem-foreground: 0 0% 100%;
     
-    --tier-5-diamond: 220 70% 45%;
-    --tier-5-diamond-light: 220 70% 88%;
-    --tier-5-diamond-foreground: 0 0% 100%;
+    --tier-5-diamond: 51 100% 50%; /* Pure golden yellow */
+    --tier-5-diamond-light: 51 100% 85%;
+    --tier-5-diamond-foreground: 76 47% 16%;
     
-    --tier-6-crown: 240 65% 50%;
-    --tier-6-crown-light: 240 65% 88%;
-    --tier-6-crown-foreground: 0 0% 100%;
+    --tier-6-crown: 45 100% 48%; /* Rich gold */
+    --tier-6-crown-light: 45 100% 85%;
+    --tier-6-crown-foreground: 76 47% 16%;
     
-    --tier-7-emperor: 260 60% 55%;
-    --tier-7-emperor-light: 260 60% 88%;
-    --tier-7-emperor-foreground: 0 0% 100%;
+    --tier-7-emperor: 40 90% 45%; /* Deep gold */
+    --tier-7-emperor-light: 40 90% 85%;
+    --tier-7-emperor-foreground: 76 47% 16%;
     
-    --tier-8-legend: 280 70% 50%;
-    --tier-8-legend-light: 280 70% 88%;
-    --tier-8-legend-foreground: 0 0% 100%;
+    --tier-8-legend: 35 85% 42%; /* Amber gold */
+    --tier-8-legend-light: 35 85% 85%;
+    --tier-8-legend-foreground: 76 47% 16%;
     
-    --tier-9-immortal: 300 75% 45%;
-    --tier-9-immortal-light: 300 75% 88%;
+    --tier-9-immortal: 30 80% 40%; /* Bronze gold pinnacle */
+    --tier-9-immortal-light: 30 80% 85%;
     --tier-9-immortal-foreground: 0 0% 100%;
     
-    /* Legacy Wellness Colors (for backwards compatibility) */
-    --tier-gold: 43 89% 58%;
-    --tier-gold-foreground: 240 15% 15%;
-    --tier-amethyst: 270 50% 65%;
+    /* Legacy compatibility colors remapped to olive theme */
+    --tier-gold: 51 100% 50%; /* Golden Yellow */
+    --tier-gold-foreground: 76 47% 16%;
+    --tier-amethyst: 76 47% 50%; /* Olive variant */
     --tier-amethyst-foreground: 0 0% 100%;
-    --tier-sage: 140 35% 55%;
+    --tier-sage: 76 47% 36%; /* Primary olive */
     --tier-sage-foreground: 0 0% 100%;
-    --tier-rose: 350 45% 65%;
+    --tier-rose: 76 47% 42%; /* Light olive */
     --tier-rose-foreground: 0 0% 100%;
 
-    /* Yogic Mile Brand Colors - Mindful & Serene */
-    --primary: 187 69% 64%; /* Serene Blue #4FC3F7 */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 122 39% 59%; /* Sage Green #66BB6A */
-    --secondary-foreground: 0 0% 100%;
-    --accent: 54 100% 67%; /* Golden Accent #FFD54F */
-    --accent-foreground: 240 15% 15%;
-    
-    /* Yogic Color Palette */
-    --serene-blue: 187 69% 64%; /* #4FC3F7 */
-    --sage-green: 122 39% 59%; /* #66BB6A */
-    --golden-accent: 54 100% 67%; /* #FFD54F */
-    --deep-teal: 174 51% 54%; /* #26A69A */
-    --soft-lavender: 261 46% 71%; /* #B39DDB */
-    --warm-coral: 14 90% 63%; /* #FF7043 */
-    --earthy-brown: 19 21% 48%; /* #8D6E63 */
-    
-    /* Yogic Gradients */
+    /* Yogic Mile Olive + Golden Gradients */
     --gradient-golden: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    --gradient-yogic-header: linear-gradient(135deg, #E3F2FD 0%, #E8F5E8 100%);
-    --gradient-serene: linear-gradient(135deg, hsl(var(--serene-blue)), hsl(var(--deep-teal)));
-    --gradient-sage: linear-gradient(135deg, hsl(var(--sage-green)), hsl(var(--deep-teal)));
-    --gradient-mindful: linear-gradient(135deg, hsl(var(--soft-lavender)), hsl(var(--serene-blue)));
+    --gradient-olive-to-gold: linear-gradient(135deg, #708238 0%, #FFD700 100%);
+    --gradient-yogic-header: linear-gradient(135deg, #708238 0%, #8A9A4A 100%);
+    --gradient-serene: linear-gradient(135deg, hsl(var(--olive-primary)), hsl(var(--golden-yellow)));
+    --gradient-sage: linear-gradient(135deg, hsl(var(--olive-primary)), hsl(var(--olive-light)));
+    --gradient-mindful: linear-gradient(135deg, hsl(var(--golden-yellow)), hsl(var(--golden-light)));
 
-    /* Premium Status Colors */
-    --success: 140 35% 55%;
+    /* Status Colors (keeping semantic meaning) */
+    --success: 120 60% 50%; /* Green for success */
     --success-foreground: 0 0% 100%;
-    --warning: 35 85% 60%;
-    --warning-foreground: 240 15% 15%;
-    --destructive: 350 45% 65%;
+    --warning: 38 92% 50%; /* Orange for warnings */
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%; /* Red for destructive actions */
     --destructive-foreground: 0 0% 100%;
 
-    /* Premium UI Elements */
-    --border: 240 10% 88%;
-    --input: 240 10% 88%;
-    --ring: 270 50% 65%;
-    --muted: 245 15% 93%;
-    --muted-foreground: 240 15% 50%;
+    /* UI Elements with Olive Theme */
+    --border: 76 47% 80%; /* Light olive borders */
+    --input: 0 0% 100%; /* White inputs with olive borders */
+    --ring: 76 47% 36%; /* Olive focus rings */
+    --muted: 0 0% 96%; /* Very light gray */
+    --muted-foreground: 76 47% 25%; /* Muted olive text */
 
-    /* Yogic Mile Gradients */
-    --gradient-primary: var(--gradient-serene);
+    /* Yogic Mile Primary Gradients */
+    --gradient-primary: var(--gradient-olive-to-gold);
     --gradient-performance: var(--gradient-sage);
     --gradient-achievement: var(--gradient-golden);
     --gradient-champion: var(--gradient-mindful);
 
-    /* Premium Shadow System */
-    --shadow-sm: 0 1px 3px 0 hsl(240 15% 15% / 0.08);
-    --shadow-md: 0 4px 12px -2px hsl(240 15% 15% / 0.12);
-    --shadow-lg: 0 20px 25px -5px hsl(240 15% 15% / 0.15);
-    --shadow-glow: 0 0 30px hsl(270 50% 65% / 0.25);
-    --shadow-premium: 0 8px 25px -8px hsl(270 50% 65% / 0.3);
+    /* Olive-themed Shadow System */
+    --shadow-sm: 0 1px 3px 0 hsl(76 47% 16% / 0.08);
+    --shadow-md: 0 4px 12px -2px hsl(76 47% 16% / 0.12);
+    --shadow-lg: 0 20px 25px -5px hsl(76 47% 16% / 0.15);
+    --shadow-glow: 0 0 30px hsl(76 47% 36% / 0.25);
+    --shadow-premium: 0 8px 25px -8px hsl(76 47% 36% / 0.3);
 
     --radius: 12px;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Admin Sidebar with Olive Theme */
+    --sidebar-background: 76 47% 36%; /* Olive green sidebar */
+    --sidebar-foreground: 0 0% 100%; /* White text */
+    --sidebar-primary: 0 0% 100%; /* White for active items */
+    --sidebar-primary-foreground: 76 47% 36%; /* Olive text on white */
+    --sidebar-accent: 76 47% 45%; /* Lighter olive for hover */
+    --sidebar-accent-foreground: 0 0% 100%; /* White on olive */
+    --sidebar-border: 76 47% 45%; /* Olive borders */
+    --sidebar-ring: 51 100% 50%; /* Golden focus ring */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --surface: 222.2 84% 6.9%;
+    /* Dark mode with olive tones */
+    --background: 76 47% 8%; /* Very dark olive */
+    --foreground: 0 0% 98%; /* Near white */
+    --surface: 76 47% 10%; /* Dark olive surface */
 
-    --card: 222.2 84% 6.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 76 47% 12%; /* Dark olive cards */
+    --card-foreground: 0 0% 95%; /* Light text */
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 76 47% 8%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 270 50% 65%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 76 47% 45%; /* Lighter olive for visibility */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 76 47% 15%; /* Dark olive secondary */
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 76 47% 15%;
+    --muted-foreground: 76 47% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 51 100% 60%; /* Brighter golden for dark mode */
+    --accent-foreground: 76 47% 12%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 0 0% 95%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 76 47% 20%;
+    --input: 76 47% 15%;
+    --ring: 51 100% 50%; /* Golden focus ring */
     
-    /* Dark Mode Typography for Step Tracking */
-    --text-primary: 210 40% 98%;
-    --text-secondary: 215 20.2% 65.1%;
-    --text-muted: 217.2 32.6% 45%;
-
-    /* Maintain tier colors with adjusted opacity for dark mode accessibility */
-    --tier-1-paisa: 45 100% 51%;
-    --tier-2-coin: 34 100% 55%;
-    --tier-3-token: 207 90% 64%;
-    --tier-4-gem: 187 100% 52%;
-    --tier-5-diamond: 259 48% 61%;
-    --tier-6-crown: 231 48% 58%;
-    --tier-7-emperor: 340 82% 62%;
-    --tier-8-legend: 292 69% 59%;
-    --tier-9-immortal: 277 64% 52%;
+    /* Dark mode tier colors with olive → golden progression */
+    --tier-1-paisa: 76 47% 50%;
+    --tier-2-coin: 76 47% 55%;
+    --tier-3-token: 70 60% 60%;
+    --tier-4-gem: 60 80% 65%;
+    --tier-5-diamond: 51 100% 60%;
+    --tier-6-crown: 45 100% 55%;
+    --tier-7-emperor: 40 90% 50%;
+    --tier-8-legend: 35 85% 50%;
+    --tier-9-immortal: 30 80% 45%;
     
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Dark mode admin sidebar */
+    --sidebar-background: 76 47% 12%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 51 100% 50%;
+    --sidebar-primary-foreground: 76 47% 12%;
+    --sidebar-accent: 76 47% 20%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 76 47% 20%;
+    --sidebar-ring: 51 100% 50%;
   }
 }
 
@@ -256,24 +246,22 @@ All colors MUST be HSL for consistent theming
 }
 
 @layer components {
-  /* Mobile-Optimized Dashboard Components */
+  /* Enhanced Mobile Dashboard Components - Olive Theme */
   .dashboard-card {
-    @apply bg-surface/80 backdrop-blur-md rounded-2xl p-5 border border-border/30;
-    box-shadow: var(--shadow-md);
-    transition: all var(--animation-duration-normal) var(--animation-easing);
-    /* Ensure compositing layer for smooth animations */
-    will-change: transform, box-shadow;
+    @apply bg-surface/95 backdrop-blur-md rounded-2xl p-5 border;
+    border-color: hsl(76 47% 36% / 0.2);
+    box-shadow: 0 4px 12px -2px hsl(76 47% 36% / 0.08);
+    transition: all 0.3s ease;
   }
 
   .stat-card {
     @apply dashboard-card hover:shadow-premium transition-all duration-500 hover:-translate-y-1 hover:scale-[1.02];
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(12px);
-    /* Mobile touch optimization */
-    min-height: var(--touch-target-min);
+    border: 1px solid hsl(76 47% 36% / 0.15);
+    min-height: 44px; /* Touch target */
     cursor: pointer;
-    /* Improve touch response */
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -282,9 +270,9 @@ All colors MUST be HSL for consistent theming
   }
 
   .ad-banner {
-    @apply dashboard-card bg-gradient-to-br from-secondary/60 via-muted/40 to-secondary/60 p-4;
-    border-radius: 12px;
-    box-shadow: var(--shadow-sm);
+    @apply rounded-xl p-4 border border-border/30;
+    background: hsl(0 0% 98%);
+    box-shadow: 0 2px 8px -2px hsl(76 47% 36% / 0.06);
     backdrop-filter: blur(8px);
   }
 
@@ -309,39 +297,36 @@ All colors MUST be HSL for consistent theming
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Olive-themed Progress Ring */
   .progress-ring-glow {
-    filter: drop-shadow(0 0 12px hsl(var(--tier-1-paisa) / 0.4)) 
-            drop-shadow(0 0 24px hsl(var(--tier-1-paisa) / 0.2));
+    filter: drop-shadow(0 0 12px hsl(76 47% 36% / 0.4)) 
+            drop-shadow(0 0 24px hsl(51 100% 50% / 0.2));
   }
 
-  /* Tier-specific progress ring glows */
-  .tier-1-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-1-paisa) / 0.5)); }
-  .tier-2-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-2-coin) / 0.5)); }
-  .tier-3-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-3-token) / 0.5)); }
-  .tier-4-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-4-gem) / 0.5)); }
-  .tier-5-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-5-diamond) / 0.5)); }
-  .tier-6-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-6-crown) / 0.5)); }
-  .tier-7-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-7-emperor) / 0.5)); }
-  .tier-8-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-8-legend) / 0.5)); }
-  .tier-9-glow { filter: drop-shadow(0 0 8px hsl(var(--tier-9-immortal) / 0.5)); }
+  /* Tier-specific progress ring glows - Olive to Golden */
+  .tier-1-glow { filter: drop-shadow(0 0 8px hsl(76 47% 36% / 0.5)); }
+  .tier-2-glow { filter: drop-shadow(0 0 8px hsl(76 47% 42% / 0.5)); }
+  .tier-3-glow { filter: drop-shadow(0 0 8px hsl(70 50% 45% / 0.5)); }
+  .tier-4-glow { filter: drop-shadow(0 0 8px hsl(60 70% 48% / 0.5)); }
+  .tier-5-glow { filter: drop-shadow(0 0 8px hsl(51 100% 50% / 0.5)); }
+  .tier-6-glow { filter: drop-shadow(0 0 8px hsl(45 100% 48% / 0.5)); }
+  .tier-7-glow { filter: drop-shadow(0 0 8px hsl(40 90% 45% / 0.5)); }
+  .tier-8-glow { filter: drop-shadow(0 0 8px hsl(35 85% 42% / 0.5)); }
+  .tier-9-glow { filter: drop-shadow(0 0 8px hsl(30 80% 40% / 0.5)); }
 
-  /* Mobile-Optimized CTA Button */
+  /* Olive-themed CTA Button */
   .cta-button {
-    @apply bg-gradient-primary text-primary-foreground font-bold py-5 px-8 rounded-2xl
-           shadow-premium hover:shadow-glow transition-all duration-300
+    @apply font-bold py-5 px-8 rounded-2xl shadow-premium hover:shadow-glow transition-all duration-300
            hover:scale-[1.02] active:scale-[0.98] active:opacity-90 backdrop-blur-sm;
     font-size: 1.1rem;
     letter-spacing: 0.025em;
-    background: linear-gradient(135deg, hsl(var(--tier-1-paisa)), hsl(var(--tier-2-coin)));
-    /* Ensure minimum touch target */
-    min-height: var(--touch-target-comfortable);
-    /* Remove default button styles */
+    background: linear-gradient(135deg, hsl(76 47% 36%), hsl(51 100% 50%)); /* Olive to Golden */
+    color: white;
+    min-height: 52px;
     border: none;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    /* Improve button press feedback */
     user-select: none;
-    -webkit-user-select: none;
   }
 
   .cta-button:disabled {
@@ -350,13 +335,26 @@ All colors MUST be HSL for consistent theming
     filter: grayscale(1);
   }
 
-  /* Secondary Button with Touch Optimization */
+  /* Golden Redeem Button Variant */
+  .cta-golden {
+    background: linear-gradient(135deg, hsl(51 100% 50%), hsl(45 100% 48%));
+    color: hsl(76 47% 16%); /* Dark olive text */
+  }
+
+  /* Olive-themed Secondary Button */
   .btn-secondary {
-    @apply border-2 border-tier-1-paisa text-tier-1-paisa bg-transparent font-semibold py-3 px-6 rounded-xl
-           hover:bg-tier-1-paisa hover:text-tier-1-paisa-foreground transition-all duration-300
+    @apply border-2 font-semibold py-3 px-6 rounded-xl transition-all duration-300
            hover:scale-[1.02] active:scale-[0.98] active:opacity-90;
-    min-height: var(--touch-target-min);
+    border-color: hsl(76 47% 36%);
+    color: hsl(76 47% 36%);
+    background: transparent;
+    min-height: 44px;
     -webkit-tap-highlight-color: transparent;
+  }
+  
+  .btn-secondary:hover {
+    background: hsl(76 47% 36%);
+    color: white;
   }
 
   /* Mobile-Optimized Navigation Cards */
@@ -379,16 +377,23 @@ All colors MUST be HSL for consistent theming
     touch-action: manipulation;
   }
 
+  /* Olive-themed Tab Navigation */
   .tab-active {
-    @apply bg-gradient-primary text-primary-foreground shadow-premium;
-    box-shadow: var(--shadow-premium);
+    background: hsl(76 47% 36%); /* Olive green for active */
+    color: white;
+    box-shadow: 0 8px 25px -8px hsl(76 47% 36% / 0.3);
   }
 
   .tab-inactive {
-    @apply text-muted-foreground hover:text-foreground hover:bg-secondary/70;
+    @apply text-muted-foreground hover:text-foreground;
+    background: transparent;
+  }
+  
+  .tab-inactive:hover {
+    background: hsl(76 47% 90%); /* Light olive hover */
   }
 
-  /* Mobile Bottom Navigation */
+  /* White Bottom Navigation with Olive Accents */
   .bottom-navigation {
     position: fixed;
     bottom: 0;
@@ -396,15 +401,12 @@ All colors MUST be HSL for consistent theming
     transform: translateX(-50%);
     width: 100%;
     max-width: 428px;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.98); /* White background */
     backdrop-filter: blur(16px);
-    border-top: 1px solid hsl(var(--border) / 0.5);
+    border-top: 1px solid hsl(76 47% 36% / 0.2); /* Light olive border */
     padding: 0.5rem 1.5rem;
-    /* Handle safe areas */
-    padding-bottom: calc(0.5rem + var(--safe-area-inset-bottom));
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 8px));
     z-index: 50;
-    /* Enable hardware acceleration */
-    will-change: transform;
   }
 
   /* Responsive Typography */
@@ -578,13 +580,16 @@ All colors MUST be HSL for consistent theming
     box-shadow: var(--shadow-sm);
   }
 
-  /* Premium Brand Styles */
+  /* Olive-themed Brand Styles */
   .yogicmile-brand {
-    @apply font-display text-primary bg-gradient-primary bg-clip-text text-transparent;
+    @apply font-display bg-clip-text text-transparent;
+    background: linear-gradient(135deg, hsl(76 47% 36%), hsl(51 100% 50%));
   }
 
   .premium-glass {
-    @apply bg-white/80 backdrop-blur-md border border-white/20;
+    @apply backdrop-blur-md border;
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(112, 130, 56, 0.2); /* Olive with opacity */
   }
 }
 
