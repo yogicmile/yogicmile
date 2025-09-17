@@ -14,6 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      ab_test_assignments: {
+        Row: {
+          assigned_at: string
+          conversion_events: Json | null
+          id: string
+          test_id: string
+          user_id: string
+          variant: string
+        }
+        Insert: {
+          assigned_at?: string
+          conversion_events?: Json | null
+          id?: string
+          test_id: string
+          user_id: string
+          variant: string
+        }
+        Update: {
+          assigned_at?: string
+          conversion_events?: Json | null
+          id?: string
+          test_id?: string
+          user_id?: string
+          variant?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_ab_test_assignments_test_id"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "ab_tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ab_tests: {
+        Row: {
+          allocation_percentage: number | null
+          assigned_users: Json | null
+          created_at: string
+          created_by: string
+          end_date: string | null
+          experiment_name: string
+          feature_name: string
+          id: string
+          results: Json | null
+          start_date: string
+          status: string
+          success_metrics: Json | null
+          updated_at: string
+          variant_a: Json
+          variant_b: Json
+        }
+        Insert: {
+          allocation_percentage?: number | null
+          assigned_users?: Json | null
+          created_at?: string
+          created_by: string
+          end_date?: string | null
+          experiment_name: string
+          feature_name: string
+          id?: string
+          results?: Json | null
+          start_date?: string
+          status?: string
+          success_metrics?: Json | null
+          updated_at?: string
+          variant_a: Json
+          variant_b: Json
+        }
+        Update: {
+          allocation_percentage?: number | null
+          assigned_users?: Json | null
+          created_at?: string
+          created_by?: string
+          end_date?: string | null
+          experiment_name?: string
+          feature_name?: string
+          id?: string
+          results?: Json | null
+          start_date?: string
+          status?: string
+          success_metrics?: Json | null
+          updated_at?: string
+          variant_a?: Json
+          variant_b?: Json
+        }
+        Relationships: []
+      }
       achievements: {
         Row: {
           achievement_name: string
@@ -172,6 +261,57 @@ export type Database = {
         }
         Relationships: []
       }
+      app_crashes: {
+        Row: {
+          app_version: string
+          created_at: string
+          device_info: Json
+          error_context: Json | null
+          error_message: string
+          id: string
+          os_version: string | null
+          resolved_status: string
+          severity: string
+          stack_trace: string | null
+          timestamp: string
+          url: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          app_version?: string
+          created_at?: string
+          device_info?: Json
+          error_context?: Json | null
+          error_message: string
+          id?: string
+          os_version?: string | null
+          resolved_status?: string
+          severity?: string
+          stack_trace?: string | null
+          timestamp?: string
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          app_version?: string
+          created_at?: string
+          device_info?: Json
+          error_context?: Json | null
+          error_message?: string
+          id?: string
+          os_version?: string | null
+          resolved_status?: string
+          severity?: string
+          stack_trace?: string | null
+          timestamp?: string
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -198,6 +338,39 @@ export type Database = {
           id?: string
           ip_address?: unknown | null
           user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      battery_usage_logs: {
+        Row: {
+          background_activity_level: string
+          battery_level: number | null
+          charging_status: boolean | null
+          created_at: string
+          id: string
+          sync_interval_seconds: number
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          background_activity_level?: string
+          battery_level?: number | null
+          charging_status?: boolean | null
+          created_at?: string
+          id?: string
+          sync_interval_seconds?: number
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          background_activity_level?: string
+          battery_level?: number | null
+          charging_status?: boolean | null
+          created_at?: string
+          id?: string
+          sync_interval_seconds?: number
+          timestamp?: string
           user_id?: string | null
         }
         Relationships: []
@@ -229,6 +402,39 @@ export type Database = {
           description?: string | null
           id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      cache_status: {
+        Row: {
+          cache_key: string
+          cache_type: string
+          created_at: string
+          expiry_time: string
+          id: string
+          last_updated: string
+          size_bytes: number | null
+          user_id: string | null
+        }
+        Insert: {
+          cache_key: string
+          cache_type: string
+          created_at?: string
+          expiry_time: string
+          id?: string
+          last_updated?: string
+          size_bytes?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          cache_key?: string
+          cache_type?: string
+          created_at?: string
+          expiry_time?: string
+          id?: string
+          last_updated?: string
+          size_bytes?: number | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -315,6 +521,87 @@ export type Database = {
           terms?: string | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      crash_analytics: {
+        Row: {
+          affected_users: number
+          crash_count: number
+          created_at: string
+          date: string
+          device_breakdown: Json
+          id: string
+          os_breakdown: Json
+          top_errors: Json
+        }
+        Insert: {
+          affected_users?: number
+          crash_count?: number
+          created_at?: string
+          date?: string
+          device_breakdown?: Json
+          id?: string
+          os_breakdown?: Json
+          top_errors?: Json
+        }
+        Update: {
+          affected_users?: number
+          crash_count?: number
+          created_at?: string
+          date?: string
+          device_breakdown?: Json
+          id?: string
+          os_breakdown?: Json
+          top_errors?: Json
+        }
+        Relationships: []
+      }
+      daily_stats: {
+        Row: {
+          created_at: string
+          date: string
+          dau: number | null
+          id: string
+          new_users: number | null
+          retention_day1: number | null
+          retention_day30: number | null
+          retention_day7: number | null
+          session_duration_avg: number | null
+          top_feature: string | null
+          top_location: string | null
+          total_earnings_paisa: number | null
+          total_steps: number | null
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          dau?: number | null
+          id?: string
+          new_users?: number | null
+          retention_day1?: number | null
+          retention_day30?: number | null
+          retention_day7?: number | null
+          session_duration_avg?: number | null
+          top_feature?: string | null
+          top_location?: string | null
+          total_earnings_paisa?: number | null
+          total_steps?: number | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          dau?: number | null
+          id?: string
+          new_users?: number | null
+          retention_day1?: number | null
+          retention_day30?: number | null
+          retention_day7?: number | null
+          session_duration_avg?: number | null
+          top_feature?: string | null
+          top_location?: string | null
+          total_earnings_paisa?: number | null
+          total_steps?: number | null
         }
         Relationships: []
       }
@@ -434,6 +721,81 @@ export type Database = {
           unhelpful_votes?: number | null
           updated_at?: string
           views_count?: number | null
+        }
+        Relationships: []
+      }
+      geographic_analytics: {
+        Row: {
+          ad_revenue: number | null
+          city: string | null
+          country: string | null
+          coupon_redemptions: number | null
+          created_at: string
+          date: string
+          id: string
+          state: string | null
+          total_earnings_paisa: number | null
+          total_steps: number | null
+          user_count: number | null
+        }
+        Insert: {
+          ad_revenue?: number | null
+          city?: string | null
+          country?: string | null
+          coupon_redemptions?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          state?: string | null
+          total_earnings_paisa?: number | null
+          total_steps?: number | null
+          user_count?: number | null
+        }
+        Update: {
+          ad_revenue?: number | null
+          city?: string | null
+          country?: string | null
+          coupon_redemptions?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          state?: string | null
+          total_earnings_paisa?: number | null
+          total_steps?: number | null
+          user_count?: number | null
+        }
+        Relationships: []
+      }
+      load_time_analytics: {
+        Row: {
+          connection_type: string | null
+          created_at: string
+          device_type: string | null
+          id: string
+          load_time_ms: number
+          page_name: string
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          connection_type?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          load_time_ms: number
+          page_name: string
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          connection_type?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          load_time_ms?: number
+          page_name?: string
+          timestamp?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -759,6 +1121,42 @@ export type Database = {
         }
         Relationships: []
       }
+      performance_metrics: {
+        Row: {
+          api_response_time: number | null
+          average_load_time: number | null
+          bounce_rate: number | null
+          created_at: string
+          date: string
+          error_rate: number | null
+          id: string
+          page_name: string
+          user_count: number | null
+        }
+        Insert: {
+          api_response_time?: number | null
+          average_load_time?: number | null
+          bounce_rate?: number | null
+          created_at?: string
+          date?: string
+          error_rate?: number | null
+          id?: string
+          page_name: string
+          user_count?: number | null
+        }
+        Update: {
+          api_response_time?: number | null
+          average_load_time?: number | null
+          bounce_rate?: number | null
+          created_at?: string
+          date?: string
+          error_rate?: number | null
+          id?: string
+          page_name?: string
+          user_count?: number | null
+        }
+        Relationships: []
+      }
       phases: {
         Row: {
           days_limit: number
@@ -945,6 +1343,45 @@ export type Database = {
         }
         Relationships: []
       }
+      revenue_analytics: {
+        Row: {
+          ad_revenue: number | null
+          amount_paisa: number
+          coupon_commissions: number | null
+          created_at: string
+          date: string
+          earning_source: string
+          geographic_location: string | null
+          id: string
+          referral_bonuses: number | null
+          user_id: string | null
+        }
+        Insert: {
+          ad_revenue?: number | null
+          amount_paisa?: number
+          coupon_commissions?: number | null
+          created_at?: string
+          date?: string
+          earning_source: string
+          geographic_location?: string | null
+          id?: string
+          referral_bonuses?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          ad_revenue?: number | null
+          amount_paisa?: number
+          coupon_commissions?: number | null
+          created_at?: string
+          date?: string
+          earning_source?: string
+          geographic_location?: string | null
+          id?: string
+          referral_bonuses?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       rewards: {
         Row: {
           created_at: string | null
@@ -1035,6 +1472,42 @@ export type Database = {
           reward_description?: string
           reward_type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      step_analytics: {
+        Row: {
+          active_users: number | null
+          average_steps: number | null
+          created_at: string
+          date: string
+          goal_completions: number | null
+          id: string
+          new_user_signups: number | null
+          streak_achievements: number | null
+          total_steps: number | null
+        }
+        Insert: {
+          active_users?: number | null
+          average_steps?: number | null
+          created_at?: string
+          date?: string
+          goal_completions?: number | null
+          id?: string
+          new_user_signups?: number | null
+          streak_achievements?: number | null
+          total_steps?: number | null
+        }
+        Update: {
+          active_users?: number | null
+          average_steps?: number | null
+          created_at?: string
+          date?: string
+          goal_completions?: number | null
+          id?: string
+          new_user_signups?: number | null
+          streak_achievements?: number | null
+          total_steps?: number | null
         }
         Relationships: []
       }
@@ -1236,6 +1709,51 @@ export type Database = {
         }
         Relationships: []
       }
+      sync_queue: {
+        Row: {
+          action_type: string
+          created_at: string
+          data_payload: Json
+          id: string
+          max_retries: number
+          next_retry_at: string | null
+          priority: number
+          retry_count: number
+          sync_status: string
+          timestamp: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          data_payload: Json
+          id?: string
+          max_retries?: number
+          next_retry_at?: string | null
+          priority?: number
+          retry_count?: number
+          sync_status?: string
+          timestamp?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          data_payload?: Json
+          id?: string
+          max_retries?: number
+          next_retry_at?: string | null
+          priority?: number
+          retry_count?: number
+          sync_status?: string
+          timestamp?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       system_alerts: {
         Row: {
           alert_type: string
@@ -1380,6 +1898,123 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_activity_logs: {
+        Row: {
+          activity_data: Json | null
+          activity_type: string
+          id: string
+          ip_address: unknown | null
+          session_id: string | null
+          timestamp: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_type: string
+          id?: string
+          ip_address?: unknown | null
+          session_id?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_type?: string
+          id?: string
+          ip_address?: unknown | null
+          session_id?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_engagement_scores: {
+        Row: {
+          challenge_completion_score: number | null
+          created_at: string
+          daily_usage_score: number | null
+          date: string
+          feature_interaction_score: number | null
+          id: string
+          percentile_rank: number | null
+          social_sharing_score: number | null
+          total_engagement_score: number | null
+          user_id: string
+        }
+        Insert: {
+          challenge_completion_score?: number | null
+          created_at?: string
+          daily_usage_score?: number | null
+          date?: string
+          feature_interaction_score?: number | null
+          id?: string
+          percentile_rank?: number | null
+          social_sharing_score?: number | null
+          total_engagement_score?: number | null
+          user_id: string
+        }
+        Update: {
+          challenge_completion_score?: number | null
+          created_at?: string
+          daily_usage_score?: number | null
+          date?: string
+          feature_interaction_score?: number | null
+          id?: string
+          percentile_rank?: number | null
+          social_sharing_score?: number | null
+          total_engagement_score?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_metrics: {
+        Row: {
+          active_flag: boolean | null
+          created_at: string
+          date: string
+          features_used: Json | null
+          id: string
+          last_active_at: string | null
+          login_count: number | null
+          pages_visited: Json | null
+          retention_day: number | null
+          session_duration: number | null
+          steps_logged: number | null
+          user_id: string
+        }
+        Insert: {
+          active_flag?: boolean | null
+          created_at?: string
+          date?: string
+          features_used?: Json | null
+          id?: string
+          last_active_at?: string | null
+          login_count?: number | null
+          pages_visited?: Json | null
+          retention_day?: number | null
+          session_duration?: number | null
+          steps_logged?: number | null
+          user_id: string
+        }
+        Update: {
+          active_flag?: boolean | null
+          created_at?: string
+          date?: string
+          features_used?: Json | null
+          id?: string
+          last_active_at?: string | null
+          login_count?: number | null
+          pages_visited?: Json | null
+          retention_day?: number | null
+          session_duration?: number | null
+          steps_logged?: number | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_phases: {
         Row: {

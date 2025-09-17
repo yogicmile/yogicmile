@@ -29,7 +29,7 @@ import { AdminModeration } from "./pages/admin/AdminModeration";
 import { AdminAnalytics } from "./pages/admin/AdminAnalytics";
 import { AdminSettings } from "./pages/admin/AdminSettings";
 import { HelpSupportPage } from "./pages/HelpSupportPage";
-import { SpinWheelPage } from "./pages/SpinWheelPage";
+import { AdminPerformance } from "./pages/admin/AdminPerformance";
 
 const queryClient = new QueryClient();
 
@@ -56,7 +56,7 @@ const App = () => (
                 <Route path="rewards" element={<AdminRewards />} />
                 <Route path="moderation" element={<AdminModeration />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
-                <Route path="settings" element={<AdminSettings />} />
+                <Route path="performance" element={<AdminPerformance />} />
               </Route>
               
               {/* Main App Routes */}
