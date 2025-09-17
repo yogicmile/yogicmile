@@ -120,12 +120,20 @@ export const useSupportSystem = () => {
 
       // Update FAQ vote counts manually
       const updateField = voteType === 'helpful' ? 'helpful_votes' : 'unhelpful_votes';
-        await supabase
+      const { data: currentFaq } = await supabase
+        .from('faqs')
+        .select(updateField)
+        .eq('id', faqId)
+        .single();
+      
+      if (currentFaq) {
+        const { error: updateError } = await supabase
           .from('faqs')
           .update({ [updateField]: (currentFaq[updateField] || 0) + 1 })
           .eq('id', faqId);
-
-      if (updateError) console.warn('Failed to update vote count:', updateError);
+          
+        if (updateError) console.warn('Failed to update vote count:', updateError);
+      }
 
       toast({
         title: 'Thank you!',

@@ -14,7 +14,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { useSupportSystem } from '@/hooks/use-support-system';
-import { LoadingStates } from '@/components/LoadingStates';
+import { LoadingSpinner } from '@/components/LoadingStates';
 import { format } from 'date-fns';
 
 export const SupportChat: React.FC = () => {
@@ -75,7 +75,12 @@ export const SupportChat: React.FC = () => {
   };
 
   if (loading && chats.length === 0) {
-    return <LoadingStates type="page" message="Loading chat..." />;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <LoadingSpinner className="mr-2" />
+        Loading chat...
+      </div>
+    );
   }
 
   const groupedMessages = groupMessagesByDate();

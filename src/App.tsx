@@ -28,6 +28,7 @@ import { AdminRewards } from "./pages/admin/AdminRewards";
 import { AdminModeration } from "./pages/admin/AdminModeration";
 import { AdminAnalytics } from "./pages/admin/AdminAnalytics";
 import { AdminSettings } from "./pages/admin/AdminSettings";
+import { HelpSupportPage } from "./pages/HelpSupportPage";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,7 @@ const App = () => (
                       <Route path="rewards" element={<RewardsPage />} />
                       <Route path="coins-history" element={<CoinsHistory />} />
                       <Route path="phase-journey" element={<PhaseJourney />} />
+                      <Route path="help" element={<HelpSupportPage />} />
                       <Route path="calculation-review" element={<CalculationReview />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>

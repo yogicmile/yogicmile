@@ -6,8 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ReferralCard } from '@/components/ReferralCard';
 import { DynamicAdBanner } from '@/components/DynamicAdBanner';
+import { HelpCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const ProfilePage = () => {
+  const navigate = useNavigate();
   const userStats = {
     totalSteps: 847500,
     totalCoins: 12450,
@@ -20,22 +23,32 @@ export const ProfilePage = () => {
     {
       icon: <Settings className="w-5 h-5" />,
       label: 'Settings',
-      description: 'App preferences & notifications'
+      description: 'App preferences & notifications',
+      action: () => {}
     },
     {
       icon: <Share2 className="w-5 h-5" />,
       label: 'Refer Friends',
-      description: 'Earn bonus coins for referrals'
+      description: 'Earn bonus coins for referrals',
+      action: () => {}
     },
     {
       icon: <Trophy className="w-5 h-5" />,
       label: 'Achievements',
-      description: 'View your milestones'
+      description: 'View your milestones',
+      action: () => {}
     },
     {
       icon: <Target className="w-5 h-5" />,
       label: 'Goals',
-      description: 'Set daily step targets'
+      description: 'Set daily step targets',
+      action: () => {}
+    },
+    {
+      icon: <HelpCircle className="w-5 h-5" />,
+      label: 'Help & Support',
+      description: 'Get help and find answers',
+      action: () => navigate('/help')
     }
   ];
 
@@ -106,7 +119,11 @@ export const ProfilePage = () => {
         {/* Menu Items */}
         <div className="space-y-3">
           {menuItems.map((item, index) => (
-            <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
+            <Card 
+              key={index} 
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={item.action}
+            >
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg text-primary">

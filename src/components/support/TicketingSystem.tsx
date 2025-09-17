@@ -18,7 +18,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { useSupportSystem } from '@/hooks/use-support-system';
-import { LoadingStates } from '@/components/LoadingStates';
+import { LoadingSpinner } from '@/components/LoadingStates';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
@@ -109,7 +109,12 @@ export const TicketingSystem: React.FC = () => {
   };
 
   if (loading && tickets.length === 0) {
-    return <LoadingStates type="page" message="Loading support tickets..." />;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <LoadingSpinner className="mr-2" />
+        Loading support tickets...
+      </div>
+    );
   }
 
   return (

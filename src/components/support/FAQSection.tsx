@@ -15,7 +15,7 @@ import {
   Filter
 } from 'lucide-react';
 import { useSupportSystem } from '@/hooks/use-support-system';
-import { LoadingStates } from '@/components/LoadingStates';
+import { LoadingSpinner } from '@/components/LoadingStates';
 
 export const FAQSection: React.FC = () => {
   const { faqs, loading, fetchFAQs, voteFAQ } = useSupportSystem();
@@ -63,7 +63,12 @@ export const FAQSection: React.FC = () => {
   });
 
   if (loading && faqs.length === 0) {
-    return <div className="flex items-center justify-center p-8">Loading FAQ...</div>;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <LoadingSpinner className="mr-2" />
+        Loading FAQ...
+      </div>
+    );
   }
 
   return (

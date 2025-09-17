@@ -14,7 +14,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useSupportSystem } from '@/hooks/use-support-system';
-import { LoadingStates } from '@/components/LoadingStates';
+import { LoadingSpinner } from '@/components/LoadingStates';
 
 export const VideoTutorials: React.FC = () => {
   const { tutorials, loading, fetchTutorials, trackTutorialView } = useSupportSystem();
@@ -50,7 +50,12 @@ export const VideoTutorials: React.FC = () => {
     : tutorials.filter(t => t.category === selectedCategory);
 
   if (loading && tutorials.length === 0) {
-    return <LoadingStates type="page" message="Loading video tutorials..." />;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <LoadingSpinner className="mr-2" />
+        Loading video tutorials...
+      </div>
+    );
   }
 
   return (
