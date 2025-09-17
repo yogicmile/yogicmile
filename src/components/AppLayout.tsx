@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { EnhancedBottomNavigation } from '@/components/EnhancedBottomNavigation';
+import { FloatingHelpButton } from '@/components/FloatingHelpButton';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -66,12 +67,15 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
       
       {/* Persistent Bottom Navigation - hidden on auth pages */}
       {!hideBottomNav && (
-        <EnhancedBottomNavigation
-          activeTab={getActiveTab()}
-          onTabChange={handleTabChange}
-          notificationCounts={notificationCounts}
-          walletBalance={walletBalance}
-        />
+        <>
+          <EnhancedBottomNavigation
+            activeTab={getActiveTab()}
+            onTabChange={handleTabChange}
+            notificationCounts={notificationCounts}
+            walletBalance={walletBalance}
+          />
+          <FloatingHelpButton />
+        </>
       )}
     </div>
   );
