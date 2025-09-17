@@ -9,83 +9,83 @@ All colors MUST be HSL for consistent theming
 
 @layer base {
   :root {
-    /* Yogic Mile Olive Green + White + Golden Yellow Theme */
-    --background: 0 0% 100%; /* Pure White #FFFFFF */
-    --foreground: 76 47% 16%; /* Dark Olive #2E3D14 */
-    --surface: 0 0% 100%; /* Pure White */
+    /* Clean Blue Theme - Light & Minimal */
+    --background: 210 40% 98%; /* Very light blue-white */
+    --foreground: 210 22% 22%; /* Dark blue-gray text */
+    --surface: 0 0% 100%; /* Pure white */
 
     --card: 0 0% 100%; /* White cards */
-    --card-foreground: 76 47% 16%; /* Dark olive text */
+    --card-foreground: 210 22% 22%; /* Dark blue-gray text */
 
-    /* Primary Yogic Mile Theme Colors */
-    --primary: 76 47% 36%; /* Olive Green #708238 */
-    --primary-foreground: 0 0% 100%; /* White text on olive */
-    --secondary: 0 0% 95%; /* Light gray for subtle elements */
-    --secondary-foreground: 76 47% 16%; /* Dark olive on light */
-    --accent: 51 100% 50%; /* Golden Yellow #FFD700 */
-    --accent-foreground: 76 47% 16%; /* Dark olive on golden */
+    /* Primary Blue Theme Colors */
+    --primary: 210 100% 56%; /* Clean Blue #1976D2 */
+    --primary-foreground: 0 0% 100%; /* White text on blue */
+    --secondary: 210 40% 95%; /* Very light blue */
+    --secondary-foreground: 210 22% 22%; /* Dark blue-gray */
+    --accent: 200 100% 70%; /* Light cyan accent */
+    --accent-foreground: 210 22% 22%; /* Dark text on light accent */
     
-    /* Olive Theme Color Variations */
-    --olive-primary: 76 47% 36%; /* Main Olive #708238 */
-    --olive-light: 76 47% 85%; /* Light olive for backgrounds */
-    --olive-dark: 76 47% 16%; /* Dark olive for text #2E3D14 */
-    --golden-yellow: 51 100% 50%; /* Accent Golden Yellow #FFD700 */
-    --golden-light: 51 100% 85%; /* Light golden */
+    /* Blue Theme Variations */
+    --blue-primary: 210 100% 56%; /* Main Blue #1976D2 */
+    --blue-light: 210 100% 95%; /* Very light blue backgrounds */
+    --blue-dark: 210 22% 22%; /* Dark blue for text */
+    --cyan-accent: 200 100% 70%; /* Light cyan for accents */
+    --cyan-light: 200 100% 90%; /* Very light cyan */
     
-    /* Progress System with Olive → Golden Gradient */
-    --tier-1-paisa: 76 47% 36%; /* Olive base */
-    --tier-1-paisa-light: 76 47% 85%;
+    /* Progress System with Blue Gradient */
+    --tier-1-paisa: 210 100% 56%; /* Clean blue base */
+    --tier-1-paisa-light: 210 100% 95%;
     --tier-1-paisa-foreground: 0 0% 100%;
     
-    --tier-2-coin: 76 47% 42%; /* Slightly lighter olive */
-    --tier-2-coin-light: 76 47% 88%;
+    --tier-2-coin: 205 100% 58%; /* Slightly lighter blue */
+    --tier-2-coin-light: 205 100% 95%;
     --tier-2-coin-foreground: 0 0% 100%;
     
-    --tier-3-token: 70 50% 45%; /* Transitioning to golden */
-    --tier-3-token-light: 70 50% 88%;
+    --tier-3-token: 200 100% 60%; /* Transitioning to cyan */
+    --tier-3-token-light: 200 100% 95%;
     --tier-3-token-foreground: 0 0% 100%;
     
-    --tier-4-gem: 60 70% 48%; /* More golden */
-    --tier-4-gem-light: 60 70% 85%;
+    --tier-4-gem: 195 100% 65%; /* More cyan */
+    --tier-4-gem-light: 195 100% 95%;
     --tier-4-gem-foreground: 0 0% 100%;
     
-    --tier-5-diamond: 51 100% 50%; /* Pure golden yellow */
-    --tier-5-diamond-light: 51 100% 85%;
-    --tier-5-diamond-foreground: 76 47% 16%;
+    --tier-5-diamond: 190 100% 70%; /* Light cyan */
+    --tier-5-diamond-light: 190 100% 95%;
+    --tier-5-diamond-foreground: 210 22% 22%;
     
-    --tier-6-crown: 45 100% 48%; /* Rich gold */
-    --tier-6-crown-light: 45 100% 85%;
-    --tier-6-crown-foreground: 76 47% 16%;
+    --tier-6-crown: 185 100% 65%; /* Aqua */
+    --tier-6-crown-light: 185 100% 95%;
+    --tier-6-crown-foreground: 210 22% 22%;
     
-    --tier-7-emperor: 40 90% 45%; /* Deep gold */
-    --tier-7-emperor-light: 40 90% 85%;
-    --tier-7-emperor-foreground: 76 47% 16%;
+    --tier-7-emperor: 180 100% 60%; /* Turquoise */
+    --tier-7-emperor-light: 180 100% 95%;
+    --tier-7-emperor-foreground: 210 22% 22%;
     
-    --tier-8-legend: 35 85% 42%; /* Amber gold */
-    --tier-8-legend-light: 35 85% 85%;
-    --tier-8-legend-foreground: 76 47% 16%;
+    --tier-8-legend: 175 100% 55%; /* Teal */
+    --tier-8-legend-light: 175 100% 95%;
+    --tier-8-legend-foreground: 0 0% 100%;
     
-    --tier-9-immortal: 30 80% 40%; /* Bronze gold pinnacle */
-    --tier-9-immortal-light: 30 80% 85%;
+    --tier-9-immortal: 170 100% 50%; /* Deep teal pinnacle */
+    --tier-9-immortal-light: 170 100% 95%;
     --tier-9-immortal-foreground: 0 0% 100%;
     
-    /* Legacy compatibility colors remapped to olive theme */
-    --tier-gold: 51 100% 50%; /* Golden Yellow */
-    --tier-gold-foreground: 76 47% 16%;
-    --tier-amethyst: 76 47% 50%; /* Olive variant */
+    /* Legacy compatibility colors remapped to blue theme */
+    --tier-gold: 200 100% 70%; /* Light cyan */
+    --tier-gold-foreground: 210 22% 22%;
+    --tier-amethyst: 210 100% 60%; /* Blue variant */
     --tier-amethyst-foreground: 0 0% 100%;
-    --tier-sage: 76 47% 36%; /* Primary olive */
+    --tier-sage: 210 100% 56%; /* Primary blue */
     --tier-sage-foreground: 0 0% 100%;
-    --tier-rose: 76 47% 42%; /* Light olive */
+    --tier-rose: 205 100% 58%; /* Light blue */
     --tier-rose-foreground: 0 0% 100%;
 
-    /* Yogic Mile Olive + Golden Gradients */
-    --gradient-golden: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    --gradient-olive-to-gold: linear-gradient(135deg, #708238 0%, #FFD700 100%);
-    --gradient-yogic-header: linear-gradient(135deg, #708238 0%, #8A9A4A 100%);
-    --gradient-serene: linear-gradient(135deg, hsl(var(--olive-primary)), hsl(var(--golden-yellow)));
-    --gradient-sage: linear-gradient(135deg, hsl(var(--olive-primary)), hsl(var(--olive-light)));
-    --gradient-mindful: linear-gradient(135deg, hsl(var(--golden-yellow)), hsl(var(--golden-light)));
+    /* Clean Blue Gradients */
+    --gradient-blue: linear-gradient(135deg, #1976D2 0%, #42A5F5 100%);
+    --gradient-blue-to-cyan: linear-gradient(135deg, #1976D2 0%, #00BCD4 100%);
+    --gradient-light-blue: linear-gradient(135deg, #E3F2FD 0%, #F1F8FF 100%);
+    --gradient-serene: linear-gradient(135deg, hsl(var(--blue-primary)), hsl(var(--cyan-accent)));
+    --gradient-sage: linear-gradient(135deg, hsl(var(--blue-primary)), hsl(var(--blue-light)));
+    --gradient-mindful: linear-gradient(135deg, hsl(var(--cyan-accent)), hsl(var(--cyan-light)));
 
     /* Status Colors (keeping semantic meaning) */
     --success: 120 60% 50%; /* Green for success */
@@ -95,90 +95,90 @@ All colors MUST be HSL for consistent theming
     --destructive: 0 84% 60%; /* Red for destructive actions */
     --destructive-foreground: 0 0% 100%;
 
-    /* UI Elements with Olive Theme */
-    --border: 76 47% 80%; /* Light olive borders */
-    --input: 0 0% 100%; /* White inputs with olive borders */
-    --ring: 76 47% 36%; /* Olive focus rings */
-    --muted: 0 0% 96%; /* Very light gray */
-    --muted-foreground: 76 47% 25%; /* Muted olive text */
+    /* UI Elements with Blue Theme */
+    --border: 210 40% 85%; /* Light blue borders */
+    --input: 0 0% 100%; /* White inputs with blue borders */
+    --ring: 210 100% 56%; /* Blue focus rings */
+    --muted: 210 40% 96%; /* Very light blue-gray */
+    --muted-foreground: 210 22% 45%; /* Muted blue text */
 
-    /* Yogic Mile Primary Gradients */
-    --gradient-primary: var(--gradient-olive-to-gold);
+    /* Clean Blue Primary Gradients */
+    --gradient-primary: var(--gradient-blue-to-cyan);
     --gradient-performance: var(--gradient-sage);
-    --gradient-achievement: var(--gradient-golden);
+    --gradient-achievement: var(--gradient-blue);
     --gradient-champion: var(--gradient-mindful);
 
-    /* Olive-themed Shadow System */
-    --shadow-sm: 0 1px 3px 0 hsl(76 47% 16% / 0.08);
-    --shadow-md: 0 4px 12px -2px hsl(76 47% 16% / 0.12);
-    --shadow-lg: 0 20px 25px -5px hsl(76 47% 16% / 0.15);
-    --shadow-glow: 0 0 30px hsl(76 47% 36% / 0.25);
-    --shadow-premium: 0 8px 25px -8px hsl(76 47% 36% / 0.3);
+    /* Blue-themed Shadow System */
+    --shadow-sm: 0 1px 3px 0 hsl(210 100% 56% / 0.06);
+    --shadow-md: 0 4px 12px -2px hsl(210 100% 56% / 0.08);
+    --shadow-lg: 0 20px 25px -5px hsl(210 100% 56% / 0.10);
+    --shadow-glow: 0 0 30px hsl(210 100% 56% / 0.15);
+    --shadow-premium: 0 8px 25px -8px hsl(210 100% 56% / 0.20);
 
     --radius: 12px;
 
-    /* Admin Sidebar with Olive Theme */
-    --sidebar-background: 76 47% 36%; /* Olive green sidebar */
+    /* Admin Sidebar with Blue Theme */
+    --sidebar-background: 210 100% 56%; /* Blue sidebar */
     --sidebar-foreground: 0 0% 100%; /* White text */
     --sidebar-primary: 0 0% 100%; /* White for active items */
-    --sidebar-primary-foreground: 76 47% 36%; /* Olive text on white */
-    --sidebar-accent: 76 47% 45%; /* Lighter olive for hover */
-    --sidebar-accent-foreground: 0 0% 100%; /* White on olive */
-    --sidebar-border: 76 47% 45%; /* Olive borders */
-    --sidebar-ring: 51 100% 50%; /* Golden focus ring */
+    --sidebar-primary-foreground: 210 100% 56%; /* Blue text on white */
+    --sidebar-accent: 205 100% 60%; /* Lighter blue for hover */
+    --sidebar-accent-foreground: 0 0% 100%; /* White on blue */
+    --sidebar-border: 205 100% 60%; /* Blue borders */
+    --sidebar-ring: 200 100% 70%; /* Cyan focus ring */
   }
 
   .dark {
-    /* Dark mode with olive tones */
-    --background: 76 47% 8%; /* Very dark olive */
+    /* Dark mode with blue tones */
+    --background: 210 50% 8%; /* Very dark blue */
     --foreground: 0 0% 98%; /* Near white */
-    --surface: 76 47% 10%; /* Dark olive surface */
+    --surface: 210 50% 10%; /* Dark blue surface */
 
-    --card: 76 47% 12%; /* Dark olive cards */
+    --card: 210 50% 12%; /* Dark blue cards */
     --card-foreground: 0 0% 95%; /* Light text */
 
-    --popover: 76 47% 8%;
+    --popover: 210 50% 8%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 76 47% 45%; /* Lighter olive for visibility */
+    --primary: 210 100% 60%; /* Brighter blue for visibility */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 76 47% 15%; /* Dark olive secondary */
+    --secondary: 210 50% 15%; /* Dark blue secondary */
     --secondary-foreground: 0 0% 95%;
 
-    --muted: 76 47% 15%;
-    --muted-foreground: 76 47% 65%;
+    --muted: 210 50% 15%;
+    --muted-foreground: 210 40% 65%;
 
-    --accent: 51 100% 60%; /* Brighter golden for dark mode */
-    --accent-foreground: 76 47% 12%;
+    --accent: 200 100% 70%; /* Brighter cyan for dark mode */
+    --accent-foreground: 210 50% 12%;
 
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 95%;
 
-    --border: 76 47% 20%;
-    --input: 76 47% 15%;
-    --ring: 51 100% 50%; /* Golden focus ring */
+    --border: 210 50% 20%;
+    --input: 210 50% 15%;
+    --ring: 200 100% 70%; /* Cyan focus ring */
     
-    /* Dark mode tier colors with olive → golden progression */
-    --tier-1-paisa: 76 47% 50%;
-    --tier-2-coin: 76 47% 55%;
-    --tier-3-token: 70 60% 60%;
-    --tier-4-gem: 60 80% 65%;
-    --tier-5-diamond: 51 100% 60%;
-    --tier-6-crown: 45 100% 55%;
-    --tier-7-emperor: 40 90% 50%;
-    --tier-8-legend: 35 85% 50%;
-    --tier-9-immortal: 30 80% 45%;
+    /* Dark mode tier colors with blue → cyan progression */
+    --tier-1-paisa: 210 100% 60%;
+    --tier-2-coin: 205 100% 62%;
+    --tier-3-token: 200 100% 65%;
+    --tier-4-gem: 195 100% 68%;
+    --tier-5-diamond: 190 100% 70%;
+    --tier-6-crown: 185 100% 65%;
+    --tier-7-emperor: 180 100% 60%;
+    --tier-8-legend: 175 100% 55%;
+    --tier-9-immortal: 170 100% 50%;
     
     /* Dark mode admin sidebar */
-    --sidebar-background: 76 47% 12%;
+    --sidebar-background: 210 50% 12%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 51 100% 50%;
-    --sidebar-primary-foreground: 76 47% 12%;
-    --sidebar-accent: 76 47% 20%;
+    --sidebar-primary: 200 100% 70%;
+    --sidebar-primary-foreground: 210 50% 12%;
+    --sidebar-accent: 210 50% 20%;
     --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 76 47% 20%;
-    --sidebar-ring: 51 100% 50%;
+    --sidebar-border: 210 50% 20%;
+    --sidebar-ring: 200 100% 70%;
   }
 }
 
@@ -246,20 +246,21 @@ All colors MUST be HSL for consistent theming
 }
 
 @layer components {
-  /* Enhanced Mobile Dashboard Components - Olive Theme */
+  /* Enhanced Mobile Dashboard Components - Blue Theme */
   .dashboard-card {
-    @apply bg-surface/95 backdrop-blur-md rounded-2xl p-5 border;
-    border-color: hsl(76 47% 36% / 0.2);
-    box-shadow: 0 4px 12px -2px hsl(76 47% 36% / 0.08);
+    @apply backdrop-blur-md rounded-2xl p-5 border;
+    background: rgba(255, 255, 255, 0.98);
+    border-color: hsl(210 40% 85%);
+    box-shadow: 0 2px 8px -2px hsl(210 100% 56% / 0.04);
     transition: all 0.3s ease;
   }
 
   .stat-card {
     @apply dashboard-card hover:shadow-premium transition-all duration-500 hover:-translate-y-1 hover:scale-[1.02];
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.98);
+    background: rgba(255, 255, 255, 0.99);
     backdrop-filter: blur(12px);
-    border: 1px solid hsl(76 47% 36% / 0.15);
+    border: 1px solid hsl(210 40% 85%);
     min-height: 44px; /* Touch target */
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -271,8 +272,8 @@ All colors MUST be HSL for consistent theming
 
   .ad-banner {
     @apply rounded-xl p-4 border border-border/30;
-    background: hsl(0 0% 98%);
-    box-shadow: 0 2px 8px -2px hsl(76 47% 36% / 0.06);
+    background: hsl(210 40% 98%);
+    box-shadow: 0 2px 8px -2px hsl(210 100% 56% / 0.03);
     backdrop-filter: blur(8px);
   }
 
@@ -314,13 +315,13 @@ All colors MUST be HSL for consistent theming
   .tier-8-glow { filter: drop-shadow(0 0 8px hsl(35 85% 42% / 0.5)); }
   .tier-9-glow { filter: drop-shadow(0 0 8px hsl(30 80% 40% / 0.5)); }
 
-  /* Olive-themed CTA Button */
+  /* Clean Blue CTA Button */
   .cta-button {
     @apply font-bold py-5 px-8 rounded-2xl shadow-premium hover:shadow-glow transition-all duration-300
            hover:scale-[1.02] active:scale-[0.98] active:opacity-90 backdrop-blur-sm;
     font-size: 1.1rem;
     letter-spacing: 0.025em;
-    background: linear-gradient(135deg, hsl(76 47% 36%), hsl(51 100% 50%)); /* Olive to Golden */
+    background: linear-gradient(135deg, hsl(210 100% 56%), hsl(200 100% 70%)); /* Blue to cyan */
     color: white;
     min-height: 52px;
     border: none;
@@ -335,10 +336,10 @@ All colors MUST be HSL for consistent theming
     filter: grayscale(1);
   }
 
-  /* Golden Redeem Button Variant */
-  .cta-golden {
-    background: linear-gradient(135deg, hsl(51 100% 50%), hsl(45 100% 48%));
-    color: hsl(76 47% 16%); /* Dark olive text */
+  /* Light Cyan Button Variant */
+  .cta-cyan {
+    background: linear-gradient(135deg, hsl(200 100% 70%), hsl(190 100% 70%));
+    color: hsl(210 22% 22%); /* Dark blue text */
   }
 
   /* Olive-themed Secondary Button */
@@ -377,20 +378,21 @@ All colors MUST be HSL for consistent theming
     touch-action: manipulation;
   }
 
-  /* Olive-themed Tab Navigation */
+  /* Blue-themed Tab Navigation */
   .tab-active {
-    background: hsl(76 47% 36%); /* Olive green for active */
+    background: hsl(210 100% 56%); /* Clean blue for active */
     color: white;
-    box-shadow: 0 8px 25px -8px hsl(76 47% 36% / 0.3);
+    box-shadow: 0 4px 12px -2px hsl(210 100% 56% / 0.25);
   }
 
   .tab-inactive {
     @apply text-muted-foreground hover:text-foreground;
     background: transparent;
+    color: hsl(210 22% 60%); /* Gray inactive tabs */
   }
   
   .tab-inactive:hover {
-    background: hsl(76 47% 90%); /* Light olive hover */
+    background: hsl(210 40% 95%); /* Very light blue hover */
   }
 
   /* White Bottom Navigation with Olive Accents */
@@ -580,16 +582,16 @@ All colors MUST be HSL for consistent theming
     box-shadow: var(--shadow-sm);
   }
 
-  /* Olive-themed Brand Styles */
+  /* Blue-themed Brand Styles */
   .yogicmile-brand {
     @apply font-display bg-clip-text text-transparent;
-    background: linear-gradient(135deg, hsl(76 47% 36%), hsl(51 100% 50%));
+    background: linear-gradient(135deg, hsl(210 100% 56%), hsl(200 100% 70%));
   }
 
   .premium-glass {
     @apply backdrop-blur-md border;
-    background: rgba(255, 255, 255, 0.9);
-    border-color: rgba(112, 130, 56, 0.2); /* Olive with opacity */
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(25, 118, 210, 0.15); /* Blue with opacity */
   }
 }
 
