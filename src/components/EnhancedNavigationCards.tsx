@@ -97,8 +97,7 @@ export const EnhancedNavigationCards = () => {
         navigate('/rewards');
         break;
       case 'spin-wheel':
-        // TODO: Navigate to spin wheel page when implemented
-        console.log('Spin wheel feature coming soon!');
+        navigate('/spin-wheel');
         break;
       case 'wallet':
         navigate('/wallet');
