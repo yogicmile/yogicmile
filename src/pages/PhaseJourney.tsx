@@ -30,18 +30,17 @@ const PhaseJourney: React.FC = () => {
   const [showTierModal, setShowTierModal] = useState(false);
   const [animatedTiers, setAnimatedTiers] = useState<number[]>([]);
 
-  // Mock tier data for all 9 phases - Updated with correct calculations
   const allTiers: TierInfo[] = [
     {
       id: 1,
       symbol: '🟡',
       name: 'Paisa Phase',
-      spiritualName: 'Foundation of Discipline',
+      spiritualName: 'Foundation Level',
       stepGoal: 200000,
       timeLimit: 30,
       dailyAverage: 6667,
       rewardRate: 1, // 1 paisa per 25 steps
-      spiritualBenefit: 'Build foundation of discipline and commitment to the path',
+      spiritualBenefit: 'Build foundation of fitness and commitment to daily goals',
       status: 'current',
       coinsEarned: 8000 // 200K steps ÷ 25 × 1 paisa = 8000 paisa
     },
@@ -49,96 +48,96 @@ const PhaseJourney: React.FC = () => {
       id: 2,
       symbol: '🪙',
       name: 'Coin Phase',
-      spiritualName: 'Consistent Practice',
+      spiritualName: 'Consistency Level',
       stepGoal: 300000,
       timeLimit: 45,
       dailyAverage: 6667,
       rewardRate: 2, // 2 paisa per 25 steps
-      spiritualBenefit: 'Develop consistent practice and mindful awareness',
+      spiritualBenefit: 'Develop consistent practice and healthy habits',
       status: 'locked'
     },
     {
       id: 3,
       symbol: '🎟️',
       name: 'Token Phase',
-      spiritualName: 'Strengthened Willpower',
+      spiritualName: 'Strength Level',
       stepGoal: 400000,
       timeLimit: 60,
       dailyAverage: 6667,
       rewardRate: 3, // 3 paisa per 25 steps
-      spiritualBenefit: 'Strengthen willpower and mental resilience',
+      spiritualBenefit: 'Strengthen willpower and physical resilience',
       status: 'locked'
     },
     {
       id: 4,
       symbol: '💎',
       name: 'Gem Phase',
-      spiritualName: 'Inner Clarity',
+      spiritualName: 'Focus Level',
       stepGoal: 500000,
       timeLimit: 75,
       dailyAverage: 6667,
       rewardRate: 5, // 5 paisa per 25 steps
-      spiritualBenefit: 'Achieve inner clarity and focused intention',
+      spiritualBenefit: 'Achieve clear focus and determined goals',
       status: 'locked'
     },
     {
       id: 5,
       symbol: '💠',
       name: 'Diamond Phase',
-      spiritualName: 'Unshakeable Focus',
+      spiritualName: 'Strong Focus',
       stepGoal: 600000,
       timeLimit: 80,
       dailyAverage: 7500,
       rewardRate: 7, // 7 paisa per 25 steps
-      spiritualBenefit: 'Cultivate unshakeable focus and determination',
+      spiritualBenefit: 'Build strong focus and determination',
       status: 'locked'
     },
     {
       id: 6,
       symbol: '👑',
       name: 'Crown Phase',
-      spiritualName: 'Mastery of Self',
+      spiritualName: 'Self Mastery',
       stepGoal: 1000000,
       timeLimit: 120,
       dailyAverage: 8334,
       rewardRate: 10, // 10 paisa per 25 steps
-      spiritualBenefit: 'Master self-discipline and inner sovereignty',
+      spiritualBenefit: 'Master self-discipline and personal goals',
       status: 'locked'
     },
     {
       id: 7,
       symbol: '🏵️',
       name: 'Emperor Phase',
-      spiritualName: 'Transcendent Power',
+      spiritualName: 'Peak Performance',
       stepGoal: 1700000,
       timeLimit: 200,
       dailyAverage: 8500,
       rewardRate: 15, // 15 paisa per 25 steps
-      spiritualBenefit: 'Access transcendent power and wisdom',
+      spiritualBenefit: 'Reach peak performance and expertise',
       status: 'locked'
     },
     {
       id: 8,
       symbol: '🏅',
       name: 'Legend Phase',
-      spiritualName: 'Enlightened Being',
+      spiritualName: 'Elite Status',
       stepGoal: 2000000,
       timeLimit: 250,
       dailyAverage: 8000,
       rewardRate: 20, // 20 paisa per 25 steps
-      spiritualBenefit: 'Become an enlightened being of pure awareness',
+      spiritualBenefit: 'Achieve elite fitness status and recognition',
       status: 'locked'
     },
     {
       id: 9,
       symbol: '🏆',
       name: 'Immortal Phase',
-      spiritualName: 'Eternal Consciousness',
+      spiritualName: 'Ultimate Achievement',
       stepGoal: 3000000,
       timeLimit: 365,
       dailyAverage: 8219,
       rewardRate: 30, // 30 paisa per 25 steps
-      spiritualBenefit: 'Achieve eternal consciousness and cosmic unity',
+      spiritualBenefit: 'Reach ultimate fitness achievement and legacy status',
       status: 'locked'
     }
   ];

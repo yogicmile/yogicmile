@@ -25,10 +25,10 @@ export const EnhancedNavigationCards = () => {
       title: 'Phase Journey',
       subtitle: 'Explore All 9 Tiers',
       icon: '🗺️',
-      yogicIcon: '🕉️',
+      yogicIcon: '🎯',
       badge: 'Discover',
       gradient: 'from-golden-accent/20 via-serene-blue/10 to-soft-lavender/20',
-      description: 'Discover your path through the 9 phases of transformation',
+      description: 'Discover your path through the 9 phases of progress',
       isNew: true
     },
     {
@@ -36,27 +36,27 @@ export const EnhancedNavigationCards = () => {
       title: 'Daily Earnings',
       subtitle: `${mockData.dailyProgress.coinsEarnedToday} coins today`,
       icon: '📊',
-      yogicIcon: '🪷💰',
+      yogicIcon: '💰📊',
       badge: mockData.dailyProgress.coinsEarnedToday > 0 ? mockData.dailyProgress.coinsEarnedToday : null,
       gradient: 'from-sage-green/20 via-deep-teal/10 to-serene-blue/20',
-      description: 'Track your mindful earnings and coin history'
+      description: 'Track your daily earnings and coin history'
     },
     {
       id: 'vouchers',
       title: 'Rewards Store',
-      subtitle: 'Mindful Shopping',
+      subtitle: 'Shop Rewards',
       icon: '🎁',
-      yogicIcon: '☮️🛍️',
+      yogicIcon: '🛍️✨',
       badge: 'NEW',
       gradient: 'from-soft-lavender/20 via-warm-coral/10 to-golden-accent/20',
-      description: 'Redeem coins for wellness and lifestyle rewards'
+      description: 'Redeem coins for rewards and lifestyle products'
     },
     {
       id: 'spin-wheel',
       title: 'Lucky Spin',
       subtitle: 'Spin & Win',
       icon: '🎡',
-      yogicIcon: '☸️',
+      yogicIcon: '🎲⭐',
       badge: 1,
       gradient: 'from-warm-coral/20 via-golden-accent/10 to-sage-green/20',
       description: 'Spin the wheel of fortune for bonus rewards'
@@ -64,7 +64,7 @@ export const EnhancedNavigationCards = () => {
     {
       id: 'wallet',
       title: 'My Wallet',
-      subtitle: 'Mindful Money',
+      subtitle: 'Your Balance',
       icon: '💰',
       yogicIcon: '💪💳',
       badge: mockData.wallet.mockData.pendingRedemptions > 0 ? mockData.wallet.mockData.pendingRedemptions : null,
@@ -86,13 +86,28 @@ export const EnhancedNavigationCards = () => {
   const handleCardClick = (cardId: string) => {
     console.log(`Navigating to: ${cardId}`);
     
-    if (cardId === 'phase-journey') {
-      navigate('/phase-journey');
-    } else if (cardId === 'calculation-review') {
-      navigate('/calculation-review');
-    } else {
-      // Add navigation logic for other cards here
-      console.log(`Opening ${cardId} view...`);
+    switch (cardId) {
+      case 'phase-journey':
+        navigate('/phase-journey');
+        break;
+      case 'coins-earned':
+        navigate('/coins-history');
+        break;
+      case 'vouchers':
+        navigate('/rewards');
+        break;
+      case 'spin-wheel':
+        // TODO: Navigate to spin wheel page when implemented
+        console.log('Spin wheel feature coming soon!');
+        break;
+      case 'wallet':
+        navigate('/wallet');
+        break;
+      case 'calculation-review':
+        navigate('/calculation-review');
+        break;
+      default:
+        console.log(`No navigation defined for ${cardId}`);
     }
   };
 
