@@ -4,25 +4,25 @@ export const NavigationCards = () => {
   const navigationItems = [
     {
       icon: List,
-      title: "Karma Journal",
+      title: "Activity Log",
       subtitle: "Track Progress",
       gradient: "from-tier-gold via-tier-gold to-[hsl(35_80%_65%)]"
     },
     {
       icon: Gift,
-      title: "Wellness Store",
-      subtitle: "Mindful Rewards",
+      title: "Rewards Store",
+      subtitle: "Your Rewards",
       gradient: "from-tier-amethyst via-tier-amethyst to-[hsl(290_45%_70%)]"
     },
     {
       icon: Disc,
-      title: "Dharma Wheel",
-      subtitle: "Daily Inspiration",
+      title: "Daily Goals",
+      subtitle: "Daily Progress",
       gradient: "from-tier-sage via-tier-sage to-[hsl(160_40%_60%)]"
     },
     {
       icon: Wallet,
-      title: "Sacred Vault",
+      title: "My Wallet",
       subtitle: "Your Balance",
       gradient: "from-tier-rose via-tier-rose to-[hsl(320_50%_70%)]"
     }
@@ -30,7 +30,7 @@ export const NavigationCards = () => {
 
   return (
     <div>
-      <h3 className="text-xl font-display font-semibold mb-6 text-foreground">Mindful Pathways</h3>
+      <h3 className="text-xl font-display font-semibold mb-6 text-foreground">Quick Actions</h3>
       <div className="grid grid-cols-2 gap-5">
         {navigationItems.map((item, index) => (
           <div key={index} className="nav-card">

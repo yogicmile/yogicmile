@@ -124,11 +124,11 @@ export const EnhancedBottomNavigation = ({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
-      {/* Yogic Mile Mini Header */}
+      {/* Step Rewards Mini Header */}
       <div className="bg-surface/95 backdrop-blur-md border-t px-4 py-2">
         <div className="text-center">
           <div className="text-xs text-tier-1-paisa font-medium opacity-80">
-            Walk. Earn. Evolve. 🧘‍♀️
+            Walk. Earn. Achieve. 👟
           </div>
         </div>
       </div>

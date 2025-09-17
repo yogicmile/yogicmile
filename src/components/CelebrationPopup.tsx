@@ -215,7 +215,7 @@ export const ReferralBonusPopup = ({
     onClose={onClose}
     type="referral"
     title="Friend Joined!"
-    message={`${friendsName || 'Your friend'} joined Yogic Mile using your referral code!`}
+    message={`${friendsName || 'Your friend'} joined Step Rewards using your referral code!`}
     amount={bonusAmount}
   />
 );
@@ -288,7 +288,7 @@ export const WelcomeBonusPopup = ({
     isOpen={isOpen}
     onClose={onClose}
     type="welcome_bonus"
-    title="Welcome to Yogic Mile!"
+    title="Welcome to Step Rewards!"
     message="Welcome bonus added to your wallet. Start walking to earn more!"
     amount={100} // ₹1.00
   />

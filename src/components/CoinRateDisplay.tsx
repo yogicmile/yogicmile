@@ -181,7 +181,7 @@ export const CoinRateDisplay = ({
         </div>
         
         <p className="text-center text-xs text-muted-foreground mt-4 italic">
-          "Progress is meditation in motion" 🧘‍♂️
+          "Progress is success in motion" 🚀
         </p>
       </div>
     </div>

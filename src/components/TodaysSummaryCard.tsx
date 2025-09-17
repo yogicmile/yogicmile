@@ -66,10 +66,10 @@ export const TodaysSummaryCard = ({
     >
       {/* Header */}
       <div className="flex items-center justify-center mb-6">
-        <div className="text-3xl mr-3">🧘‍♀️</div>
+        <div className="text-3xl mr-3">💪</div>
         <div className="text-center">
           <h3 className="text-xl font-bold text-foreground">Today's Achievement</h3>
-          <p className="text-sm text-muted-foreground">Your mindful progress</p>
+          <p className="text-sm text-muted-foreground">Your daily progress</p>
         </div>
       </div>
 

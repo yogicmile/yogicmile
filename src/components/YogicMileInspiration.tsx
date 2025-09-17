@@ -53,7 +53,7 @@ export const YogicMileInspiration: React.FC<YogicMileInspirationProps> = ({
     "I honor my body through mindful movement",
     "My journey inspires others to begin theirs",
     "I walk in gratitude for this moment",
-    "Every step is sacred and purposeful"
+    "Every step is meaningful and purposeful"
   ];
 
   useEffect(() => {
@@ -78,7 +78,7 @@ export const YogicMileInspiration: React.FC<YogicMileInspirationProps> = ({
       {!showIntention ? (
         <Card className="bg-gradient-to-br from-soft-lavender/10 to-serene-blue/10 border-soft-lavender/20">
           <div className="p-4 text-center">
-            <div className="text-2xl mb-2">🧘‍♀️</div>
+            <div className="text-2xl mb-2">🎯</div>
             <h3 className="font-semibold text-soft-lavender mb-2">Set Your Walking Intention</h3>
             <p className="text-sm text-muted-foreground mb-3">
               Begin your mindful journey with purpose

@@ -252,14 +252,14 @@ export const useCoinRateSystem = () => {
   const getTierMantra = useCallback(() => {
     const mantras = [
       "Every step builds the foundation of discipline 🙏",
-      "Consistency is the path to inner peace 🧘‍♂️", 
-      "Your willpower grows with each mindful step 💪",
+      "Consistency is the path to success 💪", 
+      "Your willpower grows with each determined step 💪",
       "Clarity emerges through dedicated practice ✨",
-      "Focus transforms ordinary moments into sacred ones 🔸",
-      "You are mastering the art of conscious movement 👑",
-      "Transcendent power flows through intentional action ⚡",
-      "You walk among the enlightened ones 🌟",
-      "Your consciousness expands with eternal wisdom 🔥"
+      "Focus transforms ordinary moments into special ones 🔸",
+      "You are mastering the art of purposeful movement 👑",
+      "Powerful energy flows through intentional action ⚡",
+      "You walk among the dedicated ones 🌟",
+      "Your determination expands with every step 🔥"
     ];
     return mantras[currentTier - 1] || mantras[0];
   }, [currentTier]);

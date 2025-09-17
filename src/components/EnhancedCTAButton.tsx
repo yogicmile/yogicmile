@@ -139,7 +139,7 @@ export const EnhancedCTAButton = ({
           onClick={handleClick}
           disabled={!canClaim}
           className={getButtonClass()}
-          aria-label={`Claim ${rewardAmount} karma points`}
+          aria-label={`Claim ${rewardAmount} points`}
         >
           {getButtonContent()}
         </Button>

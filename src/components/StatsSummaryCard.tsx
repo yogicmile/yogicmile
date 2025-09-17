@@ -40,7 +40,7 @@ const StatsSummaryCard: React.FC<StatsSummaryCardProps> = ({
     if (redemptionRate >= 90) {
       return "Exceptional mindful consistency! 🌟";
     } else if (redemptionRate >= 70) {
-      return "Great dedication to your practice! 🧘‍♀️";
+      return "Great dedication to your fitness! 💪";
     } else if (redemptionRate >= 50) {
       return "Keep up the mindful momentum! 🚶‍♀️";
     } else {

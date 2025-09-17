@@ -379,7 +379,7 @@ export const weeklyInsights = {
     "Every step is a prayer in motion 🙏",
     "Walk your way to inner peace 🕊️",
     "The journey of a thousand miles begins with one step 👣",
-    "Mindful walking, mindful living 🧘‍♂️"
+    "Focused walking, focused living 💪"
   ],
   challenges: [
     {

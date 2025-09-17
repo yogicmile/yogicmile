@@ -407,9 +407,9 @@ const PhaseJourney: React.FC = () => {
 
         {/* Motivational Footer */}
         <div className="text-center py-8 space-y-4">
-          <div className="text-4xl mb-3">🧘‍♀️</div>
+          <div className="text-4xl mb-3">💪</div>
           <blockquote className="text-base font-medium text-foreground italic leading-relaxed max-w-sm mx-auto">
-            "The journey of a thousand miles begins with a single step. Every phase brings you closer to enlightenment."
+            "The journey of a thousand miles begins with a single step. Every phase brings you closer to your goals."
           </blockquote>
           <div className="bg-golden-accent/10 rounded-xl p-4 border border-golden-accent/20">
             <p className="text-sm text-golden-accent font-medium">

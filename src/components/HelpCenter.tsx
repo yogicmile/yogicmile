@@ -94,7 +94,7 @@ export const HelpCenter: React.FC = () => {
         </div>
         <h1 className="text-2xl font-bold text-foreground mb-2">How can we help you?</h1>
         <p className="text-muted-foreground">
-          Find answers, get support, and learn more about Yogic Mile
+          Find answers, get support, and learn more about Step Rewards
         </p>
       </div>
 

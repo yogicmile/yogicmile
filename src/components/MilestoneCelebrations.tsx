@@ -56,7 +56,7 @@ export const MilestoneCelebrations: React.FC<MilestoneCelebrationsProps> = ({
       const quotes = {
         tier_upgrade: "As you ascend, your light illuminates the path for others 🌟",
         rate_increase: "Growth is the reward for consistent dedication 📈",
-        milestone: "Each milestone is a sacred marker on your journey 🛤️",
+        milestone: "Each milestone is an important marker on your journey 🛤️",
         streak: "Your commitment burns like an eternal flame 🔥",
         daily_goal: "Today's achievement becomes tomorrow's foundation 🏗️"
       };
@@ -82,7 +82,7 @@ export const MilestoneCelebrations: React.FC<MilestoneCelebrationsProps> = ({
   }, [event, onDismiss]);
 
   const handleShare = () => {
-    const shareText = `🎉 ${event?.message} on my Yogic Mile journey! Walking mindfully towards enlightenment. #YogicMile #MindfulWalking`;
+    const shareText = `🎉 ${event?.message} on my Step Rewards journey! Walking towards fitness goals. #StepRewards #WalkingFitness`;
     
     if (navigator.share) {
       navigator.share({

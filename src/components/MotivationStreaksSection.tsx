@@ -155,7 +155,7 @@ export const MotivationStreaksSection = ({
         <div className="relative z-10">
           {/* Header */}
           <div className="flex items-center justify-center mb-4">
-            <div className="text-2xl mr-2">🧘‍♀️</div>
+            <div className="text-2xl mr-2">💪</div>
             <h3 className="text-lg font-bold text-soft-lavender">Daily Inspiration</h3>
           </div>
 

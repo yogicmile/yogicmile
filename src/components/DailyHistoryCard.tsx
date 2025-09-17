@@ -103,7 +103,7 @@ const DailyHistoryCard: React.FC<DailyHistoryCardProps> = ({ entry }) => {
     
     if (navigator.share) {
       navigator.share({
-        title: 'My Yogic Mile Achievement',
+        title: 'My Step Rewards Achievement',
         text: shareText,
       });
     } else {

@@ -54,7 +54,7 @@ export const EnhancedNavigationCards = () => {
     {
       id: 'spin-wheel',
       title: 'Lucky Spin',
-      subtitle: 'Dharma Wheel',
+      subtitle: 'Spin & Win',
       icon: '🎡',
       yogicIcon: '☸️',
       badge: 1,
@@ -66,7 +66,7 @@ export const EnhancedNavigationCards = () => {
       title: 'My Wallet',
       subtitle: 'Mindful Money',
       icon: '💰',
-      yogicIcon: '🧘‍♂️💳',
+      yogicIcon: '💪💳',
       badge: mockData.wallet.mockData.pendingRedemptions > 0 ? mockData.wallet.mockData.pendingRedemptions : null,
       gradient: 'from-deep-teal/20 via-serene-blue/10 to-soft-lavender/20',
       description: 'Manage your earnings and transaction history'
@@ -202,9 +202,9 @@ export const EnhancedNavigationCards = () => {
 
       {/* Mindfulness Message */}
       <div className="text-center mt-6 p-4 bg-soft-lavender/10 rounded-2xl border border-soft-lavender/20">
-        <div className="text-2xl mb-2">🧘‍♀️</div>
+        <div className="text-2xl mb-2">⭐</div>
         <p className="text-sm text-muted-foreground italic">
-          "Every step on your journey is sacred. Walk with intention." 
+          "Every step on your journey matters. Walk with purpose." 
         </p>
       </div>
     </div>

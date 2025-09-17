@@ -24,13 +24,13 @@ const WelcomePage = () => {
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 flex flex-col items-center justify-center p-4">
-        {/* Yogic Mile Logo and Branding */}
+        {/* Step Rewards Logo and Branding */}
         <div className="text-center mb-8">
           <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-premium">
-            <div className="text-4xl">🧘‍♀️</div>
+            <div className="text-4xl">👟</div>
           </div>
-          <h1 className="text-4xl font-bold text-foreground mb-2">Yogic Mile</h1>
-          <p className="text-xl text-primary font-semibold">Walk. Earn. Evolve.</p>
+          <h1 className="text-4xl font-bold text-foreground mb-2">Step Rewards</h1>
+          <p className="text-xl text-primary font-semibold">Walk. Earn. Achieve.</p>
         </div>
 
         {/* Value Proposition Cards */}
@@ -44,7 +44,7 @@ const WelcomePage = () => {
             <p className="text-sm font-medium">Earn Rewards</p>
           </Card>
           <Card className="p-4 text-center hover:scale-105 transition-transform">
-            <div className="text-2xl mb-2">🧘‍♀️</div>
+            <div className="text-2xl mb-2">💪</div>
             <p className="text-sm font-medium">Stay Healthy</p>
           </Card>
         </div>
@@ -95,8 +95,8 @@ const WelcomePage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Welcome to Yogic Mile</h1>
-          <p className="text-muted-foreground mb-4">Walk. Earn. Evolve.</p>
+          <h1 className="text-2xl font-bold mb-4">Welcome to Step Rewards</h1>
+          <p className="text-muted-foreground mb-4">Walk. Earn. Achieve.</p>
           <Button onClick={() => navigate('/signup')}>Get Started</Button>
         </div>
       </div>

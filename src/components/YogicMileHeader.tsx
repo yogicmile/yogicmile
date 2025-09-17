@@ -84,12 +84,12 @@ export const YogicMileHeader = ({
             "font-bold bg-gradient-to-r from-tier-1-paisa via-tier-2-rupaya to-tier-1-paisa bg-clip-text text-transparent font-display",
             currentSize.logo
           )}>
-            Yogic Mile
+            Step Rewards
           </h1>
           
           <div className="relative">
             <div className="text-2xl animate-bounce" style={{ animationDelay: '0.5s' }}>
-              🧘‍♀️
+              👟
             </div>
           </div>
         </div>
@@ -99,7 +99,7 @@ export const YogicMileHeader = ({
             "text-muted-foreground font-medium tracking-wide animate-fade-in",
             currentSize.tagline
           )}>
-            Walk. Earn. Evolve.
+            Walk. Earn. Achieve.
           </div>
         )}
       </div>

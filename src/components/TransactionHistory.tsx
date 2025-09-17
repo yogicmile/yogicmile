@@ -76,7 +76,7 @@ export const TransactionHistory = ({ transactions }: TransactionHistoryProps) =>
       <div className="space-y-3">
         {transactions.length === 0 ? (
           <div className="text-center py-8">
-            <div className="text-6xl mb-4">🧘‍♀️</div>
+            <div className="text-6xl mb-4">💰</div>
             <h3 className="font-semibold mb-2">No transactions yet</h3>
             <p className="text-muted-foreground text-sm">
               Start walking to earn your first coins for redemption

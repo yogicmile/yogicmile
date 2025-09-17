@@ -154,7 +154,7 @@ export const LevelUpAnimations: React.FC<LevelUpAnimationProps> = ({
             </h2>
             <div className="bg-sage-green/20 rounded-xl p-4">
               <p className="text-sage-green font-medium">
-                Peaceful progress on your mindful journey 🧘‍♀️
+                Steady progress on your fitness journey 💪
               </p>
             </div>
           </div>
