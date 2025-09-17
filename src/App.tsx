@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -31,6 +32,8 @@ import { AdminSettings } from "./pages/admin/AdminSettings";
 import { HelpSupportPage } from "./pages/HelpSupportPage";
 import { AdminPerformance } from "./pages/admin/AdminPerformance";
 import { SpinWheelPage } from "./pages/SpinWheelPage";
+
+const LazySpinWheelPage = lazy(() => import("./pages/SpinWheelPage").then(m => ({ default: m.SpinWheelPage })));
 
 const queryClient = new QueryClient();
 
@@ -74,7 +77,7 @@ const App = () => (
                       <Route path="rewards" element={<RewardsPage />} />
                       <Route path="coins-history" element={<CoinsHistory />} />
                       <Route path="phase-journey" element={<PhaseJourney />} />
-                      <Route path="spin-wheel" element={<SpinWheelPage />} />
+                      <Route path="spin-wheel" element={<Suspense fallback={null}><LazySpinWheelPage /></Suspense>} />
                       <Route path="help" element={<HelpSupportPage />} />
                       <Route path="calculation-review" element={<CalculationReview />} />
                       <Route path="*" element={<NotFound />} />
