@@ -67,8 +67,16 @@ export const AdminPerformance: React.FC = () => {
         .limit(30);
 
       setCrashData((crashes || []).map(item => ({
-        ...item,
-        top_errors: Array.isArray(item.top_errors) ? item.top_errors : [],
+        date: item.date,
+        crash_count: item.crash_count,
+        affected_users: item.affected_users,
+        top_errors: Array.isArray(item.top_errors) 
+          ? item.top_errors.map((err: any) => 
+              typeof err === 'object' && err !== null && 'error' in err && 'count' in err
+                ? { error: String(err.error), count: Number(err.count) }
+                : { error: String(err), count: 1 }
+            )
+          : [],
         device_breakdown: typeof item.device_breakdown === 'object' ? item.device_breakdown as Record<string, number> : {},
         os_breakdown: typeof item.os_breakdown === 'object' ? item.os_breakdown as Record<string, number> : {}
       })));

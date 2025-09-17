@@ -30,6 +30,7 @@ import { AdminAnalytics } from "./pages/admin/AdminAnalytics";
 import { AdminSettings } from "./pages/admin/AdminSettings";
 import { HelpSupportPage } from "./pages/HelpSupportPage";
 import { AdminPerformance } from "./pages/admin/AdminPerformance";
+import { SpinWheelPage } from "./pages/SpinWheelPage";
 
 const queryClient = new QueryClient();
 
