@@ -24,7 +24,7 @@ export const ProfilePage = () => {
       icon: <Settings className="w-5 h-5" />,
       label: 'Settings',
       description: 'App preferences & notifications',
-      action: () => {}
+      action: () => navigate('/settings')
     },
     {
       icon: <Share2 className="w-5 h-5" />,
@@ -36,13 +36,13 @@ export const ProfilePage = () => {
       icon: <Trophy className="w-5 h-5" />,
       label: 'Achievements',
       description: 'View your milestones',
-      action: () => {}
+      action: () => navigate('/achievements')
     },
     {
       icon: <Target className="w-5 h-5" />,
       label: 'Goals',
       description: 'Set daily step targets',
-      action: () => {}
+      action: () => navigate('/goals')
     },
     {
       icon: <HelpCircle className="w-5 h-5" />,

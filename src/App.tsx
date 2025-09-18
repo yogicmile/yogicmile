@@ -29,7 +29,9 @@ import { AdminRewards } from "./pages/admin/AdminRewards";
 import { AdminModeration } from "./pages/admin/AdminModeration";
 import { AdminAnalytics } from "./pages/admin/AdminAnalytics";
 import { AdminSettings } from "./pages/admin/AdminSettings";
-import { HelpSupportPage } from "./pages/HelpSupportPage";
+import { SettingsPage } from "./pages/SettingsPage";
+import { AchievementsPage } from "./pages/AchievementsPage"; 
+import { GoalsPage } from "./pages/GoalsPage";
 import { AdminPerformance } from "./pages/admin/AdminPerformance";
 import { SpinWheelPage } from "./pages/SpinWheelPage";
 import { CommunityPage } from "./pages/CommunityPage";
@@ -82,7 +84,9 @@ const App = () => (
                       <Route path="coins-history" element={<CoinsHistory />} />
                       <Route path="phase-journey" element={<PhaseJourney />} />
                       <Route path="spin-wheel" element={<Suspense fallback={null}><LazySpinWheelPage /></Suspense>} />
-                      <Route path="help" element={<HelpSupportPage />} />
+                      <Route path="settings" element={<SettingsPage />} />
+                      <Route path="achievements" element={<AchievementsPage />} />
+                      <Route path="goals" element={<GoalsPage />} />
                       <Route path="calculation-review" element={<CalculationReview />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
