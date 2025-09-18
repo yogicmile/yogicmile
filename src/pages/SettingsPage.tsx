@@ -18,7 +18,11 @@ export function SettingsPage() {
   const { 
     preferences, 
     themeOptions,
-    updatePreferences,
+    savePreferences,
+    updateTheme,
+    updateLayout,
+    updateNotifications,
+    updateAccessibility,
     applyTheme,
     isLoading 
   } = useThemeCustomization();
@@ -33,11 +37,8 @@ export function SettingsPage() {
   });
 
   const handleThemeChange = async (themeName: string) => {
-    await updatePreferences({
-      themeSettings: {
-        ...preferences.themeSettings,
-        themeName: themeName as any
-      }
+    await updateTheme({
+      themeName: themeName as any
     });
     applyTheme();
   };
@@ -168,11 +169,8 @@ export function SettingsPage() {
                     id="compact-mode"
                     checked={preferences.layoutPreferences.compactMode}
                     onCheckedChange={(checked) => 
-                      updatePreferences({
-                        layoutPreferences: {
-                          ...preferences.layoutPreferences,
-                          compactMode: checked
-                        }
+        updateLayout({
+                        compactMode: checked
                       })
                     }
                   />
@@ -183,11 +181,8 @@ export function SettingsPage() {
                   <Select 
                     value={preferences.layoutPreferences.cardLayout}
                     onValueChange={(value) => 
-                      updatePreferences({
-                        layoutPreferences: {
-                          ...preferences.layoutPreferences,
-                          cardLayout: value as 'grid' | 'list'
-                        }
+        updateLayout({
+                        cardLayout: value as 'grid' | 'list'
                       })
                     }
                   >

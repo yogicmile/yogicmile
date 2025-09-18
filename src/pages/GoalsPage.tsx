@@ -41,7 +41,7 @@ export function GoalsPage() {
       type: 'daily',
       title: 'Daily Steps Goal',
       target: 10000,
-      current: dailyProgress.steps % 10000, // Mock current progress
+      current: dailyProgress.currentSteps % 10000, // Mock current progress
       unit: 'steps',
       isActive: true,
       reward: '50 bonus coins'
