@@ -1021,6 +1021,45 @@ export type Database = {
         }
         Relationships: []
       }
+      device_sessions: {
+        Row: {
+          created_at: string | null
+          device_fingerprint: string
+          expires_at: string | null
+          id: string
+          ip_address: unknown | null
+          is_active: boolean | null
+          last_activity: string | null
+          session_token: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_fingerprint: string
+          expires_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          last_activity?: string | null
+          session_token: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_fingerprint?: string
+          expires_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          last_activity?: string | null
+          session_token?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       device_trust_scores: {
         Row: {
           created_at: string
@@ -2023,8 +2062,11 @@ export type Database = {
           attempts: number
           blocked_until: string | null
           created_at: string
+          daily_attempts: number | null
+          daily_window_start: string | null
           id: string
           mobile_number: string
+          permanent_block: boolean | null
           updated_at: string
           window_start: string
         }
@@ -2032,8 +2074,11 @@ export type Database = {
           attempts?: number
           blocked_until?: string | null
           created_at?: string
+          daily_attempts?: number | null
+          daily_window_start?: string | null
           id?: string
           mobile_number: string
+          permanent_block?: boolean | null
           updated_at?: string
           window_start?: string
         }
@@ -2041,8 +2086,11 @@ export type Database = {
           attempts?: number
           blocked_until?: string | null
           created_at?: string
+          daily_attempts?: number | null
+          daily_window_start?: string | null
           id?: string
           mobile_number?: string
+          permanent_block?: boolean | null
           updated_at?: string
           window_start?: string
         }
@@ -3573,6 +3621,9 @@ export type Database = {
           privacy_setting: string | null
           profile_picture_url: string | null
           profile_visibility: string | null
+          show_activity_score: boolean | null
+          show_location: boolean | null
+          show_stats: boolean | null
           stats_visible: boolean | null
           total_steps: number | null
           updated_at: string | null
@@ -3596,6 +3647,9 @@ export type Database = {
           privacy_setting?: string | null
           profile_picture_url?: string | null
           profile_visibility?: string | null
+          show_activity_score?: boolean | null
+          show_location?: boolean | null
+          show_stats?: boolean | null
           stats_visible?: boolean | null
           total_steps?: number | null
           updated_at?: string | null
@@ -3619,9 +3673,36 @@ export type Database = {
           privacy_setting?: string | null
           profile_picture_url?: string | null
           profile_visibility?: string | null
+          show_activity_score?: boolean | null
+          show_location?: boolean | null
+          show_stats?: boolean | null
           stats_visible?: boolean | null
           total_steps?: number | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: []
@@ -3869,6 +3950,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_user_role: {
+        Args: { p_user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       get_user_subscription_status: {
         Args: { p_user_id: string }
         Returns: {
@@ -3883,6 +3968,13 @@ export type Database = {
         Args: { p_boost_type: string; p_user_id: string }
         Returns: boolean
       }
+      has_role: {
+        Args: {
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       hash_otp: {
         Args: { plain_otp: string }
         Returns: string
@@ -3894,6 +3986,17 @@ export type Database = {
           p_old_values?: Json
           p_record_id?: string
           p_table_name?: string
+        }
+        Returns: undefined
+      }
+      log_security_event: {
+        Args: {
+          p_details?: Json
+          p_event_type: string
+          p_ip_address?: unknown
+          p_severity?: string
+          p_user_agent?: string
+          p_user_id: string
         }
         Returns: undefined
       }
@@ -3916,6 +4019,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "user" | "admin" | "super_admin" | "moderator"
       billing_cycle: "monthly" | "yearly"
       payment_gateway: "stripe" | "razorpay"
       payment_status: "pending" | "succeeded" | "failed" | "refunded"
@@ -4051,6 +4155,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["user", "admin", "super_admin", "moderator"],
       billing_cycle: ["monthly", "yearly"],
       payment_gateway: ["stripe", "razorpay"],
       payment_status: ["pending", "succeeded", "failed", "refunded"],
