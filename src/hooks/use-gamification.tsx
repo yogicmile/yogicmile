@@ -32,17 +32,66 @@ export function useGamification() {
     return user;
   };
 
-  // Load all achievements
+  // Load all achievements (using community_achievements as template)
   const loadAchievements = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('achievements')
-        .select('*')
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      setAchievements((data || []) as Achievement[]);
+      // For now, create mock achievement templates since we don't have a proper achievements template table
+      const mockAchievements: Achievement[] = [
+        {
+          id: '1',
+          name: 'First Steps',
+          description: 'Take your very first steps with Yogic Mile',
+          category: 'step_milestones',
+          rarity: 'common',
+          unlock_criteria: { daily_steps: 1 },
+          icon_url: '🚶',
+          animation_type: 'glow',
+          coin_reward: 10,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: '2',
+          name: 'Thousand Steps',
+          description: 'Achieve 1,000 steps in one day',
+          category: 'step_milestones',
+          rarity: 'common',
+          unlock_criteria: { daily_steps: 1000 },
+          icon_url: '🎯',
+          animation_type: 'glow',
+          coin_reward: 50,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: '3',
+          name: 'Week Warrior',
+          description: 'Maintain a 7-day walking streak',
+          category: 'streak_champions',
+          rarity: 'uncommon',
+          unlock_criteria: { streak_days: 7 },
+          icon_url: '🔥',
+          animation_type: 'glow',
+          coin_reward: 150,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: '4',
+          name: 'Friend Finder',
+          description: 'Add your first friend',
+          category: 'community_heroes',
+          rarity: 'common',
+          unlock_criteria: { friends_count: 1 },
+          icon_url: '👥',
+          animation_type: 'glow',
+          coin_reward: 50,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ];
+      setAchievements(mockAchievements);
     } catch (error) {
       console.error('Error loading achievements:', error);
       toast({
@@ -55,23 +104,45 @@ export function useGamification() {
     }
   }, [toast]);
 
-  // Load user achievements
+  // Load user achievements (using existing community_achievements)
   const loadUserAchievements = useCallback(async () => {
     try {
       const user = await getCurrentUser();
       if (!user) return;
 
       const { data, error } = await supabase
-        .from('user_achievements')
-        .select(`
-          *,
-          achievement:achievements(*)
-        `)
+        .from('community_achievements')
+        .select('*')
         .eq('user_id', user.id)
-        .order('unlocked_date', { ascending: false });
+        .order('unlocked_at', { ascending: false });
 
       if (error) throw error;
-      setUserAchievements((data || []) as UserAchievement[]);
+      
+      // Transform the data to match our UserAchievement type
+      const transformedData: UserAchievement[] = (data || []).map(item => ({
+        id: item.id,
+        user_id: item.user_id,
+        achievement_id: item.id, // Using same ID for now
+        unlocked_date: item.unlocked_at,
+        progress_percentage: 100, // Assume completed if in this table
+        shared_count: 0,
+        celebration_viewed: false,
+        achievement: {
+          id: item.id,
+          name: item.achievement_name,
+          description: item.description,
+          category: item.achievement_type,
+          rarity: 'common' as const,
+          unlock_criteria: {},
+          icon_url: item.badge_icon,
+          animation_type: 'glow',
+          coin_reward: item.coins_awarded || 0,
+          created_at: item.unlocked_at,
+          updated_at: item.unlocked_at
+        }
+      }));
+      
+      setUserAchievements(transformedData);
     } catch (error) {
       console.error('Error loading user achievements:', error);
     }
@@ -245,13 +316,21 @@ export function useGamification() {
 
       if (error) throw error;
 
-      // Update participant count
-      const { error: updateError } = await supabase
+      // Update participant count manually
+      const { data: challengeData } = await supabase
         .from('seasonal_challenges')
-        .update({ participant_count: supabase.rpc('increment', { value: 1 }) })
-        .eq('id', challengeId);
+        .select('participant_count')
+        .eq('id', challengeId)
+        .single();
 
-      if (updateError) console.warn('Failed to update participant count:', updateError);
+      if (challengeData) {
+        const { error: updateError } = await supabase
+          .from('seasonal_challenges')
+          .update({ participant_count: (challengeData.participant_count || 0) + 1 })
+          .eq('id', challengeId);
+
+        if (updateError) console.warn('Failed to update participant count:', updateError);
+      }
 
       await loadUserChallengeParticipation();
       await loadSeasonalChallenges();

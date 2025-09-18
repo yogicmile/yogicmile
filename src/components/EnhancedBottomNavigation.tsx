@@ -5,18 +5,20 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface EnhancedBottomNavigationProps {
-  activeTab: 'dashboard' | 'wallet' | 'rewards' | 'community' | 'profile';
-  onTabChange: (tab: 'dashboard' | 'wallet' | 'rewards' | 'community' | 'profile') => void;
+  activeTab: 'dashboard' | 'wallet' | 'rewards' | 'challenges' | 'community' | 'profile';
+  onTabChange: (tab: 'dashboard' | 'wallet' | 'rewards' | 'challenges' | 'community' | 'profile') => void;
   notificationCounts?: {
     dashboard?: number;
     wallet?: number;
     rewards?: number;
+    challenges?: number;
+    community?: number;
     profile?: number;
   };
   walletBalance?: number;
 }
 
-type TabId = 'dashboard' | 'wallet' | 'rewards' | 'community' | 'profile';
+type TabId = 'dashboard' | 'wallet' | 'rewards' | 'challenges' | 'community' | 'profile';
 
 export const EnhancedBottomNavigation = ({ 
   activeTab, 
@@ -59,13 +61,13 @@ export const EnhancedBottomNavigation = ({
       route: '/wallet'
     },
     {
-      id: 'rewards' as TabId,
-      label: 'Rewards',
+      id: 'challenges' as TabId,
+      label: 'Challenges',
       icon: Gift,
-      emoji: '🎁',
+      emoji: '🎯',
       gradient: 'from-sage-green to-tier-3-token',
-      badge: notificationCounts.rewards,
-      route: '/rewards'
+      badge: notificationCounts.challenges,
+      route: '/challenges'
     },
     {
       id: 'community' as TabId,
@@ -73,7 +75,7 @@ export const EnhancedBottomNavigation = ({
       icon: Users,
       emoji: '🌟',
       gradient: 'from-primary to-primary/70',
-      badge: 0,
+      badge: notificationCounts.community,
       route: '/community'
     },
     {
