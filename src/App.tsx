@@ -42,6 +42,7 @@ const LazySpinWheelPage = lazy(() => import("./pages/SpinWheelPage").then(m => (
 const LazyStepTrackingTestPage = lazy(() => import('./pages/StepTrackingTestPage'));
 const LazyPhaseTestingPage = lazy(() => import('./pages/PhaseTestingPage'));
 const LazyWalletTestPage = lazy(() => import('./pages/WalletTestPage').then(m => ({ default: m.WalletTestPage })));
+const LazyRewardsTestPage = lazy(() => import('./pages/RewardsTestPage').then(m => ({ default: m.RewardsTestPage })));
 
 const queryClient = new QueryClient();
 
@@ -96,6 +97,7 @@ const App = () => (
                       <Route path="step-tracking-test" element={<Suspense fallback={null}><LazyStepTrackingTestPage /></Suspense>} />
                       <Route path="phase-testing" element={<Suspense fallback={null}><LazyPhaseTestingPage /></Suspense>} />
                       <Route path="wallet-testing" element={<Suspense fallback={null}><LazyWalletTestPage /></Suspense>} />
+                      <Route path="rewards-testing" element={<Suspense fallback={null}><LazyRewardsTestPage /></Suspense>} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </AppLayout>
