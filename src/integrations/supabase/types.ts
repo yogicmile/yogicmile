@@ -178,6 +178,33 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_feed: {
+        Row: {
+          activity_data: Json | null
+          activity_type: string
+          created_at: string | null
+          id: string
+          user_id: string
+          visibility: string | null
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_type: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+          visibility?: string | null
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_type?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+          visibility?: string | null
+        }
+        Relationships: []
+      }
       ad_logs: {
         Row: {
           ad_id: string
@@ -477,6 +504,182 @@ export type Database = {
           last_updated?: string
           size_bytes?: number | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      challenge_participants: {
+        Row: {
+          challenge_id: string
+          current_contribution: number | null
+          id: string
+          is_admin: boolean | null
+          joined_date: string | null
+          rank_position: number | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          current_contribution?: number | null
+          id?: string
+          is_admin?: boolean | null
+          joined_date?: string | null
+          rank_position?: number | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          current_contribution?: number | null
+          id?: string
+          is_admin?: boolean | null
+          joined_date?: string | null
+          rank_position?: number | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_participants_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          end_date: string
+          goal_type: string
+          group_chat_id: string | null
+          id: string
+          participant_limit: number | null
+          privacy_setting: string | null
+          start_date: string
+          status: string | null
+          target_value: number
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          end_date: string
+          goal_type: string
+          group_chat_id?: string | null
+          id?: string
+          participant_limit?: number | null
+          privacy_setting?: string | null
+          start_date: string
+          status?: string | null
+          target_value: number
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          end_date?: string
+          goal_type?: string
+          group_chat_id?: string | null
+          id?: string
+          participant_limit?: number | null
+          privacy_setting?: string | null
+          start_date?: string
+          status?: string | null
+          target_value?: number
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      community_achievements: {
+        Row: {
+          achievement_name: string
+          achievement_type: string
+          badge_icon: string
+          coins_awarded: number | null
+          description: string
+          id: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_name: string
+          achievement_type: string
+          badge_icon: string
+          coins_awarded?: number | null
+          description: string
+          id?: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_name?: string
+          achievement_type?: string
+          badge_icon?: string
+          coins_awarded?: number | null
+          description?: string
+          id?: string
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      content_bookmarks: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      content_votes: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string | null
+          id: string
+          user_id: string
+          vote_type: string
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+          vote_type: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+          vote_type?: string
         }
         Relationships: []
       }
@@ -844,6 +1047,114 @@ export type Database = {
         }
         Relationships: []
       }
+      forum_comments: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string | null
+          downvotes: number | null
+          id: string
+          parent_comment_id: string | null
+          post_id: string
+          status: string | null
+          updated_at: string | null
+          upvotes: number | null
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string | null
+          downvotes?: number | null
+          id?: string
+          parent_comment_id?: string | null
+          post_id: string
+          status?: string | null
+          updated_at?: string | null
+          upvotes?: number | null
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string | null
+          downvotes?: number | null
+          id?: string
+          parent_comment_id?: string | null
+          post_id?: string
+          status?: string | null
+          updated_at?: string | null
+          upvotes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "forum_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "forum_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_posts: {
+        Row: {
+          author_id: string
+          category: string
+          comments_count: number | null
+          content: string
+          created_at: string | null
+          downvotes: number | null
+          id: string
+          image_urls: string[] | null
+          is_featured: boolean | null
+          is_pinned: boolean | null
+          status: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          upvotes: number | null
+        }
+        Insert: {
+          author_id: string
+          category: string
+          comments_count?: number | null
+          content: string
+          created_at?: string | null
+          downvotes?: number | null
+          id?: string
+          image_urls?: string[] | null
+          is_featured?: boolean | null
+          is_pinned?: boolean | null
+          status?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          upvotes?: number | null
+        }
+        Update: {
+          author_id?: string
+          category?: string
+          comments_count?: number | null
+          content?: string
+          created_at?: string | null
+          downvotes?: number | null
+          id?: string
+          image_urls?: string[] | null
+          is_featured?: boolean | null
+          is_pinned?: boolean | null
+          status?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          upvotes?: number | null
+        }
+        Relationships: []
+      }
       fraud_detection: {
         Row: {
           admin_reviewed: boolean | null
@@ -889,6 +1200,36 @@ export type Database = {
         }
         Relationships: []
       }
+      friendships: {
+        Row: {
+          accepted_at: string | null
+          addressee_id: string
+          created_at: string | null
+          id: string
+          request_message: string | null
+          requester_id: string
+          status: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          addressee_id: string
+          created_at?: string | null
+          id?: string
+          request_message?: string | null
+          requester_id: string
+          status?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          addressee_id?: string
+          created_at?: string | null
+          id?: string
+          request_message?: string | null
+          requester_id?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
       geographic_analytics: {
         Row: {
           ad_revenue: number | null
@@ -928,6 +1269,48 @@ export type Database = {
           total_earnings_paisa?: number | null
           total_steps?: number | null
           user_count?: number | null
+        }
+        Relationships: []
+      }
+      leaderboards: {
+        Row: {
+          category: string
+          coins_earned: number | null
+          created_at: string | null
+          id: string
+          location_filter: string | null
+          period: string
+          rank_position: number
+          steps: number | null
+          updated_at: string | null
+          user_id: string
+          weeks_active: number | null
+        }
+        Insert: {
+          category: string
+          coins_earned?: number | null
+          created_at?: string | null
+          id?: string
+          location_filter?: string | null
+          period: string
+          rank_position: number
+          steps?: number | null
+          updated_at?: string | null
+          user_id: string
+          weeks_active?: number | null
+        }
+        Update: {
+          category?: string
+          coins_earned?: number | null
+          created_at?: string | null
+          id?: string
+          location_filter?: string | null
+          period?: string
+          rank_position?: number
+          steps?: number | null
+          updated_at?: string | null
+          user_id?: string
+          weeks_active?: number | null
         }
         Relationships: []
       }
@@ -1018,6 +1401,95 @@ export type Database = {
           title?: string
           type?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          created_at: string | null
+          group_id: string | null
+          id: string
+          message_text: string
+          message_type: string | null
+          read_status: boolean | null
+          recipient_id: string | null
+          reply_to_id: string | null
+          sender_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          group_id?: string | null
+          id?: string
+          message_text: string
+          message_type?: string | null
+          read_status?: boolean | null
+          recipient_id?: string | null
+          reply_to_id?: string | null
+          sender_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          group_id?: string | null
+          id?: string
+          message_text?: string
+          message_type?: string | null
+          read_status?: boolean | null
+          recipient_id?: string | null
+          reply_to_id?: string | null
+          sender_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      moderation_reports: {
+        Row: {
+          admin_action: string | null
+          content_type: string
+          created_at: string | null
+          id: string
+          report_details: string | null
+          report_reason: string
+          reported_content_id: string
+          reporter_id: string
+          resolved_at: string | null
+          reviewed_by: string | null
+          status: string | null
+        }
+        Insert: {
+          admin_action?: string | null
+          content_type: string
+          created_at?: string | null
+          id?: string
+          report_details?: string | null
+          report_reason: string
+          reported_content_id: string
+          reporter_id: string
+          resolved_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+        }
+        Update: {
+          admin_action?: string | null
+          content_type?: string
+          created_at?: string | null
+          id?: string
+          report_details?: string | null
+          report_reason?: string
+          reported_content_id?: string
+          reporter_id?: string
+          resolved_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
         }
         Relationships: []
       }
@@ -2345,6 +2817,57 @@ export type Database = {
           phase_start_date?: string
           total_lifetime_steps?: number
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          activity_visible: boolean | null
+          bio: string | null
+          community_activity_score: number | null
+          created_at: string | null
+          display_name: string
+          id: string
+          last_active: string | null
+          location_city: string | null
+          location_state: string | null
+          profile_picture_url: string | null
+          profile_visibility: string | null
+          stats_visible: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_visible?: boolean | null
+          bio?: string | null
+          community_activity_score?: number | null
+          created_at?: string | null
+          display_name: string
+          id?: string
+          last_active?: string | null
+          location_city?: string | null
+          location_state?: string | null
+          profile_picture_url?: string | null
+          profile_visibility?: string | null
+          stats_visible?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_visible?: boolean | null
+          bio?: string | null
+          community_activity_score?: number | null
+          created_at?: string | null
+          display_name?: string
+          id?: string
+          last_active?: string | null
+          location_city?: string | null
+          location_state?: string | null
+          profile_picture_url?: string | null
+          profile_visibility?: string | null
+          stats_visible?: boolean | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
