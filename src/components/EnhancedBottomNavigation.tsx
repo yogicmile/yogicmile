@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Home, Wallet, Gift, User, TrendingUp } from 'lucide-react';
+import { Home, Wallet, Gift, User, Users } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface EnhancedBottomNavigationProps {
-  activeTab: 'dashboard' | 'wallet' | 'rewards' | 'profile';
-  onTabChange: (tab: 'dashboard' | 'wallet' | 'rewards' | 'profile') => void;
+  activeTab: 'dashboard' | 'wallet' | 'rewards' | 'community' | 'profile';
+  onTabChange: (tab: 'dashboard' | 'wallet' | 'rewards' | 'community' | 'profile') => void;
   notificationCounts?: {
     dashboard?: number;
     wallet?: number;
@@ -16,7 +16,7 @@ interface EnhancedBottomNavigationProps {
   walletBalance?: number;
 }
 
-type TabId = 'dashboard' | 'wallet' | 'rewards' | 'profile';
+type TabId = 'dashboard' | 'wallet' | 'rewards' | 'community' | 'profile';
 
 export const EnhancedBottomNavigation = ({ 
   activeTab, 
@@ -42,7 +42,7 @@ export const EnhancedBottomNavigation = ({
   const tabs = [
     {
       id: 'dashboard' as TabId,
-      label: 'Dashboard',
+      label: 'Home',
       icon: Home,
       emoji: '🏠',
       gradient: 'from-serene-blue to-deep-teal',
@@ -66,6 +66,15 @@ export const EnhancedBottomNavigation = ({
       gradient: 'from-sage-green to-tier-3-token',
       badge: notificationCounts.rewards,
       route: '/rewards'
+    },
+    {
+      id: 'community' as TabId,
+      label: 'Community',
+      icon: Users,
+      emoji: '🌟',
+      gradient: 'from-primary to-primary/70',
+      badge: 0,
+      route: '/community'
     },
     {
       id: 'profile' as TabId,

@@ -41,9 +41,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
       case 'wallet':
         navigate('/wallet');
         break;
-      case 'rewards':
-        navigate('/rewards');
-        break;
+        case 'community':
+          navigate('/community');
+          break;
       case 'profile':
         navigate('/profile');
         break;
