@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCommunity } from '@/hooks/use-community';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { FORUM_CATEGORIES, type ForumCategory } from '@/types/community';
 import type { ForumPost, ForumComment } from '@/types/community';
@@ -24,6 +25,7 @@ export const CommunityForums = () => {
   const [selectedPost, setSelectedPost] = useState<ForumPost | null>(null);
   const [comments, setComments] = useState<ForumComment[]>([]);
   const { userProfile } = useCommunity();
+  const { user, isGuest } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -80,7 +82,14 @@ export const CommunityForums = () => {
   };
 
   const handleCreatePost = async (formData: FormData) => {
-    if (!userProfile) return;
+    if (!userProfile || !user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create posts",
+        variant: "destructive"
+      });
+      return;
+    }
 
     try {
       const postData = {
@@ -115,7 +124,14 @@ export const CommunityForums = () => {
   };
 
   const handleVote = async (postId: string, voteType: 'upvote' | 'downvote') => {
-    if (!userProfile) return;
+    if (!userProfile || !user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to vote on posts",
+        variant: "destructive"
+      });
+      return;
+    }
 
     try {
       // Check if user already voted
@@ -172,8 +188,27 @@ export const CommunityForums = () => {
 
   return (
     <div className="space-y-6">
-      {/* Forum Header */}
-      <div className="flex items-center justify-between">
+      {/* Authentication Check */}
+      {(isGuest || !user) && (
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="p-6 text-center">
+            <MessageSquare className="w-16 h-16 text-primary mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Join the Community</h3>
+            <p className="text-muted-foreground mb-4">
+              Sign in to participate in community forums, create posts, and engage with other members.
+            </p>
+            <Button onClick={() => window.location.href = '/login'}>
+              Sign In to Continue
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Forum Content - Only show if authenticated */}
+      {!isGuest && user && (
+        <>
+          {/* Forum Header */}
+          <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Community Forums</h2>
           <p className="text-muted-foreground">Share knowledge, experiences, and connect with fellow walkers</p>
@@ -181,7 +216,10 @@ export const CommunityForums = () => {
         
         <Dialog open={showCreatePost} onOpenChange={setShowCreatePost}>
           <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
+            <Button 
+              className="flex items-center gap-2"
+              disabled={isGuest || !user}
+            >
               <Plus className="w-4 h-4" />
               New Post
             </Button>
@@ -452,6 +490,8 @@ export const CommunityForums = () => {
           ))
         )}
       </div>
+        </>
+      )}
     </div>
   );
 };
