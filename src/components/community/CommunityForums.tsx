@@ -35,10 +35,7 @@ export const CommunityForums = () => {
     try {
       let query = supabase
         .from('forum_posts')
-        .select(`
-          *,
-          author_profile:user_profiles!forum_posts_author_id_fkey(*)
-        `)
+        .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false });
 
@@ -46,10 +43,30 @@ export const CommunityForums = () => {
         query = query.eq('category', selectedCategory);
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
+      const { data: postsData, error: postsError } = await query;
+      if (postsError) throw postsError;
 
-      setPosts((data || []) as any);
+      // Get unique author IDs
+      const authorIds = [...new Set(postsData?.map(post => post.author_id) || [])];
+      
+      // Fetch author profiles
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('user_profiles')
+        .select('user_id, display_name, profile_picture_url')
+        .in('user_id', authorIds);
+      
+      if (profilesError) throw profilesError;
+
+      // Create a map for quick profile lookup
+      const profilesMap = new Map(profilesData?.map(profile => [profile.user_id, profile]) || []);
+
+      // Combine posts with author profiles
+      const postsWithProfiles = postsData?.map(post => ({
+        ...post,
+        author_profile: profilesMap.get(post.author_id)
+      })) || [];
+
+      setPosts(postsWithProfiles as any);
     } catch (error) {
       console.error('Error loading posts:', error);
       toast({
