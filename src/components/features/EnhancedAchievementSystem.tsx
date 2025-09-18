@@ -413,7 +413,7 @@ export const EnhancedAchievementSystem: React.FC<EnhancedAchievementSystemProps>
                         ) : (
                           <div className="text-center">
                             <p className="text-sm text-muted-foreground">
-                              Keep going! You need {(Object.values(achievement.requirement)[0] - achievement.currentProgress).toLocaleString()} more to unlock this achievement.
+                              Keep going! You need {(Number(Object.values(achievement.requirement)[0]) - achievement.currentProgress).toLocaleString()} more to unlock this achievement.
                             </p>
                           </div>
                         )}

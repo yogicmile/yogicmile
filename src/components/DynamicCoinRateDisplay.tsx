@@ -10,7 +10,7 @@ export function DynamicCoinRateDisplay() {
     dailySteps, 
     calculateBaseEarnings,
     isDailyCapExceeded,
-    getDailyCapMessage 
+    getUnlimitedStepsMessage 
   } = useCoinRateSystem();
 
   const todaysEarnings = calculateBaseEarnings(dailySteps);
