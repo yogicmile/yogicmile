@@ -103,6 +103,48 @@ export type Database = {
         }
         Relationships: []
       }
+      account_deletion_requests: {
+        Row: {
+          admin_approval: boolean | null
+          admin_user_id: string | null
+          completion_date: string | null
+          created_at: string
+          deletion_type: string
+          grace_period_end: string
+          id: string
+          reason: string | null
+          request_date: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          admin_approval?: boolean | null
+          admin_user_id?: string | null
+          completion_date?: string | null
+          created_at?: string
+          deletion_type?: string
+          grace_period_end?: string
+          id?: string
+          reason?: string | null
+          request_date?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          admin_approval?: boolean | null
+          admin_user_id?: string | null
+          completion_date?: string | null
+          created_at?: string
+          deletion_type?: string
+          grace_period_end?: string
+          id?: string
+          reason?: string | null
+          request_date?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       achievements: {
         Row: {
           achievement_name: string
@@ -650,6 +692,84 @@ export type Database = {
         }
         Relationships: []
       }
+      data_export_requests: {
+        Row: {
+          created_at: string
+          download_token: string | null
+          downloaded_at: string | null
+          expires_at: string | null
+          export_type: string
+          file_path: string | null
+          id: string
+          ip_address: unknown | null
+          request_timestamp: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          download_token?: string | null
+          downloaded_at?: string | null
+          expires_at?: string | null
+          export_type?: string
+          file_path?: string | null
+          id?: string
+          ip_address?: unknown | null
+          request_timestamp?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          download_token?: string | null
+          downloaded_at?: string | null
+          expires_at?: string | null
+          export_type?: string
+          file_path?: string | null
+          id?: string
+          ip_address?: unknown | null
+          request_timestamp?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      device_trust_scores: {
+        Row: {
+          created_at: string
+          device_fingerprint: string
+          device_info: Json
+          id: string
+          is_trusted: boolean | null
+          last_seen: string
+          risk_factors: Json | null
+          trust_score: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_fingerprint: string
+          device_info?: Json
+          id?: string
+          is_trusted?: boolean | null
+          last_seen?: string
+          risk_factors?: Json | null
+          trust_score?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_fingerprint?: string
+          device_info?: Json
+          id?: string
+          is_trusted?: boolean | null
+          last_seen?: string
+          risk_factors?: Json | null
+          trust_score?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       faq_votes: {
         Row: {
           created_at: string
@@ -721,6 +841,51 @@ export type Database = {
           unhelpful_votes?: number | null
           updated_at?: string
           views_count?: number | null
+        }
+        Relationships: []
+      }
+      fraud_detection: {
+        Row: {
+          admin_reviewed: boolean | null
+          admin_user_id: string | null
+          auto_action_taken: string | null
+          created_at: string
+          detection_data: Json
+          detection_timestamp: string
+          fraud_type: string
+          id: string
+          resolution_notes: string | null
+          resolution_status: string | null
+          severity_level: string
+          user_id: string
+        }
+        Insert: {
+          admin_reviewed?: boolean | null
+          admin_user_id?: string | null
+          auto_action_taken?: string | null
+          created_at?: string
+          detection_data?: Json
+          detection_timestamp?: string
+          fraud_type: string
+          id?: string
+          resolution_notes?: string | null
+          resolution_status?: string | null
+          severity_level?: string
+          user_id: string
+        }
+        Update: {
+          admin_reviewed?: boolean | null
+          admin_user_id?: string | null
+          auto_action_taken?: string | null
+          created_at?: string
+          detection_data?: Json
+          detection_timestamp?: string
+          fraud_type?: string
+          id?: string
+          resolution_notes?: string | null
+          resolution_status?: string | null
+          severity_level?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1184,6 +1349,48 @@ export type Database = {
         }
         Relationships: []
       }
+      privacy_settings: {
+        Row: {
+          analytics_tracking: boolean | null
+          created_at: string
+          data_collection: boolean | null
+          id: string
+          location_tracking: boolean | null
+          login_notifications: boolean | null
+          marketing_emails: boolean | null
+          profile_visibility: string
+          security_alerts: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analytics_tracking?: boolean | null
+          created_at?: string
+          data_collection?: boolean | null
+          id?: string
+          location_tracking?: boolean | null
+          login_notifications?: boolean | null
+          marketing_emails?: boolean | null
+          profile_visibility?: string
+          security_alerts?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analytics_tracking?: boolean | null
+          created_at?: string
+          data_collection?: boolean | null
+          id?: string
+          location_tracking?: boolean | null
+          login_notifications?: boolean | null
+          marketing_emails?: boolean | null
+          profile_visibility?: string
+          security_alerts?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -1409,6 +1616,54 @@ export type Database = {
           name?: string
           required_paisa?: number
           type?: Database["public"]["Enums"]["reward_type"]
+        }
+        Relationships: []
+      }
+      security_audit_log: {
+        Row: {
+          action_taken: string | null
+          additional_data: Json | null
+          admin_id: string | null
+          created_at: string
+          device_info: Json | null
+          event_id: string
+          event_timestamp: string
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          result_status: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_taken?: string | null
+          additional_data?: Json | null
+          admin_id?: string | null
+          created_at?: string
+          device_info?: Json | null
+          event_id: string
+          event_timestamp?: string
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          result_status?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_taken?: string | null
+          additional_data?: Json | null
+          admin_id?: string | null
+          created_at?: string
+          device_info?: Json | null
+          event_id?: string
+          event_timestamp?: string
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          result_status?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1929,6 +2184,45 @@ export type Database = {
           timestamp?: string
           user_agent?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_consent: {
+        Row: {
+          consent_type: string
+          consent_version: string
+          created_at: string
+          granted: boolean
+          granted_at: string
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+          user_id: string
+          withdrawn_at: string | null
+        }
+        Insert: {
+          consent_type: string
+          consent_version?: string
+          created_at?: string
+          granted?: boolean
+          granted_at?: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id: string
+          withdrawn_at?: string | null
+        }
+        Update: {
+          consent_type?: string
+          consent_version?: string
+          created_at?: string
+          granted?: boolean
+          granted_at?: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string
+          withdrawn_at?: string | null
         }
         Relationships: []
       }
