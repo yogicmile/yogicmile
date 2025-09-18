@@ -32,6 +32,7 @@ import { AdminSettings } from "./pages/admin/AdminSettings";
 import { HelpSupportPage } from "./pages/HelpSupportPage";
 import { AdminPerformance } from "./pages/admin/AdminPerformance";
 import { SpinWheelPage } from "./pages/SpinWheelPage";
+import { CommunityPage } from "./pages/CommunityPage";
 
 const LazySpinWheelPage = lazy(() => import("./pages/SpinWheelPage").then(m => ({ default: m.SpinWheelPage })));
 
@@ -75,6 +76,7 @@ const App = () => (
                       <Route path="profile" element={<ProfilePage />} />
                       <Route path="wallet" element={<WalletPage />} />
                       <Route path="rewards" element={<RewardsPage />} />
+                      <Route path="community" element={<CommunityPage />} />
                       <Route path="coins-history" element={<CoinsHistory />} />
                       <Route path="phase-journey" element={<PhaseJourney />} />
                       <Route path="spin-wheel" element={<Suspense fallback={null}><LazySpinWheelPage /></Suspense>} />
