@@ -111,10 +111,12 @@ export const useCoinRateSystem = () => {
     };
   }, [currentTier, currentTierData, currentSteps, currentStreak]);
 
-  // Calculate base earnings for given steps - UNLIMITED STEPS FOR EVERYONE! 
+  // Calculate base earnings for given steps with daily cap of 12,000
   const calculateBaseEarnings = useCallback((steps: number) => {
-    // No daily cap - unlimited steps for all users completely FREE!
-    const cappedSteps = steps;
+    // Daily cap of 12,000 steps
+    const DAILY_STEP_LIMIT = 12000;
+    const cappedSteps = Math.min(steps, DAILY_STEP_LIMIT);
+    const wasCapExceeded = steps > DAILY_STEP_LIMIT;
     
     // Calculate units (every 25 steps = 1 unit)
     const units = Math.floor(cappedSteps / 25);
@@ -127,7 +129,7 @@ export const useCoinRateSystem = () => {
       units,
       paisaEarned,
       rupeesEarned: paisaEarned / 100,
-      wasCapExceeded: false // No cap anymore!
+      wasCapExceeded
     };
   }, [currentTierData.rate]);
 
@@ -298,14 +300,14 @@ export const useCoinRateSystem = () => {
     checkStreakMilestone();
   }, [checkDailyGoal, checkStreakMilestone]);
 
-  // No daily cap anymore - unlimited steps for everyone!
+  // Daily cap of 12,000 steps
   const isDailyCapExceeded = useCallback((steps: number) => {
-    return false; // No cap - walk as much as you want!
+    return steps > 12000;
   }, []);
 
-  // Get motivational message about unlimited steps
-  const getUnlimitedStepsMessage = useCallback(() => {
-    return "🎉 NO DAILY LIMITS! Walk unlimited steps and earn unlimited rewards - completely FREE for everyone!";
+  // Get motivational message about daily limit
+  const getDailyLimitMessage = useCallback(() => {
+    return "📝 Daily earning limit: 12,000 steps. Steps beyond this won't earn coins but are still great for health!";
   }, []);
 
   return {
@@ -324,9 +326,9 @@ export const useCoinRateSystem = () => {
     getDailyPotential,
     getTierProgress,
     
-    // No limits utilities
+    // Daily limit utilities
     isDailyCapExceeded,
-    getUnlimitedStepsMessage,
+    getDailyLimitMessage,
     
     // Celebrations
     celebrationEvent,

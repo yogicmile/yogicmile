@@ -10,7 +10,7 @@ export function DynamicCoinRateDisplay() {
     dailySteps, 
     calculateBaseEarnings,
     isDailyCapExceeded,
-    getUnlimitedStepsMessage 
+    getDailyLimitMessage
   } = useCoinRateSystem();
 
   const todaysEarnings = calculateBaseEarnings(dailySteps);
@@ -38,9 +38,13 @@ export function DynamicCoinRateDisplay() {
             </div>
           </div>
 
-          {!isDailyCapExceeded(dailySteps) && (
-            <div className="text-xs text-success-600 bg-success-50 dark:bg-success-950/30 p-2 rounded-md border border-success-200 dark:border-success-800 mt-4">
-              {getUnlimitedStepsMessage()}
+          {isDailyCapExceeded(dailySteps) ? (
+            <div className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 p-2 rounded-md border border-amber-200 dark:border-amber-800 mt-4">
+              ⚠️ Daily limit reached! Steps beyond 12,000 won't earn coins but are still healthy.
+            </div>
+          ) : (
+            <div className="text-xs text-blue-600 bg-blue-50 dark:bg-blue-950/30 p-2 rounded-md border border-blue-200 dark:border-blue-800 mt-4">
+              {getDailyLimitMessage()}
             </div>
           )}
 
@@ -57,7 +61,7 @@ export function DynamicCoinRateDisplay() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Daily Cap:</span>
-                <span className="font-medium text-success">UNLIMITED! 🎉</span>
+                <span className="font-medium text-primary">12,000 steps</span>
               </div>
             </div>
           </div>
