@@ -157,11 +157,11 @@ export function VersionManager() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const getEnvironmentBadge = (env: string) => {
+  const getEnvironmentBadge = (env: string): "default" | "secondary" | "destructive" | "outline" => {
     const variants = {
-      production: 'default',
-      staging: 'secondary', 
-      development: 'destructive'
+      production: 'default' as const,
+      staging: 'secondary' as const, 
+      development: 'destructive' as const
     };
     return variants[env as keyof typeof variants] || 'secondary';
   };
