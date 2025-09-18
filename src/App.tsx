@@ -32,6 +32,7 @@ import { AdminSettings } from "./pages/admin/AdminSettings";
 import { SettingsPage } from "./pages/SettingsPage";
 import { AchievementsPage } from "./pages/AchievementsPage"; 
 import { GoalsPage } from "./pages/GoalsPage";
+import { ReferralPage } from "./pages/ReferralPage";
 import { AdminPerformance } from "./pages/admin/AdminPerformance";
 import { SpinWheelPage } from "./pages/SpinWheelPage";
 import { CommunityPage } from "./pages/CommunityPage";
@@ -87,6 +88,7 @@ const App = () => (
                       <Route path="settings" element={<SettingsPage />} />
                       <Route path="achievements" element={<AchievementsPage />} />
                       <Route path="goals" element={<GoalsPage />} />
+                      <Route path="referral" element={<ReferralPage />} />
                       <Route path="calculation-review" element={<CalculationReview />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>

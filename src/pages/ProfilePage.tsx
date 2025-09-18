@@ -30,7 +30,7 @@ export const ProfilePage = () => {
       icon: <Share2 className="w-5 h-5" />,
       label: 'Refer Friends',
       description: 'Earn bonus coins for referrals',
-      action: () => {}
+      action: () => navigate('/referral')
     },
     {
       icon: <Trophy className="w-5 h-5" />,
