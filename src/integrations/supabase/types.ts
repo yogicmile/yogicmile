@@ -474,6 +474,51 @@ export type Database = {
         }
         Relationships: []
       }
+      boost_purchases: {
+        Row: {
+          amount_cents: number
+          boost_type: string
+          created_at: string
+          currency: string
+          expires_at: string | null
+          gateway_payment_id: string
+          id: string
+          metadata: Json | null
+          payment_gateway: Database["public"]["Enums"]["payment_gateway"]
+          status: Database["public"]["Enums"]["payment_status"]
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          boost_type: string
+          created_at?: string
+          currency?: string
+          expires_at?: string | null
+          gateway_payment_id: string
+          id?: string
+          metadata?: Json | null
+          payment_gateway: Database["public"]["Enums"]["payment_gateway"]
+          status?: Database["public"]["Enums"]["payment_status"]
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          boost_type?: string
+          created_at?: string
+          currency?: string
+          expires_at?: string | null
+          gateway_payment_id?: string
+          id?: string
+          metadata?: Json | null
+          payment_gateway?: Database["public"]["Enums"]["payment_gateway"]
+          status?: Database["public"]["Enums"]["payment_status"]
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       cache_status: {
         Row: {
           cache_key: string
@@ -1009,6 +1054,96 @@ export type Database = {
           risk_factors?: Json | null
           trust_score?: number | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      family_members: {
+        Row: {
+          added_by: string | null
+          added_date: string
+          family_plan_id: string
+          id: string
+          member_user_id: string
+          parental_controls_enabled: boolean | null
+          role: string
+        }
+        Insert: {
+          added_by?: string | null
+          added_date?: string
+          family_plan_id: string
+          id?: string
+          member_user_id: string
+          parental_controls_enabled?: boolean | null
+          role?: string
+        }
+        Update: {
+          added_by?: string | null
+          added_date?: string
+          family_plan_id?: string
+          id?: string
+          member_user_id?: string
+          parental_controls_enabled?: boolean | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_members_family_plan_id_fkey"
+            columns: ["family_plan_id"]
+            isOneToOne: false
+            referencedRelation: "family_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      family_plans: {
+        Row: {
+          billing_cycle: Database["public"]["Enums"]["billing_cycle"]
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          max_members: number
+          payment_gateway: Database["public"]["Enums"]["payment_gateway"] | null
+          plan_name: string
+          primary_user_id: string
+          razorpay_subscription_id: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          stripe_subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          max_members?: number
+          payment_gateway?:
+            | Database["public"]["Enums"]["payment_gateway"]
+            | null
+          plan_name?: string
+          primary_user_id: string
+          razorpay_subscription_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          max_members?: number
+          payment_gateway?:
+            | Database["public"]["Enums"]["payment_gateway"]
+            | null
+          plan_name?: string
+          primary_user_id?: string
+          razorpay_subscription_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_subscription_id?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1913,6 +2048,75 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          family_plan_id: string | null
+          gateway_payment_id: string
+          id: string
+          invoice_id: string | null
+          metadata: Json | null
+          payment_gateway: Database["public"]["Enums"]["payment_gateway"]
+          payment_method_details: Json | null
+          processed_at: string | null
+          receipt_url: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          family_plan_id?: string | null
+          gateway_payment_id: string
+          id?: string
+          invoice_id?: string | null
+          metadata?: Json | null
+          payment_gateway: Database["public"]["Enums"]["payment_gateway"]
+          payment_method_details?: Json | null
+          processed_at?: string | null
+          receipt_url?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          family_plan_id?: string | null
+          gateway_payment_id?: string
+          id?: string
+          invoice_id?: string | null
+          metadata?: Json | null
+          payment_gateway?: Database["public"]["Enums"]["payment_gateway"]
+          payment_method_details?: Json | null
+          processed_at?: string | null
+          receipt_url?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          subscription_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_family_plan_id_fkey"
+            columns: ["family_plan_id"]
+            isOneToOne: false
+            referencedRelation: "family_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       performance_metrics: {
         Row: {
           api_response_time: number | null
@@ -1973,6 +2177,152 @@ export type Database = {
           paisa_rate?: number
           step_goal?: number
           symbol?: string | null
+        }
+        Relationships: []
+      }
+      premium_challenge_progress: {
+        Row: {
+          challenge_id: string
+          completed_at: string | null
+          current_progress: number | null
+          id: string
+          is_completed: boolean | null
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string | null
+          current_progress?: number | null
+          id?: string
+          is_completed?: boolean | null
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string | null
+          current_progress?: number | null
+          id?: string
+          is_completed?: boolean | null
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "premium_challenge_progress_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "premium_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      premium_challenges: {
+        Row: {
+          badge_icon: string | null
+          challenge_type: string
+          created_at: string
+          description: string
+          duration_days: number
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          is_seasonal: boolean | null
+          metadata: Json | null
+          min_tier: Database["public"]["Enums"]["subscription_plan"]
+          reward_paisa: number
+          start_date: string | null
+          target_value: number
+          title: string
+        }
+        Insert: {
+          badge_icon?: string | null
+          challenge_type: string
+          created_at?: string
+          description: string
+          duration_days: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_seasonal?: boolean | null
+          metadata?: Json | null
+          min_tier?: Database["public"]["Enums"]["subscription_plan"]
+          reward_paisa?: number
+          start_date?: string | null
+          target_value: number
+          title: string
+        }
+        Update: {
+          badge_icon?: string | null
+          challenge_type?: string
+          created_at?: string
+          description?: string
+          duration_days?: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_seasonal?: boolean | null
+          metadata?: Json | null
+          min_tier?: Database["public"]["Enums"]["subscription_plan"]
+          reward_paisa?: number
+          start_date?: string | null
+          target_value?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      premium_rewards: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          is_experience: boolean | null
+          metadata: Json | null
+          min_tier: Database["public"]["Enums"]["subscription_plan"]
+          partner_brand: string | null
+          redemption_cost_paisa: number
+          stock_quantity: number | null
+          title: string
+          updated_at: string
+          value_inr: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          is_experience?: boolean | null
+          metadata?: Json | null
+          min_tier?: Database["public"]["Enums"]["subscription_plan"]
+          partner_brand?: string | null
+          redemption_cost_paisa: number
+          stock_quantity?: number | null
+          title: string
+          updated_at?: string
+          value_inr: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          is_experience?: boolean | null
+          metadata?: Json | null
+          min_tier?: Database["public"]["Enums"]["subscription_plan"]
+          partner_brand?: string | null
+          redemption_cost_paisa?: number
+          stock_quantity?: number | null
+          title?: string
+          updated_at?: string
+          value_inr?: number
         }
         Relationships: []
       }
@@ -2562,6 +2912,75 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          billing_cycle: Database["public"]["Enums"]["billing_cycle"]
+          cancel_at_period_end: boolean | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          family_plan_id: string | null
+          id: string
+          payment_gateway: Database["public"]["Enums"]["payment_gateway"] | null
+          plan_type: Database["public"]["Enums"]["subscription_plan"]
+          razorpay_subscription_id: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          stripe_subscription_id: string | null
+          trial_end: string | null
+          trial_start: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          family_plan_id?: string | null
+          id?: string
+          payment_gateway?:
+            | Database["public"]["Enums"]["payment_gateway"]
+            | null
+          plan_type?: Database["public"]["Enums"]["subscription_plan"]
+          razorpay_subscription_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_subscription_id?: string | null
+          trial_end?: string | null
+          trial_start?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_cycle?: Database["public"]["Enums"]["billing_cycle"]
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          family_plan_id?: string | null
+          id?: string
+          payment_gateway?:
+            | Database["public"]["Enums"]["payment_gateway"]
+            | null
+          plan_type?: Database["public"]["Enums"]["subscription_plan"]
+          razorpay_subscription_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_subscription_id?: string | null
+          trial_end?: string | null
+          trial_start?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_subscriptions_family_plan"
+            columns: ["family_plan_id"]
+            isOneToOne: false
+            referencedRelation: "family_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_analytics: {
         Row: {
@@ -3450,6 +3869,20 @@ export type Database = {
         }
         Returns: Json
       }
+      get_user_subscription_status: {
+        Args: { p_user_id: string }
+        Returns: {
+          expires_at: string
+          is_family_member: boolean
+          is_premium: boolean
+          plan_type: Database["public"]["Enums"]["subscription_plan"]
+          status: Database["public"]["Enums"]["subscription_status"]
+        }[]
+      }
+      has_active_boost: {
+        Args: { p_boost_type: string; p_user_id: string }
+        Returns: boolean
+      }
       hash_otp: {
         Args: { plain_otp: string }
         Returns: string
@@ -3483,8 +3916,13 @@ export type Database = {
       }
     }
     Enums: {
+      billing_cycle: "monthly" | "yearly"
+      payment_gateway: "stripe" | "razorpay"
+      payment_status: "pending" | "succeeded" | "failed" | "refunded"
       redemption_status: "pending" | "completed" | "failed"
       reward_type: "voucher" | "coupon" | "bill_payment" | "cashout" | "special"
+      subscription_plan: "free" | "premium" | "family"
+      subscription_status: "active" | "past_due" | "canceled" | "paused"
       transaction_type: "earning" | "redeem" | "bonus" | "refund"
     }
     CompositeTypes: {
@@ -3613,8 +4051,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      billing_cycle: ["monthly", "yearly"],
+      payment_gateway: ["stripe", "razorpay"],
+      payment_status: ["pending", "succeeded", "failed", "refunded"],
       redemption_status: ["pending", "completed", "failed"],
       reward_type: ["voucher", "coupon", "bill_payment", "cashout", "special"],
+      subscription_plan: ["free", "premium", "family"],
+      subscription_status: ["active", "past_due", "canceled", "paused"],
       transaction_type: ["earning", "redeem", "bonus", "refund"],
     },
   },
