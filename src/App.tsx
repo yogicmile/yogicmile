@@ -39,6 +39,7 @@ import { CommunityPage } from "./pages/CommunityPage";
 import { ChallengesPage } from "./pages/ChallengesPage";
 
 const LazySpinWheelPage = lazy(() => import("./pages/SpinWheelPage").then(m => ({ default: m.SpinWheelPage })));
+const LazyStepTrackingTestPage = lazy(() => import('./pages/StepTrackingTestPage'));
 
 const queryClient = new QueryClient();
 
@@ -90,6 +91,7 @@ const App = () => (
                       <Route path="goals" element={<GoalsPage />} />
                       <Route path="referral" element={<ReferralPage />} />
                       <Route path="calculation-review" element={<CalculationReview />} />
+                      <Route path="step-tracking-test" element={<Suspense fallback={null}><LazyStepTrackingTestPage /></Suspense>} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </AppLayout>
