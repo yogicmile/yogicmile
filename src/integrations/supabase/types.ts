@@ -145,6 +145,101 @@ export type Database = {
         }
         Relationships: []
       }
+      achievement_categories: {
+        Row: {
+          color_theme: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          sort_order: number | null
+        }
+        Insert: {
+          color_theme?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          sort_order?: number | null
+        }
+        Update: {
+          color_theme?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      achievement_definitions: {
+        Row: {
+          achievement_type: string
+          category_id: string | null
+          created_at: string | null
+          description: string
+          emoji: string
+          id: string
+          is_active: boolean | null
+          is_hidden: boolean | null
+          motivational_quote: string | null
+          name: string
+          rarity: string | null
+          requirement: Json
+          reward_coins: number | null
+          sort_order: number | null
+          unlock_celebration: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          achievement_type: string
+          category_id?: string | null
+          created_at?: string | null
+          description: string
+          emoji: string
+          id?: string
+          is_active?: boolean | null
+          is_hidden?: boolean | null
+          motivational_quote?: string | null
+          name: string
+          rarity?: string | null
+          requirement: Json
+          reward_coins?: number | null
+          sort_order?: number | null
+          unlock_celebration?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          achievement_type?: string
+          category_id?: string | null
+          created_at?: string | null
+          description?: string
+          emoji?: string
+          id?: string
+          is_active?: boolean | null
+          is_hidden?: boolean | null
+          motivational_quote?: string | null
+          name?: string
+          rarity?: string | null
+          requirement?: Json
+          reward_coins?: number | null
+          sort_order?: number | null
+          unlock_celebration?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievement_definitions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "achievement_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       achievements: {
         Row: {
           achievement_name: string
@@ -327,6 +422,54 @@ export type Database = {
           status?: string
           text?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      affiliate_tracking: {
+        Row: {
+          campaign_name: string | null
+          click_id: string | null
+          clicked_at: string | null
+          conversion_data: Json | null
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          partner_id: string
+          partner_name: string
+          referrer_url: string | null
+          source_url: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          campaign_name?: string | null
+          click_id?: string | null
+          clicked_at?: string | null
+          conversion_data?: Json | null
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          partner_id: string
+          partner_name: string
+          referrer_url?: string | null
+          source_url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          campaign_name?: string | null
+          click_id?: string | null
+          clicked_at?: string | null
+          conversion_data?: Json | null
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          partner_id?: string
+          partner_name?: string
+          referrer_url?: string | null
+          source_url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -716,6 +859,51 @@ export type Database = {
         }
         Relationships: []
       }
+      connected_devices: {
+        Row: {
+          battery_level: number | null
+          connection_status: string | null
+          created_at: string | null
+          device_brand: string
+          device_name: string | null
+          device_type: string
+          id: string
+          last_sync_time: string | null
+          sync_error: string | null
+          sync_settings: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          battery_level?: number | null
+          connection_status?: string | null
+          created_at?: string | null
+          device_brand: string
+          device_name?: string | null
+          device_type: string
+          id?: string
+          last_sync_time?: string | null
+          sync_error?: string | null
+          sync_settings?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          battery_level?: number | null
+          connection_status?: string | null
+          created_at?: string | null
+          device_brand?: string
+          device_name?: string | null
+          device_type?: string
+          id?: string
+          last_sync_time?: string | null
+          sync_error?: string | null
+          sync_settings?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       content_bookmarks: {
         Row: {
           content_id: string
@@ -883,6 +1071,39 @@ export type Database = {
           id?: string
           os_breakdown?: Json
           top_errors?: Json
+        }
+        Relationships: []
+      }
+      customization_preferences: {
+        Row: {
+          accessibility_settings: Json | null
+          created_at: string | null
+          id: string
+          layout_preferences: Json | null
+          notification_config: Json | null
+          theme_settings: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          accessibility_settings?: Json | null
+          created_at?: string | null
+          id?: string
+          layout_preferences?: Json | null
+          notification_config?: Json | null
+          theme_settings?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          accessibility_settings?: Json | null
+          created_at?: string | null
+          id?: string
+          layout_preferences?: Json | null
+          notification_config?: Json | null
+          theme_settings?: Json | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1093,6 +1314,54 @@ export type Database = {
           risk_factors?: Json | null
           trust_score?: number | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      email_preferences: {
+        Row: {
+          content_types: Json | null
+          created_at: string | null
+          email: string
+          engagement_score: number | null
+          frequency_preference: string | null
+          id: string
+          last_campaign_sent: string | null
+          quiet_hours: Json | null
+          subscription_status: string | null
+          updated_at: string | null
+          user_id: string
+          verification_token: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          content_types?: Json | null
+          created_at?: string | null
+          email: string
+          engagement_score?: number | null
+          frequency_preference?: string | null
+          id?: string
+          last_campaign_sent?: string | null
+          quiet_hours?: Json | null
+          subscription_status?: string | null
+          updated_at?: string | null
+          user_id: string
+          verification_token?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          content_types?: Json | null
+          created_at?: string | null
+          email?: string
+          engagement_score?: number | null
+          frequency_preference?: string | null
+          id?: string
+          last_campaign_sent?: string | null
+          quiet_hours?: Json | null
+          subscription_status?: string | null
+          updated_at?: string | null
+          user_id?: string
+          verification_token?: string | null
+          verified_at?: string | null
         }
         Relationships: []
       }
@@ -1518,6 +1787,36 @@ export type Database = {
           total_earnings_paisa?: number | null
           total_steps?: number | null
           user_count?: number | null
+        }
+        Relationships: []
+      }
+      integration_analytics: {
+        Row: {
+          created_at: string | null
+          date: string | null
+          id: string
+          integration_type: string
+          metrics: Json | null
+          performance_data: Json | null
+          user_engagement: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string | null
+          id?: string
+          integration_type: string
+          metrics?: Json | null
+          performance_data?: Json | null
+          user_engagement?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string | null
+          id?: string
+          integration_type?: string
+          metrics?: Json | null
+          performance_data?: Json | null
+          user_engagement?: Json | null
         }
         Relationships: []
       }
@@ -2808,6 +3107,42 @@ export type Database = {
           share_type?: string
           timestamp?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      social_shares: {
+        Row: {
+          content_data: Json | null
+          content_type: string
+          created_at: string | null
+          engagement_metrics: Json | null
+          id: string
+          platform: string
+          shared_at: string | null
+          user_id: string
+          viral_tracking: Json | null
+        }
+        Insert: {
+          content_data?: Json | null
+          content_type: string
+          created_at?: string | null
+          engagement_metrics?: Json | null
+          id?: string
+          platform: string
+          shared_at?: string | null
+          user_id: string
+          viral_tracking?: Json | null
+        }
+        Update: {
+          content_data?: Json | null
+          content_type?: string
+          created_at?: string | null
+          engagement_metrics?: Json | null
+          id?: string
+          platform?: string
+          shared_at?: string | null
+          user_id?: string
+          viral_tracking?: Json | null
         }
         Relationships: []
       }

@@ -111,10 +111,10 @@ export const useCoinRateSystem = () => {
     };
   }, [currentTier, currentTierData, currentSteps, currentStreak]);
 
-  // Calculate base earnings for given steps with daily cap (without bonuses)
+  // Calculate base earnings for given steps - UNLIMITED STEPS FOR EVERYONE! 
   const calculateBaseEarnings = useCallback((steps: number) => {
-    // Apply daily cap of 12,000 steps
-    const cappedSteps = Math.min(steps, 12000);
+    // No daily cap - unlimited steps for all users completely FREE!
+    const cappedSteps = steps;
     
     // Calculate units (every 25 steps = 1 unit)
     const units = Math.floor(cappedSteps / 25);
@@ -127,7 +127,7 @@ export const useCoinRateSystem = () => {
       units,
       paisaEarned,
       rupeesEarned: paisaEarned / 100,
-      wasCapExceeded: steps > 12000
+      wasCapExceeded: false // No cap anymore!
     };
   }, [currentTierData.rate]);
 
@@ -298,14 +298,14 @@ export const useCoinRateSystem = () => {
     checkStreakMilestone();
   }, [checkDailyGoal, checkStreakMilestone]);
 
-  // Check if daily cap exceeded
+  // No daily cap anymore - unlimited steps for everyone!
   const isDailyCapExceeded = useCallback((steps: number) => {
-    return steps > 12000;
+    return false; // No cap - walk as much as you want!
   }, []);
 
-  // Get daily cap message
-  const getDailyCapMessage = useCallback(() => {
-    return "For your joint safety, only 12,000 steps per day are rewarded.";
+  // Get motivational message about unlimited steps
+  const getUnlimitedStepsMessage = useCallback(() => {
+    return "🎉 NO DAILY LIMITS! Walk unlimited steps and earn unlimited rewards - completely FREE for everyone!";
   }, []);
 
   return {
@@ -324,9 +324,9 @@ export const useCoinRateSystem = () => {
     getDailyPotential,
     getTierProgress,
     
-    // Daily cap utilities
+    // No limits utilities
     isDailyCapExceeded,
-    getDailyCapMessage,
+    getUnlimitedStepsMessage,
     
     // Celebrations
     celebrationEvent,
