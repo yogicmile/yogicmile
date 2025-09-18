@@ -599,6 +599,45 @@ export type Database = {
         }
         Relationships: []
       }
+      collectibles: {
+        Row: {
+          animation_type: string | null
+          awarded_count: number | null
+          collection_series: string | null
+          created_at: string | null
+          description: string | null
+          design_url: string | null
+          id: string
+          name: string
+          rarity: string
+          unlock_criteria: Json
+        }
+        Insert: {
+          animation_type?: string | null
+          awarded_count?: number | null
+          collection_series?: string | null
+          created_at?: string | null
+          description?: string | null
+          design_url?: string | null
+          id?: string
+          name: string
+          rarity?: string
+          unlock_criteria?: Json
+        }
+        Update: {
+          animation_type?: string | null
+          awarded_count?: number | null
+          collection_series?: string | null
+          created_at?: string | null
+          description?: string | null
+          design_url?: string | null
+          id?: string
+          name?: string
+          rarity?: string
+          unlock_criteria?: Json
+        }
+        Relationships: []
+      }
       community_achievements: {
         Row: {
           achievement_name: string
@@ -1230,6 +1269,42 @@ export type Database = {
         }
         Relationships: []
       }
+      gamification_settings: {
+        Row: {
+          animation_enabled: boolean | null
+          celebration_style: string | null
+          created_at: string | null
+          id: string
+          notification_preferences: Json | null
+          reduced_motion: boolean | null
+          sharing_preferences: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          animation_enabled?: boolean | null
+          celebration_style?: string | null
+          created_at?: string | null
+          id?: string
+          notification_preferences?: Json | null
+          reduced_motion?: boolean | null
+          sharing_preferences?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          animation_enabled?: boolean | null
+          celebration_style?: string | null
+          created_at?: string | null
+          id?: string
+          notification_preferences?: Json | null
+          reduced_motion?: boolean | null
+          sharing_preferences?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       geographic_analytics: {
         Row: {
           ad_revenue: number | null
@@ -1447,6 +1522,53 @@ export type Database = {
             columns: ["reply_to_id"]
             isOneToOne: false
             referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      milestone_photos: {
+        Row: {
+          achievement_id: string | null
+          caption: string | null
+          celebration_viewed: boolean | null
+          id: string
+          milestone_type: string
+          milestone_value: number | null
+          photo_url: string
+          shared_count: number | null
+          upload_date: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_id?: string | null
+          caption?: string | null
+          celebration_viewed?: boolean | null
+          id?: string
+          milestone_type: string
+          milestone_value?: number | null
+          photo_url: string
+          shared_count?: number | null
+          upload_date?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string | null
+          caption?: string | null
+          celebration_viewed?: boolean | null
+          id?: string
+          milestone_type?: string
+          milestone_value?: number | null
+          photo_url?: string
+          shared_count?: number | null
+          upload_date?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestone_photos_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
             referencedColumns: ["id"]
           },
         ]
@@ -1682,6 +1804,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      onboarding_progress: {
+        Row: {
+          completed: boolean | null
+          completion_date: string | null
+          created_at: string | null
+          current_step: string | null
+          id: string
+          steps_completed: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          completion_date?: string | null
+          created_at?: string | null
+          current_step?: string | null
+          id?: string
+          steps_completed?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          completion_date?: string | null
+          created_at?: string | null
+          current_step?: string | null
+          id?: string
+          steps_completed?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       otp_logs: {
         Row: {
@@ -2088,6 +2243,92 @@ export type Database = {
           name?: string
           required_paisa?: number
           type?: Database["public"]["Enums"]["reward_type"]
+        }
+        Relationships: []
+      }
+      seasonal_challenge_participants: {
+        Row: {
+          challenge_id: string
+          completed: boolean | null
+          completion_date: string | null
+          id: string
+          joined_date: string | null
+          progress: number | null
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed?: boolean | null
+          completion_date?: string | null
+          id?: string
+          joined_date?: string | null
+          progress?: number | null
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed?: boolean | null
+          completion_date?: string | null
+          id?: string
+          joined_date?: string | null
+          progress?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seasonal_challenge_participants_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "seasonal_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasonal_challenges: {
+        Row: {
+          background_color: string | null
+          created_at: string | null
+          description: string | null
+          end_date: string
+          exclusive_badge_id: string | null
+          goal_target: number
+          id: string
+          name: string
+          participant_count: number | null
+          reward_description: string | null
+          start_date: string
+          status: string | null
+          theme: string
+        }
+        Insert: {
+          background_color?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_date: string
+          exclusive_badge_id?: string | null
+          goal_target: number
+          id?: string
+          name: string
+          participant_count?: number | null
+          reward_description?: string | null
+          start_date: string
+          status?: string | null
+          theme: string
+        }
+        Update: {
+          background_color?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_date?: string
+          exclusive_badge_id?: string | null
+          goal_target?: number
+          id?: string
+          name?: string
+          participant_count?: number | null
+          reward_description?: string | null
+          start_date?: string
+          status?: string | null
+          theme?: string
         }
         Relationships: []
       }
@@ -2626,6 +2867,44 @@ export type Database = {
           },
         ]
       }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          celebration_viewed: boolean | null
+          id: string
+          progress_percentage: number | null
+          shared_count: number | null
+          unlocked_date: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          celebration_viewed?: boolean | null
+          id?: string
+          progress_percentage?: number | null
+          shared_count?: number | null
+          unlocked_date?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          celebration_viewed?: boolean | null
+          id?: string
+          progress_percentage?: number | null
+          shared_count?: number | null
+          unlocked_date?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_activity_logs: {
         Row: {
           activity_data: Json | null
@@ -2658,6 +2937,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_collectibles: {
+        Row: {
+          collectible_id: string
+          earned_date: string | null
+          id: string
+          milestone_value: number | null
+          shared_count: number | null
+          user_id: string
+        }
+        Insert: {
+          collectible_id: string
+          earned_date?: string | null
+          id?: string
+          milestone_value?: number | null
+          shared_count?: number | null
+          user_id: string
+        }
+        Update: {
+          collectible_id?: string
+          earned_date?: string | null
+          id?: string
+          milestone_value?: number | null
+          shared_count?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_collectibles_collectible_id_fkey"
+            columns: ["collectible_id"]
+            isOneToOne: false
+            referencedRelation: "collectibles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_consent: {
         Row: {
@@ -2823,50 +3137,71 @@ export type Database = {
       }
       user_profiles: {
         Row: {
+          achievements_count: number | null
+          activity_status: string | null
           activity_visible: boolean | null
+          avatar_url: string | null
           bio: string | null
+          coins_earned: number | null
           community_activity_score: number | null
           created_at: string | null
+          current_phase: string | null
           display_name: string
           id: string
           last_active: string | null
           location_city: string | null
           location_state: string | null
+          privacy_setting: string | null
           profile_picture_url: string | null
           profile_visibility: string | null
           stats_visible: boolean | null
+          total_steps: number | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          achievements_count?: number | null
+          activity_status?: string | null
           activity_visible?: boolean | null
+          avatar_url?: string | null
           bio?: string | null
+          coins_earned?: number | null
           community_activity_score?: number | null
           created_at?: string | null
+          current_phase?: string | null
           display_name: string
           id?: string
           last_active?: string | null
           location_city?: string | null
           location_state?: string | null
+          privacy_setting?: string | null
           profile_picture_url?: string | null
           profile_visibility?: string | null
           stats_visible?: boolean | null
+          total_steps?: number | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          achievements_count?: number | null
+          activity_status?: string | null
           activity_visible?: boolean | null
+          avatar_url?: string | null
           bio?: string | null
+          coins_earned?: number | null
           community_activity_score?: number | null
           created_at?: string | null
+          current_phase?: string | null
           display_name?: string
           id?: string
           last_active?: string | null
           location_city?: string | null
           location_state?: string | null
+          privacy_setting?: string | null
           profile_picture_url?: string | null
           profile_visibility?: string | null
           stats_visible?: boolean | null
+          total_steps?: number | null
           updated_at?: string | null
           user_id?: string
         }
