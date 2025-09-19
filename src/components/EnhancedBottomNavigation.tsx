@@ -157,7 +157,7 @@ export const EnhancedBottomNavigation = ({
                 key={tab.id}
                 onClick={() => handleTabPress(tab.id)}
                 className={cn(
-                  "relative flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-tier-1-paisa focus:ring-offset-2 flex-1 max-w-[70px]",
+                  "relative flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-tier-1-paisa focus:ring-offset-2 flex-1 max-w-[68px]",
                   getTabAnimation(tab.id),
                   isActive 
                     ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg` 
@@ -174,9 +174,9 @@ export const EnhancedBottomNavigation = ({
                   getIconAnimation(tab.id)
                 )}>
                   {isActive ? (
-                    <span className="text-xl">{tab.emoji}</span>
+                    <span className="text-lg">{tab.emoji}</span>
                   ) : (
-                    <IconComponent className="w-5 h-5" />
+                    <IconComponent className="w-4 h-4" />
                   )}
                   
                   {/* Notification Badge */}
@@ -184,7 +184,7 @@ export const EnhancedBottomNavigation = ({
                     <Badge 
                       variant={isActive ? "secondary" : "default"}
                       className={cn(
-                        "absolute -top-2 -right-2 min-w-5 h-5 text-xs px-1 rounded-full border-2 border-surface",
+                        "absolute -top-1 -right-1 min-w-4 h-4 text-xs px-1 rounded-full border border-surface scale-90",
                         tab.id === 'wallet' && typeof tab.badge === 'string' && tab.badge.includes('₹')
                           ? "bg-tier-1-paisa text-tier-1-paisa-foreground animate-pulse"
                           : isActive 
@@ -204,7 +204,7 @@ export const EnhancedBottomNavigation = ({
                 
                 {/* Label */}
                 <span className={cn(
-                  "text-xs font-medium transition-all duration-200 text-center leading-tight",
+                  "text-xs font-medium transition-all duration-200 text-center leading-tight mt-0.5",
                   isActive 
                     ? "text-white font-semibold" 
                     : "text-muted-foreground"
@@ -214,7 +214,7 @@ export const EnhancedBottomNavigation = ({
 
                 {/* Active tab underline */}
                 {isActive && (
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-white rounded-full"></div>
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-white rounded-full"></div>
                 )}
               </button>
             );
