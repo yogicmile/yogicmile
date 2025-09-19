@@ -150,8 +150,7 @@ export const EnhancedBottomNavigation = ({
         role="tablist"
         aria-label="Main navigation"
       >
-        <div className="overflow-x-auto scrollbar-hide">
-          <div className="flex items-center justify-between w-full min-w-[320px] max-w-sm mx-auto px-2">
+        <div className="flex items-center justify-around w-full px-1">
           {tabs.map((tab) => {
             const IconComponent = tab.icon;
             const isActive = isTabActive(tab.id);
@@ -161,7 +160,7 @@ export const EnhancedBottomNavigation = ({
                 key={tab.id}
                 onClick={() => handleTabPress(tab.id)}
                 className={cn(
-                  "relative flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-tier-1-paisa focus:ring-offset-2 min-w-[60px]",
+                  "relative flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-tier-1-paisa focus:ring-offset-2 flex-1 max-w-[70px]",
                   getTabAnimation(tab.id),
                   isActive 
                     ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg` 
@@ -208,7 +207,7 @@ export const EnhancedBottomNavigation = ({
                 
                 {/* Label */}
                 <span className={cn(
-                  "text-xs font-medium transition-all duration-200 text-center",
+                  "text-xs font-medium transition-all duration-200 text-center leading-tight",
                   isActive 
                     ? "text-white font-semibold" 
                     : "text-muted-foreground"
@@ -222,8 +221,7 @@ export const EnhancedBottomNavigation = ({
                 )}
               </button>
             );
-            })}
-          </div>
+          })}
         </div>
 
         {/* Progress indicator for active tab */}
