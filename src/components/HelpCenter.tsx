@@ -206,15 +206,15 @@ export const HelpCenter: React.FC = () => {
             )}
           </div>
           <div>
-            <Button asChild
+            <Button
               variant="ghost"
               size="sm"
               className="flex items-center space-x-2"
+              onClick={() => navigate('/')}
+              aria-label="Go to Home"
             >
-              <Link to="/">
-                <Home className="w-4 h-4" />
-                <span>Home</span>
-              </Link>
+              <Home className="w-4 h-4" />
+              <span>Home</span>
             </Button>
           </div>
         </div>
