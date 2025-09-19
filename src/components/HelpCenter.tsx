@@ -202,19 +202,19 @@ export const HelpCenter: React.FC = () => {
                 <span>Back to Help Center</span>
               </Button>
             ) : (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/')}
-                  className="flex items-center space-x-2 mr-3"
-                >
-                  <Home className="w-4 h-4" />
-                  <span>Home</span>
-                </Button>
-                <h1 className="text-xl font-bold text-foreground">Help & Support</h1>
-              </>
+              <h1 className="text-xl font-bold text-foreground">Help & Support</h1>
             )}
+          </div>
+          <div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/')}
+              className="flex items-center space-x-2"
+            >
+              <Home className="w-4 h-4" />
+              <span>Home</span>
+            </Button>
           </div>
         </div>
       </div>
