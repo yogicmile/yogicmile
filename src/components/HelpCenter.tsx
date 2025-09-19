@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +12,8 @@ import {
   Search, 
   Phone,
   Mail,
-  ArrowLeft
+  ArrowLeft,
+  Home
 } from 'lucide-react';
 import { FAQSection } from './support/FAQSection';
 import { SupportChat } from './support/SupportChat';
@@ -21,6 +23,7 @@ import { VideoTutorials } from './support/VideoTutorials';
 export type SupportSection = 'home' | 'faq' | 'chat' | 'tickets' | 'tutorials';
 
 export const HelpCenter: React.FC = () => {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<SupportSection>('home');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -187,19 +190,32 @@ export const HelpCenter: React.FC = () => {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b">
         <div className="flex items-center justify-between p-4">
-          {activeSection !== 'home' ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setActiveSection('home')}
-              className="flex items-center space-x-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Help Center</span>
-            </Button>
-          ) : (
-            <h1 className="text-xl font-bold text-foreground">Help & Support</h1>
-          )}
+          <div className="flex items-center gap-2">
+            {activeSection !== 'home' ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveSection('home')}
+                className="flex items-center space-x-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back to Help Center</span>
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/')}
+                  className="flex items-center space-x-2 mr-3"
+                >
+                  <Home className="w-4 h-4" />
+                  <span>Home</span>
+                </Button>
+                <h1 className="text-xl font-bold text-foreground">Help & Support</h1>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
