@@ -53,8 +53,8 @@ export const ProfilePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background p-4 pb-32">
-      <div className="max-w-md mx-auto space-y-6">
+    <div className="mobile-container bg-background p-4 pb-24 safe-bottom">
+      <div className="w-full space-y-6">
         {/* Header */}
         <div className="text-center">
           <h1 className="text-xl font-semibold mb-4 flex items-center justify-center gap-2">
@@ -83,27 +83,27 @@ export const ProfilePage = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card>
-            <CardContent className="p-4 text-center">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <Card className="stat-card">
+            <CardContent className="p-3 sm:p-4 text-center">
               <p className="text-2xl font-bold text-tier-1-paisa">{userStats.totalSteps.toLocaleString()}</p>
               <p className="text-sm text-muted-foreground">Total Steps</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
+          <Card className="stat-card">
+            <CardContent className="p-3 sm:p-4 text-center">
               <p className="text-2xl font-bold text-tier-2-rupaya">{userStats.totalCoins.toLocaleString()}</p>
               <p className="text-sm text-muted-foreground">Total Coins</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
+          <Card className="stat-card">
+            <CardContent className="p-3 sm:p-4 text-center">
               <p className="text-2xl font-bold text-tier-3-token">{userStats.currentStreak}</p>
               <p className="text-sm text-muted-foreground">Day Streak</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
+          <Card className="stat-card">
+            <CardContent className="p-3 sm:p-4 text-center">
               <div className="flex items-center justify-center gap-1">
                 <Calendar className="w-4 h-4 text-muted-foreground" />
                 <p className="text-lg font-bold text-foreground">365</p>
@@ -121,11 +121,11 @@ export const ProfilePage = () => {
           {menuItems.map((item, index) => (
             <Card 
               key={index} 
-              className="cursor-pointer hover:shadow-md transition-shadow"
+              className="nav-card"
               onClick={item.action}
             >
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
+              <CardContent className="p-4 min-h-[60px] flex items-center">
+                <div className="flex items-center gap-3 w-full">
                   <div className="p-2 bg-primary/10 rounded-lg text-primary">
                     {item.icon}
                   </div>
