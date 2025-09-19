@@ -37,6 +37,7 @@ import { AdminPerformance } from "./pages/admin/AdminPerformance";
 import { SpinWheelPage } from "./pages/SpinWheelPage";
 import { CommunityPage } from "./pages/CommunityPage";
 import { ChallengesPage } from "./pages/ChallengesPage";
+import { HelpPage } from "./pages/HelpPage";
 
 const LazySpinWheelPage = lazy(() => import("./pages/SpinWheelPage").then(m => ({ default: m.SpinWheelPage })));
 const LazyStepTrackingTestPage = lazy(() => import('./pages/StepTrackingTestPage'));
@@ -93,6 +94,7 @@ const App = () => (
                       <Route path="achievements" element={<AchievementsPage />} />
                       <Route path="goals" element={<GoalsPage />} />
                       <Route path="referral" element={<ReferralPage />} />
+                      <Route path="help" element={<HelpPage />} />
                       <Route path="calculation-review" element={<CalculationReview />} />
                       <Route path="step-tracking-test" element={<Suspense fallback={null}><LazyStepTrackingTestPage /></Suspense>} />
                       <Route path="phase-testing" element={<Suspense fallback={null}><LazyPhaseTestingPage /></Suspense>} />
