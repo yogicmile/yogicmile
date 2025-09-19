@@ -90,24 +90,21 @@ export const EnhancedBottomNavigation = ({
   ];
 
   const handleTabPress = (tabId: TabId) => {
-    if (tabId === activeTab && location.pathname !== '/wallet') return;
-    
+    const selected = tabs.find(t => t.id === tabId);
+    const targetRoute = selected?.route;
+    const currentPath = location.pathname;
+
+    // Animate press regardless
     setAnimatingTab(tabId);
-    
-    // Haptic feedback simulation
     if (navigator.vibrate) {
       navigator.vibrate(10);
     }
-    
-    setTimeout(() => {
-      setAnimatingTab(null);
-    }, 200);
+    setTimeout(() => setAnimatingTab(null), 200);
 
-    // Navigate using tab route for consistency
-    const selected = tabs.find(t => t.id === tabId);
-    if (selected?.route) {
-      navigate(selected.route);
-    } else {
+    // Only navigate if we're not already on the target route
+    if (targetRoute && currentPath !== targetRoute) {
+      navigate(targetRoute);
+    } else if (!targetRoute) {
       onTabChange(tabId);
     }
   };
