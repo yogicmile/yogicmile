@@ -84,7 +84,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             notificationCounts={notificationCounts}
             walletBalance={walletBalance}
           />
-          <FloatingHelpButton />
+          {location.pathname !== '/help' && <FloatingHelpButton />}
         </>
       )}
     </div>

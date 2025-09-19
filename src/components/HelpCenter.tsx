@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -206,14 +206,15 @@ export const HelpCenter: React.FC = () => {
             )}
           </div>
           <div>
-            <Button
+            <Button asChild
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/')}
               className="flex items-center space-x-2"
             >
-              <Home className="w-4 h-4" />
-              <span>Home</span>
+              <Link to="/">
+                <Home className="w-4 h-4" />
+                <span>Home</span>
+              </Link>
             </Button>
           </div>
         </div>
