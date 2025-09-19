@@ -31,6 +31,7 @@ const MAX_DAILY_STEPS = 12000;
 const MAX_WALKING_SPEED = 12; // km/h
 const STEPS_TO_PAISA = 25;
 const STORAGE_KEY = 'native-step-data';
+const TRACKING_SETUP_KEY = 'native-tracking-setup-shown';
 const SYNC_INTERVAL = 60000; // 1 minute
 const GPS_UPDATE_INTERVAL = 10000; // 10 seconds
 
@@ -95,10 +96,15 @@ export const useNativeStepTracking = () => {
       
       setIsTracking(true);
       
-      toast({
-        title: "Native Tracking Active",
-        description: "Real-time step counting enabled",
-      });
+      // Only show welcome message on first setup
+      const { value: hasShownSetup } = await Preferences.get({ key: TRACKING_SETUP_KEY });
+      if (!hasShownSetup) {
+        toast({
+          title: "Native Tracking Active",
+          description: "Real-time step counting enabled",
+        });
+        await Preferences.set({ key: TRACKING_SETUP_KEY, value: 'true' });
+      }
     } catch (error) {
       console.error('Failed to initialize native tracking:', error);
       toast({
