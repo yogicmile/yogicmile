@@ -36,6 +36,7 @@ import { ReferralPage } from "./pages/ReferralPage";
 import { AdminPerformance } from "./pages/admin/AdminPerformance";
 import { SpinWheelPage } from "./pages/SpinWheelPage";
 import { CommunityPage } from "./pages/CommunityPage";
+import { CommunityTestPage } from "./pages/CommunityTestPage";
 import { ChallengesPage } from "./pages/ChallengesPage";
 import { HelpPage } from "./pages/HelpPage";
 
@@ -90,6 +91,7 @@ const App = () => (
                       <Route path="rewards" element={<RewardsPage />} />
                       <Route path="challenges" element={<ChallengesPage />} />
                       <Route path="community" element={<CommunityPage />} />
+                      <Route path="community-test" element={<CommunityTestPage />} />
                       <Route path="coins-history" element={<CoinsHistory />} />
                       <Route path="phase-journey" element={<PhaseJourney />} />
                       <Route path="spin-wheel" element={<Suspense fallback={null}><LazySpinWheelPage /></Suspense>} />
