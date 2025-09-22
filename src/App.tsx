@@ -46,6 +46,7 @@ const LazyWalletTestPage = lazy(() => import('./pages/WalletTestPage').then(m =>
 const LazyRewardsTestPage = lazy(() => import('./pages/RewardsTestPage').then(m => ({ default: m.RewardsTestPage })));
 const LazySpinWheelTestPage = lazy(() => import('./pages/SpinWheelTestPage').then(m => ({ default: m.SpinWheelTestPage })));
 const LazyLocationTestPage = lazy(() => import('./pages/LocationTestPage').then(m => ({ default: m.LocationTestPage })));
+const LazyReferralTestPage = lazy(() => import('./pages/ReferralTestPage').then(m => ({ default: m.ReferralTestPage })));
 
 const queryClient = new QueryClient();
 
@@ -104,6 +105,7 @@ const App = () => (
                       <Route path="rewards-testing" element={<Suspense fallback={null}><LazyRewardsTestPage /></Suspense>} />
                       <Route path="spin-wheel-testing" element={<Suspense fallback={null}><LazySpinWheelTestPage /></Suspense>} />
                       <Route path="location-testing" element={<Suspense fallback={null}><LazyLocationTestPage /></Suspense>} />
+                      <Route path="referral-testing" element={<Suspense fallback={null}><LazyReferralTestPage /></Suspense>} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </AppLayout>
