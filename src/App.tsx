@@ -41,6 +41,7 @@ import { ChallengesPage } from "./pages/ChallengesPage";
 import { HelpPage } from "./pages/HelpPage";
 
 const LazyGamificationTestPage = lazy(() => import('./pages/GamificationTestPage'));
+const LazyNotificationTestPage = lazy(() => import('./pages/NotificationTestPage'));
 
 const LazySpinWheelPage = lazy(() => import("./pages/SpinWheelPage").then(m => ({ default: m.SpinWheelPage })));
 const LazyStepTrackingTestPage = lazy(() => import('./pages/StepTrackingTestPage'));
@@ -111,6 +112,7 @@ const App = () => (
                       <Route path="location-testing" element={<Suspense fallback={null}><LazyLocationTestPage /></Suspense>} />
                       <Route path="referral-testing" element={<Suspense fallback={null}><LazyReferralTestPage /></Suspense>} />
                       <Route path="gamification-test" element={<Suspense fallback={null}><LazyGamificationTestPage /></Suspense>} />
+                      <Route path="notification-test" element={<Suspense fallback={null}><LazyNotificationTestPage /></Suspense>} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </AppLayout>
