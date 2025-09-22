@@ -47,10 +47,14 @@ export function SettingsPage() {
   };
 
   const handleThemeChange = async (themeName: string) => {
+    console.log('Changing theme to:', themeName);
+    console.log('Current preferences:', preferences);
+    
     await updateTheme({
       themeName: themeName as any
     });
-    applyTheme();
+    
+    console.log('Theme changed successfully');
   };
 
   const handleNotificationToggle = (key: keyof typeof notificationSettings) => {

@@ -221,13 +221,90 @@ export const useThemeCustomization = () => {
     }
   }, [preferences, user, isGuest, toast]);
 
+  // Apply theme to document
+  const applyTheme = useCallback((customPreferences?: CustomizationPreferences) => {
+    const root = document.documentElement;
+    const currentPrefs = customPreferences || preferences;
+    const theme = currentPrefs.themeSettings;
+
+    console.log('Applying theme:', theme.themeName);
+    console.log('Root element classes before:', root.className);
+
+    // Apply CSS custom properties based on theme
+    if (theme.darkMode) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+
+    // Apply theme-specific CSS classes
+    root.className = root.className
+      .split(' ')
+      .filter(cls => !cls.startsWith('theme-'))
+      .join(' ');
+    root.classList.add(`theme-${theme.themeName}`);
+
+    console.log('Root element classes after:', root.className);
+
+    // Apply accessibility settings
+    if (theme.highContrast) {
+      root.classList.add('high-contrast');
+    } else {
+      root.classList.remove('high-contrast');
+    }
+
+    if (currentPrefs.accessibilitySettings.animationReduced) {
+      root.classList.add('reduce-motion');
+    } else {
+      root.classList.remove('reduce-motion');
+    }
+
+    // Apply font size
+    root.classList.remove('text-sm', 'text-lg', 'text-xl');
+    if (currentPrefs.accessibilitySettings.fontSize !== 'normal') {
+      const sizeMap = {
+        small: 'text-sm',
+        large: 'text-lg',
+        extra_large: 'text-xl',
+      };
+      root.classList.add(sizeMap[currentPrefs.accessibilitySettings.fontSize]);
+    }
+  }, [preferences]);
+
   // Update theme settings
   const updateTheme = useCallback(async (themeSettings: Partial<ThemeSettings>) => {
     const newSettings = { ...preferences.themeSettings, ...themeSettings };
+    const newPreferences = {
+      ...preferences,
+      themeSettings: newSettings,
+    };
+    
+    // Apply theme immediately with new preferences
+    applyTheme(newPreferences);
+    
     await savePreferences({
       themeSettings: newSettings,
     });
-  }, [preferences, savePreferences]);
+  }, [preferences, savePreferences, applyTheme]);
+
+  // Reset to defaults
+  const resetToDefaults = useCallback(async () => {
+    await savePreferences(DEFAULT_PREFERENCES);
+    toast({
+      title: "Reset Complete",
+      description: "All customization settings have been reset to defaults",
+    });
+  }, [savePreferences, toast]);
+
+  // Load preferences on mount
+  useEffect(() => {
+    loadPreferences();
+  }, [loadPreferences]);
+
+  // Apply theme whenever preferences change
+  useEffect(() => {
+    applyTheme();
+  }, [applyTheme]);
 
   // Update layout preferences
   const updateLayout = useCallback(async (layoutPreferences: Partial<LayoutPreferences>) => {
@@ -252,59 +329,6 @@ export const useThemeCustomization = () => {
       accessibilitySettings: newSettings,
     });
   }, [preferences, savePreferences]);
-
-  // Apply theme to document
-  const applyTheme = useCallback(() => {
-    const root = document.documentElement;
-    const theme = preferences.themeSettings;
-
-    // Apply CSS custom properties based on theme
-    if (theme.darkMode) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-
-    // Apply theme-specific CSS classes
-    root.className = root.className
-      .split(' ')
-      .filter(cls => !cls.startsWith('theme-'))
-      .join(' ');
-    root.classList.add(`theme-${theme.themeName}`);
-
-    // Apply accessibility settings
-    if (theme.highContrast) {
-      root.classList.add('high-contrast');
-    } else {
-      root.classList.remove('high-contrast');
-    }
-
-    if (preferences.accessibilitySettings.animationReduced) {
-      root.classList.add('reduce-motion');
-    } else {
-      root.classList.remove('reduce-motion');
-    }
-
-    // Apply font size
-    root.classList.remove('text-sm', 'text-lg', 'text-xl');
-    if (preferences.accessibilitySettings.fontSize !== 'normal') {
-      const sizeMap = {
-        small: 'text-sm',
-        large: 'text-lg',
-        extra_large: 'text-xl',
-      };
-      root.classList.add(sizeMap[preferences.accessibilitySettings.fontSize]);
-    }
-  }, [preferences]);
-
-  // Reset to defaults
-  const resetToDefaults = useCallback(async () => {
-    await savePreferences(DEFAULT_PREFERENCES);
-    toast({
-      title: "Reset Complete",
-      description: "All customization settings have been reset to defaults",
-    });
-  }, [savePreferences, toast]);
 
   // Load preferences on mount
   useEffect(() => {
