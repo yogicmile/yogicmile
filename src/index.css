@@ -184,7 +184,7 @@ All colors MUST be HSL for consistent theming
   }
 
   /* Theme-specific color overrides */
-  .theme-sky_blue {
+  :root.theme-sky_blue {
     --primary: 197 71% 73%; /* Sky Blue */
     --primary-foreground: 0 0% 100%;
     --secondary: 195 100% 50%; /* Deep Sky Blue */
@@ -193,7 +193,7 @@ All colors MUST be HSL for consistent theming
     --accent-foreground: 210 51% 24%;
   }
 
-  .theme-dark_mode {
+  :root.theme-dark_mode {
     --background: 210 51% 8%;
     --foreground: 0 0% 98%;
     --primary: 197 71% 80%;
@@ -206,7 +206,7 @@ All colors MUST be HSL for consistent theming
     --card-foreground: 0 0% 95%;
   }
 
-  .theme-nature_green {
+  :root.theme-nature_green {
     /* Core brand */
     --primary: 142 76% 36%; /* Nature Green */
     --primary-foreground: 0 0% 100%;
@@ -228,7 +228,7 @@ All colors MUST be HSL for consistent theming
     --ring: 142 76% 36%;
   }
 
-  .theme-sunset_orange {
+  :root.theme-sunset_orange {
     /* Core brand */
     --primary: 24 95% 53%; /* Sunset Orange */
     --primary-foreground: 0 0% 100%;
@@ -250,7 +250,7 @@ All colors MUST be HSL for consistent theming
     --ring: 24 95% 53%;
   }
 
-  .theme-cosmic_purple {
+  :root.theme-cosmic_purple {
     /* Core brand */
     --primary: 258 90% 66%; /* Cosmic Purple */
     --primary-foreground: 0 0% 100%;
