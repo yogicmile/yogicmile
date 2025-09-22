@@ -161,8 +161,16 @@ export const useThemeCustomization = () => {
     root.classList.add(`theme-${theme.themeName}`);
     document.body.classList.add(`theme-${theme.themeName}`);
 
+    // Also set data-theme attributes for robust theming
+    root.setAttribute('data-theme', theme.themeName);
+    document.body.setAttribute('data-theme', theme.themeName);
+
     console.log('Root element classes after:', root.className);
     console.log('Body element classes after:', document.body.className);
+
+    // Log current computed background token for debugging
+    const styles = getComputedStyle(root);
+    console.log('Computed --background:', styles.getPropertyValue('--background'));
 
     // Apply accessibility settings
     if (theme.highContrast) {
