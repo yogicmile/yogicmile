@@ -4285,6 +4285,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_user_role: {
         Args: { p_user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -4313,6 +4317,18 @@ export type Database = {
       hash_otp: {
         Args: { plain_otp: string }
         Returns: string
+      }
+      is_challenge_creator: {
+        Args: { challenge_id_param: string }
+        Returns: boolean
+      }
+      is_family_member: {
+        Args: { plan_id_param: string }
+        Returns: boolean
+      }
+      is_family_plan_owner: {
+        Args: { plan_id_param: string }
+        Returns: boolean
       }
       log_admin_action: {
         Args: {
