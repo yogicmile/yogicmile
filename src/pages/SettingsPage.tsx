@@ -48,12 +48,13 @@ export function SettingsPage() {
 
   const handleThemeChange = async (themeName: string) => {
     console.log('Changing theme to:', themeName);
-    console.log('Current preferences:', preferences);
-    
+    const isDark = themeName === 'dark_mode';
+
     await updateTheme({
-      themeName: themeName as any
+      themeName: themeName as any,
+      darkMode: isDark,
     });
-    
+
     console.log('Theme changed successfully');
   };
 

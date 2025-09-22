@@ -129,98 +129,6 @@ export const useThemeCustomization = () => {
   const { user, isGuest } = useAuth();
   const { toast } = useToast();
 
-  // Load preferences from database
-  const loadPreferences = useCallback(async () => {
-    if (isGuest || !user) {
-      // Load from localStorage for guest users
-      const saved = localStorage.getItem('yogicmile-theme-preferences');
-      if (saved) {
-        try {
-          setPreferences({ ...DEFAULT_PREFERENCES, ...JSON.parse(saved) });
-        } catch {
-          setPreferences(DEFAULT_PREFERENCES);
-        }
-      }
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('customization_preferences')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (error && error.code !== 'PGRST116') throw error;
-
-      if (data) {
-        setPreferences({
-          themeSettings: (data.theme_settings as any) || DEFAULT_PREFERENCES.themeSettings,
-          layoutPreferences: (data.layout_preferences as any) || DEFAULT_PREFERENCES.layoutPreferences,
-          notificationConfig: (data.notification_config as any) || DEFAULT_PREFERENCES.notificationConfig,
-          accessibilitySettings: (data.accessibility_settings as any) || DEFAULT_PREFERENCES.accessibilitySettings,
-        });
-      }
-    } catch (error) {
-      console.error('Error loading preferences:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load customization preferences",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user, isGuest, toast]);
-
-  // Save preferences to database
-  const savePreferences = useCallback(async (newPreferences: Partial<CustomizationPreferences>) => {
-    const updatedPreferences = { ...preferences, ...newPreferences };
-    setPreferences(updatedPreferences);
-
-    if (isGuest) {
-      // Save to localStorage for guest users
-      localStorage.setItem('yogicmile-theme-preferences', JSON.stringify(updatedPreferences));
-      toast({
-        title: "Settings Saved",
-        description: "Your preferences have been saved locally",
-      });
-      return;
-    }
-
-    if (!user) return;
-
-    try {
-      setIsSaving(true);
-      const { error } = await supabase
-        .from('customization_preferences')
-        .upsert({
-          user_id: user.id,
-          theme_settings: updatedPreferences.themeSettings as any,
-          layout_preferences: updatedPreferences.layoutPreferences as any,
-          notification_config: updatedPreferences.notificationConfig as any,
-          accessibility_settings: updatedPreferences.accessibilitySettings as any,
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Settings Saved",
-        description: "Your customization preferences have been saved",
-      });
-    } catch (error) {
-      console.error('Error saving preferences:', error);
-      toast({
-        title: "Save Failed",
-        description: "Unable to save preferences. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  }, [preferences, user, isGuest, toast]);
-
   // Apply theme to document
   const applyTheme = useCallback((customPreferences?: CustomizationPreferences) => {
     const root = document.documentElement;
@@ -271,6 +179,107 @@ export const useThemeCustomization = () => {
     }
   }, [preferences]);
 
+  // Load preferences from database
+  const loadPreferences = useCallback(async () => {
+    if (isGuest || !user) {
+      // Load from localStorage for guest users
+      const saved = localStorage.getItem('yogicmile-theme-preferences');
+      if (saved) {
+        try {
+          const loadedPrefs = { ...DEFAULT_PREFERENCES, ...JSON.parse(saved) };
+          setPreferences(loadedPrefs);
+          // Apply theme immediately
+          setTimeout(() => applyTheme(loadedPrefs), 0);
+        } catch {
+          setPreferences(DEFAULT_PREFERENCES);
+        }
+      } else {
+        // Apply default theme for guest users
+        setTimeout(() => applyTheme(DEFAULT_PREFERENCES), 0);
+      }
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('customization_preferences')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') throw error;
+
+      if (data) {
+        const loadedPrefs = {
+          themeSettings: (data.theme_settings as any) || DEFAULT_PREFERENCES.themeSettings,
+          layoutPreferences: (data.layout_preferences as any) || DEFAULT_PREFERENCES.layoutPreferences,
+          notificationConfig: (data.notification_config as any) || DEFAULT_PREFERENCES.notificationConfig,
+          accessibilitySettings: (data.accessibility_settings as any) || DEFAULT_PREFERENCES.accessibilitySettings,
+        };
+        setPreferences(loadedPrefs);
+        // Apply theme immediately
+        setTimeout(() => applyTheme(loadedPrefs), 0);
+      }
+    } catch (error) {
+      console.error('Error loading preferences:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load customization preferences",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, isGuest, toast, applyTheme]);
+
+  // Save preferences to database
+  const savePreferences = useCallback(async (newPreferences: Partial<CustomizationPreferences>) => {
+    const updatedPreferences = { ...preferences, ...newPreferences };
+    setPreferences(updatedPreferences);
+
+    if (isGuest) {
+      // Save to localStorage for guest users
+      localStorage.setItem('yogicmile-theme-preferences', JSON.stringify(updatedPreferences));
+      toast({
+        title: "Settings Saved",
+        description: "Your preferences have been saved locally",
+      });
+      return;
+    }
+
+    if (!user) return;
+
+    try {
+      setIsSaving(true);
+      const { error } = await supabase
+        .from('customization_preferences')
+        .upsert({
+          user_id: user.id,
+          theme_settings: updatedPreferences.themeSettings as any,
+          layout_preferences: updatedPreferences.layoutPreferences as any,
+          notification_config: updatedPreferences.notificationConfig as any,
+          accessibility_settings: updatedPreferences.accessibilitySettings as any,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Settings Saved",
+        description: "Your customization preferences have been saved",
+      });
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+      toast({
+        title: "Save Failed",
+        description: "Unable to save preferences. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [preferences, user, isGuest, toast]);
+
   // Update theme settings
   const updateTheme = useCallback(async (themeSettings: Partial<ThemeSettings>) => {
     const newSettings = { ...preferences.themeSettings, ...themeSettings };
@@ -286,25 +295,6 @@ export const useThemeCustomization = () => {
       themeSettings: newSettings,
     });
   }, [preferences, savePreferences, applyTheme]);
-
-  // Reset to defaults
-  const resetToDefaults = useCallback(async () => {
-    await savePreferences(DEFAULT_PREFERENCES);
-    toast({
-      title: "Reset Complete",
-      description: "All customization settings have been reset to defaults",
-    });
-  }, [savePreferences, toast]);
-
-  // Load preferences on mount
-  useEffect(() => {
-    loadPreferences();
-  }, [loadPreferences]);
-
-  // Apply theme whenever preferences change
-  useEffect(() => {
-    applyTheme();
-  }, [applyTheme]);
 
   // Update layout preferences
   const updateLayout = useCallback(async (layoutPreferences: Partial<LayoutPreferences>) => {
@@ -330,15 +320,19 @@ export const useThemeCustomization = () => {
     });
   }, [preferences, savePreferences]);
 
+  // Reset to defaults
+  const resetToDefaults = useCallback(async () => {
+    await savePreferences(DEFAULT_PREFERENCES);
+    toast({
+      title: "Reset Complete",
+      description: "All customization settings have been reset to defaults",
+    });
+  }, [savePreferences, toast]);
+
   // Load preferences on mount
   useEffect(() => {
     loadPreferences();
   }, [loadPreferences]);
-
-  // Apply theme whenever preferences change
-  useEffect(() => {
-    applyTheme();
-  }, [applyTheme]);
 
   return {
     // State
