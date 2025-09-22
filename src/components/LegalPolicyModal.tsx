@@ -21,74 +21,119 @@ export const LegalPolicyModal: React.FC<LegalPolicyModalProps> = ({
   const [activeTab, setActiveTab] = useState(initialTab);
 
   const privacyPolicyContent = {
-    lastUpdated: "September 18, 2025",
-    version: "2.0",
+    lastUpdated: "September 22, 2025",
+    version: "3.0",
     sections: [
       {
         title: "Information We Collect",
-        content: `We collect information you provide directly to us, such as:
-        • Mobile phone number for authentication
-        • Optional email address for account recovery
-        • Physical address for location-based services and advertisements
-        • Step count data from your device's sensors
-        • Transaction history for wallet management
-        • Referral network information`
+        content: `We may collect the following types of information:
+
+a) Personal Information (provided by you)
+• Mobile number (mandatory, used as User ID, login, and referral ID)
+• Name (optional, for personalization)
+• Email ID (optional, for communication and backup login)
+• Residential Address (optional, helps deliver local coupons, discounts, and location-based ads)
+• Password or OTP (for secure login)
+
+b) Activity Information (collected automatically)
+• Daily step count and activity data from device sensors or APIs
+• Coins earned, rewards redeemed, challenges joined, and progress status
+• Login history and in-app actions
+
+c) Technical & Device Information
+• Device model, operating system version, browser type
+• IP address and approximate geolocation
+• Crash reports, error logs, and performance analytics
+• Advertising identifiers (if applicable)`
       },
       {
-        title: "How We Use Your Information",
-        content: `We use your information to:
-        • Provide and maintain the Yogic Mile service
-        • Process step tracking and reward calculations
-        • Send location-based advertisements and offers
-        • Detect and prevent fraudulent activities
-        • Communicate with you about your account
-        • Improve our services through analytics`
+        title: "Why We Collect Your Data",
+        content: `We use your data for the following purposes:
+
+1. Core App Features – To track steps, calculate rewards, and maintain your wallet.
+2. Rewards & Redemptions – To process coin earnings, vouchers, and coupon redemptions.
+3. Personalization – To deliver ads, offers, and coupons based on your region and preferences.
+4. Account Management – To verify identity, manage referrals, and secure your account.
+5. Communication – To send notifications about progress, offers, and achievements.
+6. Safety & Security – To detect fraud, prevent fake step entries, and block misuse.
+7. Analytics – To improve app performance, measure engagement, and plan new features.
+8. Legal Compliance – To comply with Indian government or court requirements.`
       },
       {
-        title: "Information Sharing",
-        content: `We may share your information with:
-        • Trusted partners for reward fulfillment
-        • Advertisers for relevant local deals (anonymized data only)
-        • Law enforcement when required by law
-        • Service providers who assist in our operations
-        
-        We never sell your personal information to third parties.`
+        title: "Sharing of Information",
+        content: `We do not sell your personal data. Information is shared only in limited circumstances:
+
+• With service providers (e.g., SMS gateways, hosting, analytics, reward partners) under strict confidentiality.
+• With advertisers and merchants (only aggregated, non-personal insights like "5,000 users in Hyderabad achieved 10,000 steps this week").
+• With government authorities when legally required under the IT Act, 2000 or other applicable laws.
+• With successor businesses in case of merger, acquisition, or restructuring (with prior notice to users).`
       },
       {
-        title: "Data Security",
-        content: `We implement strong security measures:
-        • End-to-end encryption for sensitive data
-        • Secure OTP authentication system
-        • Advanced fraud detection algorithms
-        • Regular security audits and monitoring
-        • Secure data storage with backup protection`
+        title: "Data Storage & Security",
+        content: `• Data is stored in secure, encrypted servers located in India or compliant jurisdictions.
+• Passwords are hashed; sensitive information is encrypted both in transit and at rest.
+• Access to personal data is limited to authorized employees and partners under NDAs.
+• Regular security audits and penetration tests are performed.
+• Despite our best efforts, no system is 100% secure. Users must also practice caution (e.g., don't share OTPs).`
       },
       {
-        title: "Your Rights",
-        content: `Under GDPR, you have the right to:
-        • Access your personal data
-        • Correct inaccurate information
-        • Delete your account and data
-        • Export your data in a machine-readable format
-        • Withdraw consent for data processing
-        • File complaints with data protection authorities`
+        title: "User Rights & Controls",
+        content: `As a user, you have rights:
+
+• Access & Update – Edit your profile (mobile, name, email, address).
+• Data Portability – Request a copy of your data in a readable format.
+• Opt-Out – Stop receiving promotional notifications/ads.
+• Delete Account – Request account deletion; your personal data will be removed within 90 days (except where legally required).
+• Withdraw Consent – You may withdraw your consent to data use at any time by contacting support, though core app functions may stop working.`
+      },
+      {
+        title: "Children's Privacy",
+        content: `• Yogic Mile is not intended for children under 13.
+• Users aged 13–17 must have parental or guardian consent.
+• We do not knowingly collect data from minors without consent.`
+      },
+      {
+        title: "Cookies & Tracking Technologies",
+        content: `• We may use cookies, local storage, and tracking pixels to store preferences and measure app performance.
+• Third-party analytics tools may also use such technologies, but only for legitimate app improvement.`
       },
       {
         title: "Data Retention",
-        content: `We retain your data as follows:
-        • Active account data: While your account is active
-        • Transaction records: 7 years for legal compliance
-        • Security logs: 3 years for fraud prevention
-        • Deleted account data: Permanently removed within 90 days
-        • Anonymous analytics: Indefinitely for service improvement`
+        content: `• We retain your personal data as long as your account is active.
+• Deleted accounts → Data erased within 90 days.
+• Transactional data (e.g., redemptions, payments) may be kept longer for compliance.`
       },
       {
-        title: "Contact Information",
-        content: `For privacy-related inquiries:
-        • Email: privacy@yogicmile.com
-        • Data Protection Officer: dpo@yogicmile.com
-        • Postal Address: [Your Company Address]
-        • Response time: Within 30 days as required by law`
+        title: "Third-Party Links & Services",
+        content: `• Our app may show third-party ads, coupons, or links.
+• Clicking such links takes you outside Yogic Mile; we are not responsible for their privacy practices.
+• Users should read the privacy policies of those services separately.`
+      },
+      {
+        title: "Legal Basis for Processing (India)",
+        content: `We process your data under:
+
+• Consent – By signing up, you consent to data collection.
+• Contract – To provide rewards and step tracking services.
+• Legal Obligation – To comply with IT Act, 2000 & SPDI Rules, 2011.
+• Legitimate Interest – Fraud prevention, app improvement, analytics.`
+      },
+      {
+        title: "Grievance Officer (As per IT Act, 2000)",
+        content: `If you have privacy-related concerns, complaints, or queries, you may contact our Grievance Officer:
+
+Name: [Appoint Official Name]
+Email: [Insert Support Email]
+Address: [Insert Registered Office Address]
+Phone: [Insert Contact Number]`
+      },
+      {
+        title: "Changes to this Policy",
+        content: `We may update this Privacy Policy from time to time. Major changes will be notified via in-app alert, SMS, or email. Continued use after updates means acceptance of the revised terms.
+
+Yogic Mile may update or revise this Privacy Policy from time to time to reflect changes in legal requirements, technology, or business practices. Any such updates will be published in the "Privacy Policy" section of the app.
+
+Users are advised to check this section frequently. Continued use of the app after any modifications shall be deemed as acceptance of the updated policy.`
       }
     ]
   };
