@@ -1,5 +1,5 @@
-import React from 'react';
-import { User, Settings, Share2, LogOut, Trophy, Calendar, Target } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Settings, Share2, LogOut, Trophy, Calendar, Target, Shield } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,15 +8,24 @@ import { ReferralCard } from '@/components/ReferralCard';
 import { DynamicAdBanner } from '@/components/DynamicAdBanner';
 import { HelpCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { LegalPolicyModal } from '@/components/LegalPolicyModal';
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
+  const [showLegalModal, setShowLegalModal] = useState(false);
+  const [legalModalTab, setLegalModalTab] = useState<'privacy' | 'terms'>('privacy');
+  
   const userStats = {
     totalSteps: 847500,
     totalCoins: 12450,
     currentStreak: 15,
     joinDate: 'January 2024',
     currentPhase: 'Gem Phase 💎'
+  };
+
+  const openLegalModal = (tab: 'privacy' | 'terms') => {
+    setLegalModalTab(tab);
+    setShowLegalModal(true);
   };
 
   const menuItems = [
@@ -43,6 +52,12 @@ export const ProfilePage = () => {
       label: 'Goals',
       description: 'Set daily step targets',
       action: () => navigate('/goals')
+    },
+    {
+      icon: <Shield className="w-5 h-5" />,
+      label: 'Legal & Privacy',
+      description: 'Privacy Policy & Terms of Service',
+      action: () => openLegalModal('privacy')
     },
     {
       icon: <HelpCircle className="w-5 h-5" />,
@@ -148,6 +163,12 @@ export const ProfilePage = () => {
         {/* Bottom Ad Banner */}
         <DynamicAdBanner position="bottom" page="profile" />
       </div>
+
+      <LegalPolicyModal
+        isOpen={showLegalModal}
+        onClose={() => setShowLegalModal(false)}
+        initialTab={legalModalTab}
+      />
     </div>
   );
 };
