@@ -207,30 +207,69 @@ All colors MUST be HSL for consistent theming
   }
 
   .theme-nature_green {
+    /* Core brand */
     --primary: 142 76% 36%; /* Nature Green */
     --primary-foreground: 0 0% 100%;
     --secondary: 142 69% 58%; /* Light Green */
     --secondary-foreground: 0 0% 100%;
     --accent: 51 100% 50%; /* Golden Yellow */
     --accent-foreground: 210 51% 24%;
+
+    /* Surfaces */
+    --background: 160 100% 97%; /* Minty light */
+    --foreground: 160 25% 16%; /* Deep evergreen */
+    --card: 0 0% 100%;
+    --card-foreground: 160 25% 16%;
+
+    /* UI tokens */
+    --muted: 160 60% 96%;
+    --muted-foreground: 160 10% 35%;
+    --border: 160 30% 85%;
+    --ring: 142 76% 36%;
   }
 
   .theme-sunset_orange {
+    /* Core brand */
     --primary: 24 95% 53%; /* Sunset Orange */
     --primary-foreground: 0 0% 100%;
     --secondary: 20 90% 48%; /* Dark Orange */
     --secondary-foreground: 0 0% 100%;
     --accent: 51 100% 50%; /* Golden Yellow */
     --accent-foreground: 210 51% 24%;
+
+    /* Surfaces */
+    --background: 33 100% 96%; /* Warm light */
+    --foreground: 20 35% 16%; /* Deep brown/orange */
+    --card: 0 0% 100%;
+    --card-foreground: 20 35% 16%;
+
+    /* UI tokens */
+    --muted: 33 100% 95%;
+    --muted-foreground: 20 15% 38%;
+    --border: 28 60% 80%;
+    --ring: 24 95% 53%;
   }
 
   .theme-cosmic_purple {
+    /* Core brand */
     --primary: 258 90% 66%; /* Cosmic Purple */
     --primary-foreground: 0 0% 100%;
     --secondary: 262 83% 58%; /* Deep Purple */
     --secondary-foreground: 0 0% 100%;
     --accent: 51 100% 50%; /* Golden Yellow */
     --accent-foreground: 210 51% 24%;
+
+    /* Surfaces */
+    --background: 262 100% 97%; /* Lavender light */
+    --foreground: 258 30% 20%; /* Deep purple text */
+    --card: 0 0% 100%;
+    --card-foreground: 258 30% 20%;
+
+    /* UI tokens */
+    --muted: 262 70% 96%;
+    --muted-foreground: 258 15% 40%;
+    --border: 260 30% 85%;
+    --ring: 258 90% 66%;
   }
 }
 
