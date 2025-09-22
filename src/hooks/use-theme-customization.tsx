@@ -141,18 +141,28 @@ export const useThemeCustomization = () => {
     // Apply CSS custom properties based on theme
     if (theme.darkMode) {
       root.classList.add('dark');
+      document.body.classList.add('dark');
     } else {
       root.classList.remove('dark');
+      document.body.classList.remove('dark');
     }
 
-    // Apply theme-specific CSS classes
-    root.className = root.className
-      .split(' ')
-      .filter(cls => !cls.startsWith('theme-'))
-      .join(' ');
+    // Apply theme-specific CSS classes on both html and body
+    const clearThemeClasses = (el: HTMLElement) => {
+      el.className = el.className
+        .split(' ')
+        .filter(cls => cls && !cls.startsWith('theme-'))
+        .join(' ');
+    };
+
+    clearThemeClasses(root);
+    clearThemeClasses(document.body);
+
     root.classList.add(`theme-${theme.themeName}`);
+    document.body.classList.add(`theme-${theme.themeName}`);
 
     console.log('Root element classes after:', root.className);
+    console.log('Body element classes after:', document.body.className);
 
     // Apply accessibility settings
     if (theme.highContrast) {
