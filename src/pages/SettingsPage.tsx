@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Settings, Palette, Mail, Shield, Bell, Info } from 'lucide-react';
+import { ArrowLeft, Settings, Palette, Mail, Shield, Bell, Info, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { EmailPreferencesSettings } from '@/components/features/EmailPreferencesSettings';
 import { useThemeCustomization } from '@/hooks/use-theme-customization';
@@ -12,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BetaFeedbackSystem } from '@/components/beta-testing/BetaFeedbackSystem';
 import { VersionManager } from '@/components/app-info/VersionManager';
+import { LegalPolicyModal } from '@/components/LegalPolicyModal';
+import { ConsentManager } from '@/components/ConsentManager';
 
 export function SettingsPage() {
   const navigate = useNavigate();
@@ -35,6 +37,14 @@ export function SettingsPage() {
     weeklyReports: true,
     marketingEmails: false
   });
+
+  const [showLegalModal, setShowLegalModal] = useState(false);
+  const [legalModalTab, setLegalModalTab] = useState<'privacy' | 'terms'>('privacy');
+
+  const openLegalModal = (tab: 'privacy' | 'terms') => {
+    setLegalModalTab(tab);
+    setShowLegalModal(true);
+  };
 
   const handleThemeChange = async (themeName: string) => {
     await updateTheme({
@@ -73,7 +83,7 @@ export function SettingsPage() {
         </div>
 
         <Tabs defaultValue="appearance" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="appearance" className="flex items-center gap-1">
               <Palette className="w-4 h-4" />
               <span className="hidden sm:inline">Theme</span>
@@ -85,6 +95,10 @@ export function SettingsPage() {
             <TabsTrigger value="email" className="flex items-center gap-1">
               <Mail className="w-4 h-4" />
               <span className="hidden sm:inline">Email</span>
+            </TabsTrigger>
+            <TabsTrigger value="privacy" className="flex items-center gap-1">
+              <Shield className="w-4 h-4" />
+              <span className="hidden sm:inline">Legal</span>
             </TabsTrigger>
             <TabsTrigger value="about" className="flex items-center gap-1">
               <Info className="w-4 h-4" />
@@ -278,6 +292,61 @@ export function SettingsPage() {
             <EmailPreferencesSettings />
           </TabsContent>
 
+          {/* Privacy & Legal */}
+          <TabsContent value="privacy" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-primary" />
+                  Privacy & Legal Documents
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Access our Privacy Policy and Terms & Conditions
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => openLegalModal('privacy')}
+                    className="justify-start h-auto p-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Shield className="w-5 h-5 text-primary" />
+                      <div className="text-left">
+                        <div className="font-medium">Privacy Policy</div>
+                        <div className="text-sm text-muted-foreground">
+                          Learn how we protect and use your data
+                        </div>
+                      </div>
+                    </div>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => openLegalModal('terms')}
+                    className="justify-start h-auto p-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-secondary" />
+                      <div className="text-left">
+                        <div className="font-medium">Terms & Conditions</div>
+                        <div className="text-sm text-muted-foreground">
+                          Review our usage terms and conditions
+                        </div>
+                      </div>
+                    </div>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <ConsentManager 
+              mode="settings"
+              className="animate-fade-in"
+            />
+          </TabsContent>
+
           {/* About & Version Info */}
           <TabsContent value="about">
             <VersionManager />
@@ -287,6 +356,12 @@ export function SettingsPage() {
         {/* Beta Feedback System */}
         <BetaFeedbackSystem />
       </div>
+
+      <LegalPolicyModal
+        isOpen={showLegalModal}
+        onClose={() => setShowLegalModal(false)}
+        initialTab={legalModalTab}
+      />
     </div>
   );
 }
