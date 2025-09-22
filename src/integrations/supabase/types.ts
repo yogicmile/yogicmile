@@ -2843,34 +2843,46 @@ export type Database = {
       }
       referrals_new: {
         Row: {
-          created_at: string
+          bonus_paid: boolean | null
+          completed_at: string | null
+          created_at: string | null
           id: string
-          referee_bonus_paisa: number
+          minimum_steps_required: number | null
           referee_mobile: string
-          referrer_bonus_paisa: number
+          referee_user_id: string | null
+          referral_code: string
           referrer_mobile: string
+          referrer_user_id: string | null
           status: string
-          updated_at: string
+          steps_completed: number | null
         }
         Insert: {
-          created_at?: string
+          bonus_paid?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
           id?: string
-          referee_bonus_paisa?: number
+          minimum_steps_required?: number | null
           referee_mobile: string
-          referrer_bonus_paisa?: number
+          referee_user_id?: string | null
+          referral_code: string
           referrer_mobile: string
+          referrer_user_id?: string | null
           status?: string
-          updated_at?: string
+          steps_completed?: number | null
         }
         Update: {
-          created_at?: string
+          bonus_paid?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
           id?: string
-          referee_bonus_paisa?: number
+          minimum_steps_required?: number | null
           referee_mobile?: string
-          referrer_bonus_paisa?: number
+          referee_user_id?: string | null
+          referral_code?: string
           referrer_mobile?: string
+          referrer_user_id?: string | null
           status?: string
-          updated_at?: string
+          steps_completed?: number | null
         }
         Relationships: []
       }
@@ -3079,33 +3091,39 @@ export type Database = {
       }
       share_logs: {
         Row: {
+          analytics_data: Json | null
           content_shared: string | null
-          created_at: string
           id: string
+          ip_address: unknown | null
           platform: string | null
           share_context: string | null
           share_type: string
-          timestamp: string
+          shared_at: string | null
+          user_agent: string | null
           user_id: string
         }
         Insert: {
+          analytics_data?: Json | null
           content_shared?: string | null
-          created_at?: string
           id?: string
+          ip_address?: unknown | null
           platform?: string | null
           share_context?: string | null
           share_type: string
-          timestamp?: string
+          shared_at?: string | null
+          user_agent?: string | null
           user_id: string
         }
         Update: {
+          analytics_data?: Json | null
           content_shared?: string | null
-          created_at?: string
           id?: string
+          ip_address?: unknown | null
           platform?: string | null
           share_context?: string | null
           share_type?: string
-          timestamp?: string
+          shared_at?: string | null
+          user_agent?: string | null
           user_id?: string
         }
         Relationships: []
@@ -4331,6 +4349,10 @@ export type Database = {
         }
         Returns: Json
       }
+      generate_referral_code: {
+        Args: { mobile_number_param: string }
+        Returns: string
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -4396,6 +4418,16 @@ export type Database = {
           p_user_id: string
         }
         Returns: undefined
+      }
+      log_social_share: {
+        Args: {
+          p_content?: string
+          p_context?: string
+          p_platform: string
+          p_share_type: string
+          p_user_id: string
+        }
+        Returns: string
       }
       process_spin_result: {
         Args: {
