@@ -341,18 +341,18 @@ All colors MUST be HSL for consistent theming
   /* Enhanced Mobile Dashboard Components - Sky Blue Theme */
   .dashboard-card {
     @apply backdrop-blur-md rounded-2xl p-5 border;
-    background: rgba(255, 255, 255, 0.95);
-    border-color: hsl(197 71% 85%);
-    box-shadow: 0 4px 16px -4px hsl(195 100% 50% / 0.08);
+    background: hsl(var(--card));
+    border-color: hsl(var(--border));
+    box-shadow: 0 4px 16px -4px hsl(var(--ring) / 0.08);
     transition: all 0.3s ease;
   }
 
   .stat-card {
     @apply dashboard-card hover:shadow-premium transition-all duration-500 hover:-translate-y-1 hover:scale-[1.02];
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.98);
+    background: hsl(var(--card));
     backdrop-filter: blur(12px);
-    border: 1px solid hsl(197 71% 85%);
+    border: 1px solid hsl(var(--border));
     min-height: 44px; /* Touch target */
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -364,8 +364,8 @@ All colors MUST be HSL for consistent theming
 
   .ad-banner {
     @apply rounded-xl p-4 border border-border/30;
-    background: hsl(208 100% 98%);
-    box-shadow: 0 2px 8px -2px hsl(195 100% 50% / 0.04);
+    background: hsl(var(--muted));
+    box-shadow: 0 2px 8px -2px hsl(var(--ring) / 0.04);
     backdrop-filter: blur(8px);
   }
 
@@ -413,7 +413,7 @@ All colors MUST be HSL for consistent theming
            hover:scale-[1.02] active:scale-[0.98] active:opacity-90 backdrop-blur-sm;
     font-size: 1.1rem;
     letter-spacing: 0.025em;
-    background: linear-gradient(135deg, hsl(195 100% 50%), hsl(197 71% 73%)); /* Deep Sky Blue to Sky Blue */
+    background: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--primary)));
     color: white;
     min-height: 52px;
     border: none;
@@ -430,29 +430,29 @@ All colors MUST be HSL for consistent theming
 
   /* Golden Redeem Button Variant */
   .cta-golden {
-    background: linear-gradient(135deg, hsl(51 100% 50%), hsl(45 100% 50%));
-    color: hsl(210 51% 24%); /* Dark navy text */
+    background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent)));
+    color: hsl(var(--accent-foreground));
     box-shadow: var(--shadow-golden);
   }
   
   .cta-golden:hover {
-    box-shadow: 0 12px 30px -8px hsl(51 100% 50% / 0.35);
+    box-shadow: 0 12px 30px -8px hsl(var(--accent) / 0.35);
   }
 
   /* Olive-themed Secondary Button */
   .btn-secondary {
     @apply border-2 font-semibold py-3 px-6 rounded-xl transition-all duration-300
            hover:scale-[1.02] active:scale-[0.98] active:opacity-90;
-    border-color: hsl(76 47% 36%);
-    color: hsl(76 47% 36%);
+    border-color: hsl(var(--primary));
+    color: hsl(var(--primary));
     background: transparent;
     min-height: 44px;
     -webkit-tap-highlight-color: transparent;
   }
   
   .btn-secondary:hover {
-    background: hsl(76 47% 36%);
-    color: white;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
   }
 
   /* Mobile-Optimized Navigation Cards */
@@ -477,19 +477,19 @@ All colors MUST be HSL for consistent theming
 
   /* Sky Blue Tab Navigation */
   .tab-active {
-    background: hsl(195 100% 50%); /* Deep Sky Blue for active */
-    color: white;
-    box-shadow: 0 4px 12px -2px hsl(195 100% 50% / 0.25);
+    background: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
+    box-shadow: 0 4px 12px -2px hsl(var(--ring) / 0.25);
   }
 
   .tab-inactive {
     @apply text-muted-foreground hover:text-foreground;
     background: transparent;
-    color: hsl(214 20% 69%); /* Inactive gray #A0AEC0 */
+    color: hsl(var(--muted-foreground));
   }
   
   .tab-inactive:hover {
-    background: hsl(208 100% 95%); /* Very light sky blue hover */
+    background: hsl(var(--muted));
   }
 
   /* White Bottom Navigation with Olive Accents */
@@ -502,7 +502,7 @@ All colors MUST be HSL for consistent theming
     max-width: 428px;
     background: rgba(255, 255, 255, 0.98); /* White background */
     backdrop-filter: blur(16px);
-    border-top: 1px solid hsl(76 47% 36% / 0.2); /* Light olive border */
+    border-top: 1px solid hsl(var(--border) / 0.2); /* Themed border */
     padding: 0.5rem 1.5rem;
     padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 8px));
     z-index: 50;
