@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { EnhancedBottomNavigation } from '@/components/EnhancedBottomNavigation';
 import { FloatingHelpButton } from '@/components/FloatingHelpButton';
+import { ThemeInitializer } from '@/components/ThemeInitializer';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -70,6 +71,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Theme bootstrapper */}
+      <ThemeInitializer />
+
       {/* Main content */}
       <main className={hideBottomNav ? "" : "pb-32"}> {/* Add bottom padding only when nav is shown */}
         {children}
