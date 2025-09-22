@@ -3146,6 +3146,48 @@ export type Database = {
         }
         Relationships: []
       }
+      spin_cooldowns: {
+        Row: {
+          available_spins: number | null
+          bonus_spins: number | null
+          cooldown_ends_at: string | null
+          created_at: string | null
+          id: string
+          last_free_spin_date: string | null
+          last_spin_time: string | null
+          premium_weekly_reset_date: string | null
+          premium_weekly_spin_used: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          available_spins?: number | null
+          bonus_spins?: number | null
+          cooldown_ends_at?: string | null
+          created_at?: string | null
+          id?: string
+          last_free_spin_date?: string | null
+          last_spin_time?: string | null
+          premium_weekly_reset_date?: string | null
+          premium_weekly_spin_used?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          available_spins?: number | null
+          bonus_spins?: number | null
+          cooldown_ends_at?: string | null
+          created_at?: string | null
+          id?: string
+          last_free_spin_date?: string | null
+          last_spin_time?: string | null
+          premium_weekly_reset_date?: string | null
+          premium_weekly_spin_used?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       spin_results: {
         Row: {
           created_at: string
@@ -4269,6 +4311,10 @@ export type Database = {
       }
     }
     Functions: {
+      check_spin_availability: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       earn_steps: {
         Args: { p_steps: number; p_user_id: string }
         Returns: string
@@ -4350,6 +4396,16 @@ export type Database = {
           p_user_id: string
         }
         Returns: undefined
+      }
+      process_spin_result: {
+        Args: {
+          p_bonus_spin_awarded?: boolean
+          p_reward_amount: number
+          p_reward_description: string
+          p_reward_type: string
+          p_user_id: string
+        }
+        Returns: Json
       }
       verify_hashed_otp: {
         Args: { hashed_otp: string; plain_otp: string }
