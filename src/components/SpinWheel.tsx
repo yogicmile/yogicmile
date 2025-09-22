@@ -16,12 +16,11 @@ interface SpinReward {
 }
 
 const spinRewards: SpinReward[] = [
-  { type: 'paisa', amount: 25, description: '+25 paisa', probability: 30, color: 'hsl(var(--tier-1-paisa))' },
-  { type: 'paisa', amount: 50, description: '+50 paisa', probability: 25, color: 'hsl(var(--tier-2-rupaya))' },
-  { type: 'paisa', amount: 100, description: '+100 paisa', probability: 20, color: 'hsl(var(--tier-3-token))' },
-  { type: 'paisa', amount: 200, description: '+200 paisa', probability: 15, color: 'hsl(var(--tier-4-gem))' },
-  { type: 'coupon', amount: 0, description: 'Discount Coupon', probability: 5, color: 'hsl(var(--tier-5-diamond))' },
-  { type: 'better_luck', amount: 0, description: 'Better Luck', probability: 5, color: 'hsl(var(--muted))' },
+  { type: 'paisa', amount: 10, description: '+10 paisa', probability: 30, color: 'hsl(var(--tier-1-paisa))' },
+  { type: 'paisa', amount: 25, description: '+25 paisa', probability: 25, color: 'hsl(var(--tier-2-rupaya))' },
+  { type: 'paisa', amount: 50, description: '+50 paisa', probability: 20, color: 'hsl(var(--tier-3-token))' },
+  { type: 'paisa', amount: 100, description: '+100 paisa', probability: 15, color: 'hsl(var(--tier-4-gem))' },
+  { type: 'bonus_spin', amount: 0, description: 'Bonus Spin', probability: 10, color: 'hsl(var(--tier-5-diamond))' },
 ];
 
 interface SpinWheelProps {
@@ -78,50 +77,43 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ dailySteps, canSpin, onSpi
       
       if (user) {
         try {
-          // Save spin result to database
-          const today = new Date().toISOString().split('T')[0];
-          await supabase.from('spin_results').insert({
-            user_id: user.id,
-            date: today,
-            reward_type: reward.type,
-            reward_amount: reward.amount,
-            reward_description: reward.description,
+          // Process spin result using database function
+          const { data: result, error } = await supabase.rpc('process_spin_result', {
+            p_user_id: user.id,
+            p_reward_type: reward.type,
+            p_reward_amount: reward.amount,
+            p_reward_description: reward.description,
+            p_bonus_spin_awarded: reward.type === 'bonus_spin'
           });
 
-          // Apply reward if applicable
-          if (reward.type === 'paisa' && reward.amount > 0) {
-            await supabase.from('transactions').insert({
-              user_id: user.id,
-              type: 'spin_wheel',
-              amount: reward.amount,
-              description: `Spin wheel bonus: ${reward.description}`,
+          if (error) {
+            console.error('Error processing spin result:', error);
+            toast({
+              title: "Error",
+              description: "Failed to save spin result. Please try again.",
+              variant: "destructive",
             });
+            return;
+          }
 
-            // Update wallet balance
-            const { data: currentBalance } = await supabase
-              .from('wallet_balances')
-              .select('total_balance, total_earned')
-              .eq('user_id', user.id)
-              .single();
-
-            if (currentBalance) {
-              await supabase.from('wallet_balances')
-                .update({ 
-                  total_balance: currentBalance.total_balance + reward.amount,
-                  total_earned: currentBalance.total_earned + reward.amount,
-                  last_updated: new Date().toISOString()
-                })
-                .eq('user_id', user.id);
-            }
+          let toastMessage = `You won: ${reward.description}`;
+          if (reward.type === 'bonus_spin') {
+            toastMessage += " - Extra spin added!";
           }
 
           toast({
-            title: "Spin complete!",
-            description: `You won: ${reward.description}`,
-            variant: reward.amount > 0 ? "default" : "destructive",
+            title: "Spin complete! 🎉",
+            description: toastMessage,
+            variant: "default",
           });
+
         } catch (error) {
-          console.error('Error saving spin result:', error);
+          console.error('Error processing spin:', error);
+          toast({
+            title: "Error",
+            description: "Something went wrong. Please try again.",
+            variant: "destructive",
+          });
         }
       }
       
