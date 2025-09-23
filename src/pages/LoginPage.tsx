@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MobileOTPLogin } from '@/components/MobileOTPLogin';
+import { EmailPasswordLogin } from '@/components/EmailPasswordLogin';
 import { useAuth } from '@/contexts/AuthContext';
+import { Mail, Smartphone, LogIn } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { enterGuestMode } = useAuth();
+  const [activeTab, setActiveTab] = useState("otp");
 
   const handleLoginSuccess = () => {
     navigate('/');
@@ -15,6 +19,14 @@ export default function LoginPage() {
 
   const handleSwitchToSignup = () => {
     navigate('/signup');
+  };
+
+  const handleSwitchToOTP = () => {
+    setActiveTab("otp");
+  };
+
+  const handleSwitchToEmail = () => {
+    setActiveTab("email");
   };
 
   const handleGuestMode = () => {
@@ -38,11 +50,35 @@ export default function LoginPage() {
         </CardHeader>
 
         <CardContent>
-          <MobileOTPLogin
-            onSuccess={handleLoginSuccess}
-            onSwitchToSignup={handleSwitchToSignup}
-            className="border-0 shadow-none"
-          />
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="otp" className="flex items-center gap-2">
+                <Smartphone className="h-4 w-4" />
+                Mobile OTP
+              </TabsTrigger>
+              <TabsTrigger value="email" className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Email Login
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="otp" className="mt-6">
+              <MobileOTPLogin
+                onSuccess={handleLoginSuccess}
+                onSwitchToSignup={handleSwitchToSignup}
+                className="border-0 shadow-none"
+              />
+            </TabsContent>
+
+            <TabsContent value="email" className="mt-6">
+              <EmailPasswordLogin
+                onSuccess={handleLoginSuccess}
+                onSwitchToOTP={handleSwitchToOTP}
+                onSwitchToSignup={handleSwitchToSignup}
+                className="border-0 shadow-none"
+              />
+            </TabsContent>
+          </Tabs>
 
           <div className="mt-6 text-center">
             <Button
