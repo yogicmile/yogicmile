@@ -51,6 +51,7 @@ const LazyRewardsTestPage = lazy(() => import('./pages/RewardsTestPage').then(m 
 const LazySpinWheelTestPage = lazy(() => import('./pages/SpinWheelTestPage').then(m => ({ default: m.SpinWheelTestPage })));
 const LazyLocationTestPage = lazy(() => import('./pages/LocationTestPage').then(m => ({ default: m.LocationTestPage })));
 const LazyReferralTestPage = lazy(() => import('./pages/ReferralTestPage').then(m => ({ default: m.ReferralTestPage })));
+const LazySupportTestPage = lazy(() => import('./pages/SupportTestPage').then(m => ({ default: m.SupportTestPage })));
 
 const queryClient = new QueryClient();
 
@@ -103,6 +104,7 @@ const App = () => (
                       <Route path="goals" element={<GoalsPage />} />
                       <Route path="referral" element={<ReferralPage />} />
                       <Route path="help" element={<HelpPage />} />
+                      <Route path="support-testing" element={<Suspense fallback={null}><LazySupportTestPage /></Suspense>} />
                       <Route path="calculation-review" element={<CalculationReview />} />
                       <Route path="step-tracking-test" element={<Suspense fallback={null}><LazyStepTrackingTestPage /></Suspense>} />
                       <Route path="phase-testing" element={<Suspense fallback={null}><LazyPhaseTestingPage /></Suspense>} />
