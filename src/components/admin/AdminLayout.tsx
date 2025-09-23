@@ -26,6 +26,7 @@ const sidebarItems = [
   { icon: Shield, label: 'Moderation', path: '/admin/moderation' },
   { icon: BarChart3, label: 'Analytics', path: '/admin/analytics' },
   { icon: Settings, label: 'Settings', path: '/admin/settings' },
+  { icon: Settings, label: 'Testing Suite', path: '/admin/testing' },
 ];
 
 export const AdminLayout: React.FC = () => {

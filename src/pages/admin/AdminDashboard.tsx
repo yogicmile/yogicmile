@@ -16,6 +16,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { AdminTestingQuickActions } from '@/components/admin/AdminTestingQuickActions';
 
 interface DashboardStats {
   totalUsers: number;
@@ -294,6 +295,9 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Admin Testing Suite */}
+      <AdminTestingQuickActions />
 
       {/* System Alerts */}
       {alerts.length > 0 && (
