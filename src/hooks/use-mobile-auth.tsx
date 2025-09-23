@@ -167,14 +167,14 @@ export const useMobileAuth = () => {
 
       const formatted = formatMobileNumber(formData.mobileNumber);
       
-      // Check if user already exists
-      const { data: existingUser } = await supabase
+      // Check if user already exists using a more permissive approach
+      const { data: existingUsers } = await supabase
         .from('users')
         .select('id, mobile_number')
         .eq('mobile_number', formatted)
-        .single();
+        .limit(1);
 
-      if (existingUser) {
+      if (existingUsers && existingUsers.length > 0) {
         await Haptics.impact({ style: ImpactStyle.Medium });
         toast({
           title: "User Exists",
