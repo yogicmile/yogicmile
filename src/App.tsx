@@ -55,6 +55,7 @@ const LazySupportTestPage = lazy(() => import('./pages/SupportTestPage').then(m 
 const LazyAdminTestPage = lazy(() => import('./pages/admin/AdminTestPage').then(m => ({ default: m.AdminTestPage })));
 const LazySecurityTestPage = lazy(() => import('./pages/SecurityTestPage').then(m => ({ default: m.SecurityTestPage })));
 const LazyPerformanceTestPage = lazy(() => import('./pages/PerformanceTestPage').then(m => ({ default: m.PerformanceTestPage })));
+const LazyIntegrationTestPage = lazy(() => import('./pages/IntegrationTestPage').then(m => ({ default: m.IntegrationTestPage })));
 
 const queryClient = new QueryClient();
 
@@ -121,6 +122,7 @@ const App = () => (
                       <Route path="notification-test" element={<Suspense fallback={null}><LazyNotificationTestPage /></Suspense>} />
                       <Route path="security-tests" element={<Suspense fallback={null}><LazySecurityTestPage /></Suspense>} />
                       <Route path="performance-tests" element={<Suspense fallback={null}><LazyPerformanceTestPage /></Suspense>} />
+                      <Route path="integration-tests" element={<Suspense fallback={null}><LazyIntegrationTestPage /></Suspense>} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </AppLayout>
