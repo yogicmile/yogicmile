@@ -57,6 +57,7 @@ const LazySecurityTestPage = lazy(() => import('./pages/SecurityTestPage').then(
 const LazyPerformanceTestPage = lazy(() => import('./pages/PerformanceTestPage').then(m => ({ default: m.PerformanceTestPage })));
 const LazyIntegrationTestPage = lazy(() => import('./pages/IntegrationTestPage').then(m => ({ default: m.IntegrationTestPage })));
 const LazyUXTestPage = lazy(() => import('./pages/UXTestPage'));
+const LazyAccessibilityTestPage = lazy(() => import('./pages/AccessibilityTestPage'));
 
 const queryClient = new QueryClient();
 
@@ -125,6 +126,7 @@ const App = () => (
                       <Route path="performance-tests" element={<Suspense fallback={null}><LazyPerformanceTestPage /></Suspense>} />
                       <Route path="integration-tests" element={<Suspense fallback={null}><LazyIntegrationTestPage /></Suspense>} />
                       <Route path="ux-testing" element={<Suspense fallback={null}><LazyUXTestPage /></Suspense>} />
+                      <Route path="accessibility-testing" element={<Suspense fallback={null}><LazyAccessibilityTestPage /></Suspense>} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </AppLayout>
