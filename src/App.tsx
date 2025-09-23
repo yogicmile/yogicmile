@@ -52,6 +52,7 @@ const LazySpinWheelTestPage = lazy(() => import('./pages/SpinWheelTestPage').the
 const LazyLocationTestPage = lazy(() => import('./pages/LocationTestPage').then(m => ({ default: m.LocationTestPage })));
 const LazyReferralTestPage = lazy(() => import('./pages/ReferralTestPage').then(m => ({ default: m.ReferralTestPage })));
 const LazySupportTestPage = lazy(() => import('./pages/SupportTestPage').then(m => ({ default: m.SupportTestPage })));
+const LazyAdminTestPage = lazy(() => import('./pages/admin/AdminTestPage').then(m => ({ default: m.AdminTestPage })));
 
 const queryClient = new QueryClient();
 
@@ -79,6 +80,7 @@ const App = () => (
                 <Route path="moderation" element={<AdminModeration />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
                 <Route path="performance" element={<AdminPerformance />} />
+                <Route path="testing" element={<Suspense fallback={null}><LazyAdminTestPage /></Suspense>} />
               </Route>
               
               {/* Main App Routes */}
