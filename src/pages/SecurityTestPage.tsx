@@ -1,16 +1,14 @@
 import React, { useEffect } from 'react';
-import { SecurityTestingSuite } from '@/components/security/SecurityTestingSuite';
+import { EnhancedSecurityDashboard } from '@/components/security/EnhancedSecurityDashboard';
 
 export const SecurityTestPage: React.FC = () => {
   useEffect(() => {
-    document.title = 'Security Tests | Yogic Mile';
+    document.title = 'Security Dashboard | Yogic Mile';
   }, []);
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-6">
-        <SecurityTestingSuite />
-      </div>
+      <EnhancedSecurityDashboard />
     </div>
   );
 };

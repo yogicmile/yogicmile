@@ -2739,6 +2739,39 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          attempt_count: number
+          blocked_until: string | null
+          created_at: string
+          id: string
+          operation_type: string
+          updated_at: string
+          user_id: string | null
+          window_start: string
+        }
+        Insert: {
+          attempt_count?: number
+          blocked_until?: string | null
+          created_at?: string
+          id?: string
+          operation_type: string
+          updated_at?: string
+          user_id?: string | null
+          window_start?: string
+        }
+        Update: {
+          attempt_count?: number
+          blocked_until?: string | null
+          created_at?: string
+          id?: string
+          operation_type?: string
+          updated_at?: string
+          user_id?: string | null
+          window_start?: string
+        }
+        Relationships: []
+      }
       redemptions: {
         Row: {
           coins_spent: number
@@ -4357,6 +4390,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_user_challenge_role: {
+        Args: { challenge_id_param: string }
+        Returns: string
+      }
       get_user_role: {
         Args: { p_user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -4419,6 +4456,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      log_security_violation: {
+        Args: {
+          p_details?: Json
+          p_table_name: string
+          p_violation_type: string
+        }
+        Returns: undefined
+      }
       log_social_share: {
         Args: {
           p_content?: string
@@ -4426,6 +4471,14 @@ export type Database = {
           p_platform: string
           p_share_type: string
           p_user_id: string
+        }
+        Returns: string
+      }
+      mask_sensitive_data: {
+        Args: {
+          p_data: string
+          p_data_owner_id: string
+          p_requester_id: string
         }
         Returns: string
       }

@@ -53,6 +53,7 @@ const LazyLocationTestPage = lazy(() => import('./pages/LocationTestPage').then(
 const LazyReferralTestPage = lazy(() => import('./pages/ReferralTestPage').then(m => ({ default: m.ReferralTestPage })));
 const LazySupportTestPage = lazy(() => import('./pages/SupportTestPage').then(m => ({ default: m.SupportTestPage })));
 const LazyAdminTestPage = lazy(() => import('./pages/admin/AdminTestPage').then(m => ({ default: m.AdminTestPage })));
+const LazyPrivacySettings = lazy(() => import('./components/PrivacySettings').then(m => ({ default: m.PrivacySettings })));
 const LazySecurityTestPage = lazy(() => import('./pages/SecurityTestPage').then(m => ({ default: m.SecurityTestPage })));
 const LazyPerformanceTestPage = lazy(() => import('./pages/PerformanceTestPage').then(m => ({ default: m.PerformanceTestPage })));
 const LazyIntegrationTestPage = lazy(() => import('./pages/IntegrationTestPage').then(m => ({ default: m.IntegrationTestPage })));
@@ -112,7 +113,8 @@ const App = () => (
                       <Route path="achievements" element={<AchievementsPage />} />
                       <Route path="goals" element={<GoalsPage />} />
                       <Route path="referral" element={<ReferralPage />} />
-                      <Route path="help" element={<HelpPage />} />
+                       <Route path="help" element={<HelpPage />} />
+                       <Route path="privacy-settings" element={<Suspense fallback={null}><LazyPrivacySettings /></Suspense>} />
                       <Route path="support-testing" element={<Suspense fallback={null}><LazySupportTestPage /></Suspense>} />
                       <Route path="calculation-review" element={<CalculationReview />} />
                       <Route path="step-tracking-test" element={<Suspense fallback={null}><LazyStepTrackingTestPage /></Suspense>} />
