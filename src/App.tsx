@@ -59,6 +59,7 @@ const LazyIntegrationTestPage = lazy(() => import('./pages/IntegrationTestPage')
 const LazyUXTestPage = lazy(() => import('./pages/UXTestPage'));
 const LazyAccessibilityTestPage = lazy(() => import('./pages/AccessibilityTestPage'));
 const LazyCrossPlatformTestPage = lazy(() => import('./pages/CrossPlatformTestPage'));
+const LazyBusinessLogicTestPage = lazy(() => import('./pages/BusinessLogicTestPage'));
 
 const queryClient = new QueryClient();
 
@@ -129,6 +130,7 @@ const App = () => (
                       <Route path="ux-testing" element={<Suspense fallback={null}><LazyUXTestPage /></Suspense>} />
                       <Route path="accessibility-testing" element={<Suspense fallback={null}><LazyAccessibilityTestPage /></Suspense>} />
                       <Route path="cross-platform-testing" element={<Suspense fallback={null}><LazyCrossPlatformTestPage /></Suspense>} />
+                      <Route path="business-logic-testing" element={<Suspense fallback={null}><LazyBusinessLogicTestPage /></Suspense>} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </AppLayout>
