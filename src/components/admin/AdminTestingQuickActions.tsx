@@ -97,6 +97,12 @@ export const AdminTestingQuickActions: React.FC = () => {
           >
             Support Tests
           </Button>
+          <Button 
+            variant="outline"
+            onClick={() => window.open('/security-tests', '_blank')}
+          >
+            Security Tests
+          </Button>
         </div>
 
         <div className="mt-3 p-2 bg-muted rounded text-xs text-muted-foreground">

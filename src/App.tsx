@@ -53,6 +53,7 @@ const LazyLocationTestPage = lazy(() => import('./pages/LocationTestPage').then(
 const LazyReferralTestPage = lazy(() => import('./pages/ReferralTestPage').then(m => ({ default: m.ReferralTestPage })));
 const LazySupportTestPage = lazy(() => import('./pages/SupportTestPage').then(m => ({ default: m.SupportTestPage })));
 const LazyAdminTestPage = lazy(() => import('./pages/admin/AdminTestPage').then(m => ({ default: m.AdminTestPage })));
+const LazySecurityTestPage = lazy(() => import('./pages/SecurityTestPage').then(m => ({ default: m.SecurityTestPage })));
 
 const queryClient = new QueryClient();
 
@@ -117,6 +118,7 @@ const App = () => (
                       <Route path="referral-testing" element={<Suspense fallback={null}><LazyReferralTestPage /></Suspense>} />
                       <Route path="gamification-test" element={<Suspense fallback={null}><LazyGamificationTestPage /></Suspense>} />
                       <Route path="notification-test" element={<Suspense fallback={null}><LazyNotificationTestPage /></Suspense>} />
+                      <Route path="security-tests" element={<Suspense fallback={null}><LazySecurityTestPage /></Suspense>} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </AppLayout>
