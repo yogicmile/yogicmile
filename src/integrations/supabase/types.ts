@@ -4362,6 +4362,10 @@ export type Database = {
       }
     }
     Functions: {
+      can_view_challenge: {
+        Args: { p_challenge_id: string }
+        Returns: boolean
+      }
       check_spin_availability: {
         Args: { p_user_id: string }
         Returns: Json
