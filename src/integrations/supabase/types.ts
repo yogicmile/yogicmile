@@ -4366,6 +4366,14 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
+      detect_fraud_patterns: {
+        Args: {
+          p_activity_data: Json
+          p_activity_type: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       earn_steps: {
         Args: { p_steps: number; p_user_id: string }
         Returns: string

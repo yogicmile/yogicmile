@@ -139,13 +139,13 @@ export const useEnhancedSecurityMonitoring = () => {
     if (!user) return { isFraud: false, reason: null };
 
     try {
-      // Call the function using raw SQL since it's not in the generated types yet
+      // Call the fraud detection function
       const { data, error } = await supabase
-        .rpc('detect_fraud_patterns' as any, {
+        .rpc('detect_fraud_patterns', {
           p_user_id: user.id,
           p_activity_type: eventType,
           p_activity_data: details
-        } as any);
+        });
 
       if (error) throw error;
 
@@ -174,7 +174,7 @@ export const useEnhancedSecurityMonitoring = () => {
         .eq('user_id', user.id)
         .eq('operation_type', operationType)
         .gte('window_start', oneHourAgo.toISOString())
-        .single();
+        .maybeSingle();
 
       if (existing) {
         if (existing.blocked_until && new Date(existing.blocked_until) > now) {
