@@ -4370,6 +4370,16 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
+      create_user_with_mobile: {
+        Args: {
+          p_address?: string
+          p_email?: string
+          p_full_name: string
+          p_mobile_number: string
+          p_referred_by?: string
+        }
+        Returns: string
+      }
       detect_fraud_patterns: {
         Args: {
           p_activity_data: Json

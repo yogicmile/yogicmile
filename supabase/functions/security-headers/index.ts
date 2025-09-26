@@ -80,7 +80,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message || 'Failed to configure security headers'
+        error: (error as Error)?.message || 'Failed to configure security headers'
       }),
       {
         status: 500,

@@ -167,28 +167,11 @@ export const useMobileAuth = () => {
 
       const formatted = formatMobileNumber(formData.mobileNumber);
       
-      // Check if user already exists using a more permissive approach
-      const { data: existingUsers } = await supabase
-        .from('users')
-        .select('id, mobile_number')
-        .eq('mobile_number', formatted)
-        .limit(1);
-
-      if (existingUsers && existingUsers.length > 0) {
-        await Haptics.impact({ style: ImpactStyle.Medium });
-        toast({
-          title: "User Exists",
-          description: "Account with this number already exists. Please login.",
-          variant: "destructive",
-        });
-        return { success: false, errors: ['User already exists'] };
-      }
-
-      // Create user account
-      let userId: string;
+      // Create user account using secure RPC function
+      let userId: string | null = null;
       
       if (formData.authChoice === 'password' && formData.email && formData.password) {
-        // Email + Password signup
+        // Email + Password signup through Supabase Auth
         const { data, error } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
@@ -203,28 +186,29 @@ export const useMobileAuth = () => {
 
         if (error) throw error;
         userId = data.user!.id;
-      } else {
-        // OTP-only signup
-        userId = crypto.randomUUID();
       }
 
-      const userData = {
-        id: userId,
-        mobile_number: formatted,
-        full_name: formData.fullName,
-        email: formData.email || null,
-        address: `${formData.address.city}, ${formData.address.district}, ${formData.address.state}, ${formData.address.country}`,
-        referred_by: formData.referralCode || null,
-        referral_code: formatted, // Mobile acts as referral code
-        password_hash: formData.authChoice === 'password' ? 'hashed_by_supabase' : null,
-      };
-
-      // Insert into users table
-      const { error: dbError } = await supabase
-        .from('users')
-        .insert(userData);
+      // Use secure RPC to create user record (handles duplicates safely)
+      const { data: createdUserId, error: dbError } = await supabase.rpc('create_user_with_mobile', {
+        p_mobile_number: formatted,
+        p_full_name: formData.fullName,
+        p_email: formData.email || null,
+        p_address: `${formData.address.city}, ${formData.address.district}, ${formData.address.state}, ${formData.address.country}`,
+        p_referred_by: formData.referralCode || null
+      });
 
       if (dbError) throw dbError;
+      
+      // Check if user already existed
+      if (createdUserId && createdUserId !== userId) {
+        await Haptics.impact({ style: ImpactStyle.Medium });
+        toast({
+          title: "User Exists",
+          description: "Account with this number already exists. Please login.",
+          variant: "destructive",
+        });
+        return { success: false, errors: ['User already exists'] };
+      }
 
       await Haptics.impact({ style: ImpactStyle.Light });
       
@@ -364,12 +348,12 @@ export const useMobileAuth = () => {
       // Reset failed attempts on success
       setState(prev => ({ ...prev, failedAttempts: 0, otpSent: false }));
 
-      // Get user data for session
+      // Get user data for session (if authenticated, can view own row)
       const { data: user } = await supabase
         .from('users')
         .select('*')
         .eq('mobile_number', formatted)
-        .single();
+        .maybeSingle();
 
       if (user) {
         // Store secure session

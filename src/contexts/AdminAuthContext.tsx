@@ -54,28 +54,23 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
 
       let roleValue = data?.role as string | null;
 
-      // If no row exists, create a minimal user row so role queries work
+      // If no row exists, create using secure RPC function
       if (!roleValue) {
         const { data: userInfo } = await supabase.auth.getUser();
         const email = userInfo.user?.email || 'admin@yogicmile.com';
         const fullName = email.split('@')[0] || 'Admin User';
 
-        // Upsert user's row with safe defaults (RLS requires id = auth.uid())
-        const { error: upsertErr } = await supabase
-          .from('users')
-          .insert({
-            id: userId,
-            mobile_number: '0000000000',
-            full_name: fullName,
-            email,
-            address: 'N/A',
-            role: 'user',
-          })
-          .select()
-          .single();
+        // Use secure RPC to create user record
+        const { data: createdUserId, error: upsertErr } = await supabase.rpc('create_user_with_mobile', {
+          p_mobile_number: '0000000000',
+          p_full_name: fullName,
+          p_email: email,
+          p_address: 'N/A',
+          p_referred_by: null
+        });
 
         if (upsertErr) {
-          console.error('User upsert failed:', upsertErr);
+          console.error('User creation failed:', upsertErr);
         } else {
           roleValue = 'user';
         }
