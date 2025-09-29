@@ -20,15 +20,14 @@ import { NoTransactionsEmptyState } from '@/components/EmptyState';
 import { NativeStepDisplay } from '@/components/NativeStepDisplay';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useYogicMileData } from '@/hooks/use-mock-data';
+import { useFitnessData } from '@/hooks/use-fitness-data';
 import { useCoinRateSystem } from '@/hooks/use-coin-rate-system';
 import { useNativeStepTracking } from '@/hooks/use-native-step-tracking';
-import { DynamicAdBanner } from '@/components/DynamicAdBanner';
 
 const Index = () => {
   const navigate = useNavigate();
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const yogicData = useYogicMileData();
+  const fitnessData = useFitnessData();
   const coinRateSystem = useCoinRateSystem();
   const nativeSteps = useNativeStepTracking();
 
@@ -40,7 +39,7 @@ const Index = () => {
 
   const handleClaimReward = async (): Promise<boolean> => {
     try {
-      await yogicData.redeemDailyCoins(10);
+      await fitnessData.redeemDailyCoins(10);
       return true;
     } catch {
       return false;
@@ -76,20 +75,16 @@ const Index = () => {
             size="medium"
           />
 
-          {/* Top Ad Slot - Wellness themed */}
-          <div className="px-4">
-            <DynamicAdBanner position="top" page="home" />
-          </div>
 
           {/* Enhanced Phase Progress Section */}
           <div className="px-4 py-4">
             <EnhancedPhaseProgress
-              currentTier={yogicData.user.currentTier}
-              tierName={yogicData.user.tierName}
-              tierSymbol={yogicData.user.tierSymbol}
-              currentSteps={yogicData.tierProgress.currentTierSteps}
-              tierTarget={yogicData.tierProgress.tierTarget}
-              daysRemaining={yogicData.tierProgress.daysRemaining}
+              currentTier={fitnessData.user.currentTier}
+              tierName={fitnessData.user.tierName}
+              tierSymbol={fitnessData.user.tierSymbol}
+              currentSteps={fitnessData.tierProgress.currentTierSteps}
+              tierTarget={fitnessData.tierProgress.tierTarget}
+              daysRemaining={fitnessData.tierProgress.daysRemaining}
               className="animate-scale-in"
             />
           </div>
@@ -102,10 +97,10 @@ const Index = () => {
           {/* Interactive Progress Ring */}
           <div className="px-4 pb-4">
             <InteractiveProgressRing
-              dailySteps={nativeSteps.stepData.dailySteps || yogicData.dailyProgress.currentSteps}
-              lifetimeSteps={nativeSteps.stepData.lifetimeSteps || yogicData.user.totalLifetimeSteps}
-              goalSteps={yogicData.dailyProgress.dailyGoal}
-              currentTier={yogicData.user.currentTier}
+              dailySteps={nativeSteps.stepData.dailySteps || fitnessData.dailyProgress.currentSteps}
+              lifetimeSteps={nativeSteps.stepData.lifetimeSteps || fitnessData.user.totalLifetimeSteps}
+              goalSteps={fitnessData.dailyProgress.dailyGoal}
+              currentTier={fitnessData.user.currentTier}
               onGoalReached={handleGoalReached}
             />
           </div>
@@ -118,15 +113,15 @@ const Index = () => {
           {/* Today's Summary Card */}
           <div className="px-4 pb-4">
             <TodaysSummaryCard
-              currentSteps={yogicData.dailyProgress.currentSteps}
-              dailyGoal={yogicData.dailyProgress.dailyGoal}
-              coinsEarned={yogicData.dailyProgress.coinsEarnedToday}
-              distance={yogicData.dailyProgress.distance}
-              activeMinutes={yogicData.dailyProgress.activeMinutes}
-              isGoalReached={yogicData.dailyProgress.currentSteps >= yogicData.dailyProgress.dailyGoal}
-              hasRedeemedToday={yogicData.dailyProgress.coinsRedeemedToday > 0}
+              currentSteps={fitnessData.dailyProgress.currentSteps}
+              dailyGoal={fitnessData.dailyProgress.dailyGoal}
+              coinsEarned={fitnessData.dailyProgress.coinsEarnedToday}
+              distance={fitnessData.dailyProgress.distance}
+              activeMinutes={fitnessData.dailyProgress.activeMinutes}
+              isGoalReached={fitnessData.dailyProgress.currentSteps >= fitnessData.dailyProgress.dailyGoal}
+              hasRedeemedToday={fitnessData.dailyProgress.coinsRedeemedToday > 0}
               onClaimReward={handleClaimReward}
-              coinBalance={yogicData.wallet.mockData.totalBalance}
+              coinBalance={fitnessData.wallet.mockData.totalBalance}
               className="animate-fade-in"
             />
           </div>
@@ -134,8 +129,8 @@ const Index = () => {
           {/* Stats Cards */}
           <div className="px-4 pb-4">
             <StatsCards
-              coinsEarnedToday={yogicData.dailyProgress.coinsEarnedToday}
-              coinsRedeemedToday={yogicData.dailyProgress.coinsRedeemedToday}
+              coinsEarnedToday={fitnessData.dailyProgress.coinsEarnedToday}
+              coinsRedeemedToday={fitnessData.dailyProgress.coinsRedeemedToday}
             />
           </div>
 
@@ -150,7 +145,7 @@ const Index = () => {
           {/* Motivation and Streaks Section */}
           <div className="px-4 pb-4">
             <MotivationStreaksSection
-              currentStreak={yogicData.user.streakDays}
+              currentStreak={fitnessData.user.streakDays}
               nextStreakMilestone={7}
               streakReward={50}
               className="animate-fade-in"
@@ -166,8 +161,8 @@ const Index = () => {
           {/* Yogic Mile Inspiration */}
           <div className="px-4 pb-4">
             <YogicMileInspiration
-              currentTier={yogicData.user.currentTier}
-              currentStreak={yogicData.user.streakDays}
+              currentTier={fitnessData.user.currentTier}
+              currentStreak={fitnessData.user.streakDays}
               className="animate-fade-in"
             />
           </div>
@@ -188,10 +183,6 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Bottom Ad Slot */}
-          <div className="px-4 pb-6">
-            <DynamicAdBanner position="bottom" page="home" />
-          </div>
         </main>
       </div>
     </ErrorBoundary>

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useYogicMileData } from '@/hooks/use-mock-data';
+import { useFitnessData } from '@/hooks/use-fitness-data';
 
 interface TierInfo {
   id: number;
@@ -25,7 +25,7 @@ interface TierInfo {
 
 const PhaseJourney: React.FC = () => {
   const navigate = useNavigate();
-  const yogicData = useYogicMileData();
+  const fitnessData = useFitnessData();
   const [selectedTier, setSelectedTier] = useState<TierInfo | null>(null);
   const [showTierModal, setShowTierModal] = useState(false);
   const [animatedTiers, setAnimatedTiers] = useState<number[]>([]);
@@ -175,7 +175,7 @@ const PhaseJourney: React.FC = () => {
   };
 
   const currentTier = allTiers.find(t => t.status === 'current');
-  const currentProgress = currentTier ? (yogicData.tierProgress.currentTierSteps / currentTier.stepGoal) * 100 : 0;
+  const currentProgress = currentTier ? (fitnessData.tierProgress.currentTierSteps / currentTier.stepGoal) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-soft-lavender/5 to-serene-blue/5">
@@ -208,7 +208,7 @@ const PhaseJourney: React.FC = () => {
           <h1 className="text-xl font-bold text-foreground">Your Evolution Journey</h1>
           <p className="text-sm text-muted-foreground">9 Phases of Mindful Transformation</p>
           <Badge variant="secondary" className="mt-2">
-            Currently in Phase {yogicData.user.currentTier} of 9
+            Currently in Phase {fitnessData.user.currentTier} of 9
           </Badge>
         </div>
       </header>
@@ -314,12 +314,12 @@ const PhaseJourney: React.FC = () => {
                     />
                   </div>
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{yogicData.tierProgress.currentTierSteps.toLocaleString()} steps</span>
+                    <span>{fitnessData.tierProgress.currentTierSteps.toLocaleString()} steps</span>
                     <span>{tier.stepGoal.toLocaleString()} steps</span>
                   </div>
                   <div className="bg-serene-blue/10 rounded-lg p-3 border border-serene-blue/20">
                     <p className="text-sm text-serene-blue font-medium">
-                      🕰️ {yogicData.tierProgress.daysRemaining} days remaining
+                      🕰️ {fitnessData.tierProgress.daysRemaining} days remaining
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       You're {Math.round(currentProgress)}% towards {allTiers[tier.id]?.name || 'next phase'}
@@ -378,25 +378,25 @@ const PhaseJourney: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-serene-blue">
-                  {Math.floor(yogicData.user.totalLifetimeSteps / 1000)}K
+                  {Math.floor(fitnessData.user.totalLifetimeSteps / 1000)}K
                 </div>
                 <div className="text-xs text-muted-foreground">Total Steps</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-golden-accent">
-                  ₹{(yogicData.wallet.mockData.totalBalance / 100).toFixed(2)}
+                  ₹{(fitnessData.wallet.mockData.totalBalance / 100).toFixed(2)}
                 </div>
                 <div className="text-xs text-muted-foreground">Coins Earned</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-sage-green">
-                  {yogicData.insights.weekStats.averageDaily.toLocaleString()}
+                  {fitnessData.insights.weekStats.averageDaily.toLocaleString()}
                 </div>
                 <div className="text-xs text-muted-foreground">Daily Average</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-warm-coral">
-                  {yogicData.user.streakDays}
+                  {fitnessData.user.streakDays}
                 </div>
                 <div className="text-xs text-muted-foreground">Day Streak</div>
               </div>

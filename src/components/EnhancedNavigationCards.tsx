@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-import { useYogicMileData } from '@/hooks/use-mock-data';
+import { useFitnessData } from '@/hooks/use-fitness-data';
 
 interface NavigationCard {
   id: string;
@@ -17,7 +17,7 @@ interface NavigationCard {
 
 export const EnhancedNavigationCards = () => {
   const navigate = useNavigate();
-  const mockData = useYogicMileData();
+  const fitnessData = useFitnessData();
 
   const navigationCards: NavigationCard[] = [
     {
@@ -34,10 +34,10 @@ export const EnhancedNavigationCards = () => {
     {
       id: 'coins-earned',
       title: 'Daily Earnings',
-      subtitle: `${mockData.dailyProgress.coinsEarnedToday} coins today`,
+      subtitle: `${fitnessData.dailyProgress.coinsEarnedToday} coins today`,
       icon: '📊',
       yogicIcon: '💰📊',
-      badge: mockData.dailyProgress.coinsEarnedToday > 0 ? mockData.dailyProgress.coinsEarnedToday : null,
+      badge: fitnessData.dailyProgress.coinsEarnedToday > 0 ? fitnessData.dailyProgress.coinsEarnedToday : null,
       gradient: 'from-sage-green/20 via-deep-teal/10 to-serene-blue/20',
       description: 'Track your daily earnings and coin history'
     },
@@ -67,7 +67,7 @@ export const EnhancedNavigationCards = () => {
       subtitle: 'Your Balance',
       icon: '💰',
       yogicIcon: '💪💳',
-      badge: mockData.wallet.mockData.pendingRedemptions > 0 ? mockData.wallet.mockData.pendingRedemptions : null,
+      badge: fitnessData.wallet.mockData.pendingRedemptions > 0 ? fitnessData.wallet.mockData.pendingRedemptions : null,
       gradient: 'from-deep-teal/20 via-serene-blue/10 to-soft-lavender/20',
       description: 'Manage your earnings and transaction history'
     },

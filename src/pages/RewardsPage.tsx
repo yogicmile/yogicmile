@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { DynamicAdBanner } from '@/components/DynamicAdBanner';
+
 import { LocalDeals } from '@/components/LocalDeals';
 import { SpinWheel } from '@/components/SpinWheel';
 import { useToast } from '@/hooks/use-toast';
@@ -92,8 +92,6 @@ export const RewardsPage = () => {
           </div>
         </div>
 
-        {/* Top Ad Banner */}
-        <DynamicAdBanner position="top" page="rewards" />
 
         {/* Balance Display */}
         <Card className={`p-4 ${canRedeem ? 'bg-success/10 border-success/20' : 'bg-warning/10 border-warning/20'}`}>
@@ -195,8 +193,6 @@ export const RewardsPage = () => {
           </TabsContent>
         </Tabs>
         
-        {/* Bottom Ad Banner */}
-        <DynamicAdBanner position="bottom" page="rewards" />
       </div>
 
       {/* Redemption Confirmation Modal */}

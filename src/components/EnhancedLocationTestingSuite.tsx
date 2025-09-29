@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { DynamicAdBanner } from '@/components/DynamicAdBanner';
+
 import { LocalDeals } from '@/components/LocalDeals';
 
 interface TestScenario {
@@ -470,7 +470,9 @@ export const EnhancedLocationTestingSuite = () => {
                 <CardDescription>Live preview of ads for current location</CardDescription>
               </CardHeader>
               <CardContent>
-                <DynamicAdBanner position="top" page="home" />
+                <div className="p-4 bg-muted rounded border text-center text-muted-foreground">
+                  Ad preview would appear here
+                </div>
                 <div className="mt-4 space-y-2">
                   {currentAds.map((ad) => (
                     <div key={ad.id} className="border rounded p-3 hover:bg-secondary/5">

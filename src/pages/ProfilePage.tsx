@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ReferralCard } from '@/components/ReferralCard';
-import { DynamicAdBanner } from '@/components/DynamicAdBanner';
+
 import { HelpCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LegalPolicyModal } from '@/components/LegalPolicyModal';
@@ -78,8 +78,6 @@ export const ProfilePage = () => {
           </h1>
         </div>
 
-        {/* Top Ad Banner */}
-        <DynamicAdBanner position="top" page="profile" />
 
         {/* Profile Header */}
         <div className="text-center space-y-4">
@@ -160,8 +158,6 @@ export const ProfilePage = () => {
           Sign Out
         </Button>
         
-        {/* Bottom Ad Banner */}
-        <DynamicAdBanner position="bottom" page="profile" />
       </div>
 
       <LegalPolicyModal

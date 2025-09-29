@@ -9,7 +9,7 @@ import { TransactionHistory } from '@/components/TransactionHistory';
 import { WalletAnalytics } from '@/components/WalletAnalytics';
 import { useYogicData } from '@/hooks/use-yogic-data';
 import { CountdownTimer } from '@/components/CountdownTimer';
-import { DynamicAdBanner } from '@/components/DynamicAdBanner';
+
 import { DailyRedeemModal } from '@/components/DailyRedeemModal';
 
 export const WalletPage = () => {
@@ -75,10 +75,6 @@ export const WalletPage = () => {
         </div>
       </div>
 
-      {/* Top Ad Banner */}
-      <div className="px-4 py-2">
-        <DynamicAdBanner position="top" page="wallet" />
-      </div>
 
       {/* Content */}
       <div className="px-4 py-4 space-y-6">
@@ -178,8 +174,6 @@ export const WalletPage = () => {
           </p>
         </div>
 
-        {/* Bottom Ad Banner */}
-        <DynamicAdBanner position="bottom" page="wallet" />
       </div>
 
       {/* Daily Redeem Modal */}

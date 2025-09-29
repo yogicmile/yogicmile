@@ -5,16 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { SpinWheel } from '@/components/SpinWheel';
 import { useToast } from '@/hooks/use-toast';
-import { useYogicMileData } from '@/hooks/use-mock-data';
+import { useFitnessData } from '@/hooks/use-fitness-data';
 
 export const SpinWheelPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const mockData = useYogicMileData();
+  const fitnessData = useFitnessData();
   const [canSpin, setCanSpin] = useState(true);
   
   // Mock daily steps - in real app this would come from user data
-  const dailySteps = mockData.dailyProgress.currentSteps;
+  const dailySteps = fitnessData.dailyProgress.currentSteps;
 
   const handleSpinComplete = (reward: any) => {
     setCanSpin(false);

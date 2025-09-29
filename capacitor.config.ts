@@ -4,11 +4,10 @@ const config: CapacitorConfig = {
   appId: 'app.lovable.4741923f866e4468918a6e7c1c4ebf2e',
   appName: 'yogicmile',
   webDir: 'dist',
-  // For production APK, remove server config to use local files
-  // server: {
-  //   url: 'https://yogicmile.com',
-  //   cleartext: true
-  // },
+  server: {
+    url: 'https://yogicmile.com',
+    cleartext: true
+  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
