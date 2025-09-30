@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Settings, Share2, LogOut, Trophy, Calendar, Target, Shield } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ReferralCard } from '@/components/ReferralCard';
-
 import { HelpCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LegalPolicyModal } from '@/components/LegalPolicyModal';
@@ -14,6 +13,10 @@ export const ProfilePage = () => {
   const navigate = useNavigate();
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [legalModalTab, setLegalModalTab] = useState<'privacy' | 'terms'>('privacy');
+
+  useEffect(() => {
+    document.title = 'Profile | Yogic Mile';
+  }, []);
   
   const userStats = {
     totalSteps: 847500,

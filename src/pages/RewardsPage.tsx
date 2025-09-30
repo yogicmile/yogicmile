@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
-import { Gift, Star, Zap, Trophy, ShoppingBag, CreditCard, Banknote, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Trophy } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-
 import { LocalDeals } from '@/components/LocalDeals';
 import { SpinWheel } from '@/components/SpinWheel';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +12,10 @@ import { useToast } from '@/hooks/use-toast';
 export const RewardsPage = () => {
   const [selectedReward, setSelectedReward] = useState<any>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    document.title = 'Rewards | Yogic Mile';
+  }, []);
   
   const walletBalance = 52341; // 52,341 paisa = ₹523.41
   const balanceInRupees = (walletBalance / 100).toFixed(2);

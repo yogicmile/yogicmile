@@ -1,23 +1,22 @@
-import { useState } from 'react';
-import { ArrowLeft, Wallet, RefreshCw, Filter, Search, Download, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Wallet, RefreshCw, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import { TransactionHistory } from '@/components/TransactionHistory';
-import { WalletAnalytics } from '@/components/WalletAnalytics';
 import { useYogicData } from '@/hooks/use-yogic-data';
 import { CountdownTimer } from '@/components/CountdownTimer';
-
 import { DailyRedeemModal } from '@/components/DailyRedeemModal';
 
 export const WalletPage = () => {
   const navigate = useNavigate();
   const yogicData = useYogicData();
   const [activeTab, setActiveTab] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
   const [showDailyRedeem, setShowDailyRedeem] = useState(false);
+
+  useEffect(() => {
+    document.title = 'Wallet | Yogic Mile';
+  }, []);
 
   // Mock transaction data with proper structure
   const mockTransactions = [

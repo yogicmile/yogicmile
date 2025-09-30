@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,6 +17,10 @@ import { ConsentManager } from '@/components/ConsentManager';
 
 export function SettingsPage() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = 'Settings | Yogic Mile';
+  }, []);
   const { 
     preferences, 
     themeOptions,

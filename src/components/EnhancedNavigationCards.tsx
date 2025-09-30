@@ -21,25 +21,15 @@ export const EnhancedNavigationCards = () => {
 
   const navigationCards: NavigationCard[] = [
     {
-      id: 'phase-journey',
-      title: 'Phase Journey',
-      subtitle: 'Explore All 9 Tiers',
-      icon: '🗺️',
-      yogicIcon: '🎯',
-      badge: 'Discover',
-      gradient: 'from-golden-accent/20 via-serene-blue/10 to-soft-lavender/20',
-      description: 'Discover your path through the 9 phases of progress',
-      isNew: true
-    },
-    {
-      id: 'coins-earned',
-      title: 'Daily Earnings',
-      subtitle: `${fitnessData.dailyProgress.coinsEarnedToday} coins today`,
-      icon: '📊',
-      yogicIcon: '💰📊',
-      badge: fitnessData.dailyProgress.coinsEarnedToday > 0 ? fitnessData.dailyProgress.coinsEarnedToday : null,
-      gradient: 'from-sage-green/20 via-deep-teal/10 to-serene-blue/20',
-      description: 'Track your daily earnings and coin history'
+      id: 'wallet',
+      title: 'My Wallet',
+      subtitle: `Balance: ${fitnessData.wallet.mockData.totalBalance} coins`,
+      icon: '💰',
+      yogicIcon: '💪💳',
+      badge: fitnessData.wallet.mockData.pendingRedemptions > 0 ? fitnessData.wallet.mockData.pendingRedemptions : null,
+      gradient: 'from-deep-teal/20 via-serene-blue/10 to-soft-lavender/20',
+      description: 'Manage your earnings and transaction history',
+      isNew: false
     },
     {
       id: 'vouchers',
@@ -47,130 +37,29 @@ export const EnhancedNavigationCards = () => {
       subtitle: 'Shop Rewards',
       icon: '🎁',
       yogicIcon: '🛍️✨',
-      badge: 'NEW',
+      badge: 'Shop Now',
       gradient: 'from-soft-lavender/20 via-warm-coral/10 to-golden-accent/20',
-      description: 'Redeem coins for rewards and lifestyle products'
-    },
-    {
-      id: 'spin-wheel',
-      title: 'Lucky Spin',
-      subtitle: 'Spin & Win',
-      icon: '🎡',
-      yogicIcon: '🎲⭐',
-      badge: 1,
-      gradient: 'from-warm-coral/20 via-golden-accent/10 to-sage-green/20',
-      description: 'Spin the wheel of fortune for bonus rewards'
-    },
-    {
-      id: 'wallet',
-      title: 'My Wallet',
-      subtitle: 'Your Balance',
-      icon: '💰',
-      yogicIcon: '💪💳',
-      badge: fitnessData.wallet.mockData.pendingRedemptions > 0 ? fitnessData.wallet.mockData.pendingRedemptions : null,
-      gradient: 'from-deep-teal/20 via-serene-blue/10 to-soft-lavender/20',
-      description: 'Manage your earnings and transaction history'
-    },
-    {
-      id: 'calculation-review',
-      title: 'Calc Review',
-      subtitle: 'Verify Logic',
-      icon: '🧮',
-      yogicIcon: '📊✨',
-      badge: 'TEST',
-      gradient: 'from-purple-100/20 via-indigo-100/10 to-blue-100/20',
-      description: 'Test coin calculations across all phases'
+      description: 'Redeem coins for rewards and lifestyle products',
+      isNew: false
     }
   ];
 
   const handleCardClick = (cardId: string) => {
-    console.log(`Navigating to: ${cardId}`);
-    
     switch (cardId) {
-      case 'phase-journey':
-        navigate('/phase-journey');
-        break;
-      case 'coins-earned':
-        navigate('/coins-history');
-        break;
       case 'vouchers':
         navigate('/rewards');
-        break;
-      case 'spin-wheel':
-        navigate('/spin-wheel');
         break;
       case 'wallet':
         navigate('/wallet');
         break;
-      case 'calculation-review':
-        navigate('/calculation-review');
-        break;
-      default:
-        console.log(`No navigation defined for ${cardId}`);
     }
   };
 
   return (
     <div className="space-y-4">
-      {/* Phase Journey - Featured Card */}
-      <Card 
-        className={`relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-lg border-golden-accent/30 bg-gradient-to-br ${navigationCards[0].gradient}`}
-        onClick={() => handleCardClick(navigationCards[0].id)}
-      >
-        <div className="p-6">
-          {/* Background Decoration */}
-          <div className="absolute top-0 right-0 w-24 h-24 opacity-10 transform rotate-12">
-            <div className="text-6xl">{navigationCards[0].yogicIcon}</div>
-          </div>
-          
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-3">
-                <div className="text-3xl">{navigationCards[0].icon}</div>
-                <div>
-                  <h3 className="font-bold text-lg text-foreground">{navigationCards[0].title}</h3>
-                  <p className="text-sm text-muted-foreground">{navigationCards[0].subtitle}</p>
-                </div>
-              </div>
-              {navigationCards[0].badge && (
-                <Badge 
-                  variant="secondary" 
-                  className="bg-golden-accent text-golden-accent-foreground animate-pulse"
-                >
-                  {navigationCards[0].badge}
-                </Badge>
-              )}
-            </div>
-            
-            <p className="text-sm text-muted-foreground mb-4">
-              {navigationCards[0].description}
-            </p>
-            
-            {/* Tier Preview Icons */}
-            <div className="flex items-center space-x-2">
-              <div className="flex space-x-1">
-                {['🟡', '🪙', '🎯', '💎', '💠', '👑', '⚡', '🌟', '🔥'].map((symbol, index) => (
-                  <div 
-                    key={index}
-                    className={`w-6 h-6 text-xs flex items-center justify-center rounded-full transition-all duration-300 ${
-                      index === 0 ? 'bg-golden-accent text-white scale-110' : 'bg-gray-200 opacity-60'
-                    }`}
-                  >
-                    {symbol}
-                  </div>
-                ))}
-              </div>
-              <div className="text-xs text-muted-foreground ml-2">
-                Phase 1 of 9
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Other Navigation Cards */}
+      {/* Navigation Cards */}
       <div className="grid grid-cols-2 gap-4">
-        {navigationCards.slice(1).map((card) => (
+        {navigationCards.map((card) => (
           <Card 
             key={card.id}
             className={`relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-lg bg-gradient-to-br ${card.gradient} border-border/30`}
