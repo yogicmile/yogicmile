@@ -16,6 +16,8 @@ import WelcomePage from "./pages/WelcomePage";
 import NotFound from "./pages/NotFound";
 import { SettingsPage } from "./pages/SettingsPage";
 import { HelpPage } from "./pages/HelpPage";
+import { ChallengesPage } from "./pages/ChallengesPage";
+import { CommunityPage } from "./pages/CommunityPage";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +41,8 @@ const App = () => (
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="wallet" element={<WalletPage />} />
                     <Route path="rewards" element={<RewardsPage />} />
+                    <Route path="challenges" element={<ChallengesPage />} />
+                    <Route path="community" element={<CommunityPage />} />
                     <Route path="settings" element={<SettingsPage />} />
                     <Route path="help" element={<HelpPage />} />
                     <Route path="*" element={<NotFound />} />
