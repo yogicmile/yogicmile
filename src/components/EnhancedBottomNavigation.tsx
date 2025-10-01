@@ -1,22 +1,24 @@
 import { useState, useEffect } from 'react';
-import { Home, Wallet, Gift, User } from 'lucide-react';
+import { Home, Wallet, Trophy, Users, User } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface EnhancedBottomNavigationProps {
-  activeTab: 'dashboard' | 'wallet' | 'rewards' | 'profile';
-  onTabChange: (tab: 'dashboard' | 'wallet' | 'rewards' | 'profile') => void;
+  activeTab: 'dashboard' | 'wallet' | 'rewards' | 'challenges' | 'community' | 'profile';
+  onTabChange: (tab: 'dashboard' | 'wallet' | 'rewards' | 'challenges' | 'community' | 'profile') => void;
   notificationCounts?: {
     dashboard?: number;
     wallet?: number;
     rewards?: number;
+    challenges?: number;
+    community?: number;
     profile?: number;
   };
   walletBalance?: number;
 }
 
-type TabId = 'dashboard' | 'wallet' | 'rewards' | 'profile';
+type TabId = 'dashboard' | 'wallet' | 'rewards' | 'challenges' | 'community' | 'profile';
 
 export const EnhancedBottomNavigation = ({ 
   activeTab, 
@@ -50,6 +52,24 @@ export const EnhancedBottomNavigation = ({
       route: '/'
     },
     {
+      id: 'community' as TabId,
+      label: 'Community',
+      icon: Users,
+      emoji: '🌟',
+      gradient: 'from-primary to-primary/70',
+      badge: notificationCounts.community,
+      route: '/community'
+    },
+    {
+      id: 'challenges' as TabId,
+      label: 'Challenges',
+      icon: Trophy,
+      emoji: '🏆',
+      gradient: 'from-warning to-warning/70',
+      badge: notificationCounts.challenges,
+      route: '/challenges'
+    },
+    {
       id: 'wallet' as TabId,
       label: 'Wallet',
       icon: Wallet,
@@ -57,15 +77,6 @@ export const EnhancedBottomNavigation = ({
       gradient: 'from-tier-1-paisa to-tier-2-rupaya',
       badge: walletBalance >= 5 ? `₹${walletBalance}` : notificationCounts.wallet,
       route: '/wallet'
-    },
-    {
-      id: 'rewards' as TabId,
-      label: 'Rewards',
-      icon: Gift,
-      emoji: '🎁',
-      gradient: 'from-sage-green to-tier-3-token',
-      badge: notificationCounts.rewards,
-      route: '/rewards'
     },
     {
       id: 'profile' as TabId,
@@ -210,16 +221,16 @@ export const EnhancedBottomNavigation = ({
           })}
         </div>
 
-        {/* Progress indicator for active tab */}
+      {/* Progress indicator for active tab */}
         <div className="flex justify-center mt-2">
           <div className="flex space-x-1">
             {tabs.map((tab) => (
               <div
                 key={`indicator-${tab.id}`}
                 className={cn(
-                  "w-2 h-1 rounded-full transition-all duration-300",
+                  "w-1.5 h-1 rounded-full transition-all duration-300",
                   isTabActive(tab.id)
-                    ? "bg-tier-1-paisa w-6"
+                    ? "bg-tier-1-paisa w-4"
                     : "bg-border"
                 )}
               />
