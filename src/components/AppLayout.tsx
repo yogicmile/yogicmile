@@ -16,16 +16,12 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const hideBottomNav = ['/welcome', '/login', '/signup'].includes(location.pathname);
   
   // Determine active tab based on current route
-  const getActiveTab = (): 'dashboard' | 'wallet' | 'rewards' | 'challenges' | 'community' | 'profile' => {
+  const getActiveTab = (): 'dashboard' | 'wallet' | 'rewards' | 'profile' => {
     switch (location.pathname) {
       case '/wallet':
         return 'wallet';
       case '/rewards':
         return 'rewards';
-      case '/challenges':
-        return 'challenges';
-      case '/community':
-        return 'community';
       case '/profile':
         return 'profile';
       default:
@@ -33,9 +29,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'wallet' | 'rewards' | 'challenges' | 'community' | 'profile'>(getActiveTab());
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'wallet' | 'rewards' | 'profile'>(getActiveTab());
 
-  const handleTabChange = (tab: 'dashboard' | 'wallet' | 'rewards' | 'challenges' | 'community' | 'profile') => {
+  const handleTabChange = (tab: 'dashboard' | 'wallet' | 'rewards' | 'profile') => {
     setActiveTab(tab);
     
     // Navigate to appropriate route
@@ -48,12 +44,6 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         break;
       case 'rewards':
         navigate('/rewards');
-        break;
-      case 'challenges':
-        navigate('/challenges');
-        break;
-      case 'community':
-        navigate('/community');
         break;
       case 'profile':
         navigate('/profile');

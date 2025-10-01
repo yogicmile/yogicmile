@@ -111,20 +111,16 @@ export function GamifiedOnboarding({ onComplete }: GamifiedOnboardingProps) {
       // Navigate to respective sections
       switch (step.id) {
         case 'profile_setup':
-          // Navigate to profile setup
           window.location.href = '/profile';
           break;
         case 'first_steps':
-          // Navigate to step tracking
           window.location.href = '/';
           break;
         case 'find_friends':
-          // Navigate to community
-          window.location.href = '/community';
+          window.location.href = '/profile';
           break;
         case 'join_challenge':
-          // Navigate to challenges
-          window.location.href = '/challenges';
+          window.location.href = '/rewards';
           break;
       }
     }
