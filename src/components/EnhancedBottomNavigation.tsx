@@ -15,7 +15,6 @@ interface EnhancedBottomNavigationProps {
     community?: number;
     profile?: number;
   };
-  walletBalance?: number;
 }
 
 type TabId = 'dashboard' | 'wallet' | 'rewards' | 'challenges' | 'community' | 'profile';
@@ -23,8 +22,7 @@ type TabId = 'dashboard' | 'wallet' | 'rewards' | 'challenges' | 'community' | '
 export const EnhancedBottomNavigation = ({ 
   activeTab, 
   onTabChange, 
-  notificationCounts = {},
-  walletBalance = 0
+  notificationCounts = {}
 }: EnhancedBottomNavigationProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -75,7 +73,7 @@ export const EnhancedBottomNavigation = ({
       icon: Wallet,
       emoji: '💰',
       gradient: 'from-tier-1-paisa to-tier-2-rupaya',
-      badge: walletBalance >= 5 ? `₹${walletBalance}` : notificationCounts.wallet,
+      badge: notificationCounts.wallet,
       route: '/wallet'
     },
     {
@@ -185,9 +183,7 @@ export const EnhancedBottomNavigation = ({
                       variant={isActive ? "secondary" : "default"}
                       className={cn(
                         "absolute -top-1 -right-1 min-w-4 h-4 text-xs px-1 rounded-full border border-surface scale-90",
-                        tab.id === 'wallet' && typeof tab.badge === 'string' && tab.badge.includes('₹')
-                          ? "bg-tier-1-paisa text-tier-1-paisa-foreground animate-pulse"
-                          : isActive 
+                        isActive 
                           ? "bg-white text-foreground" 
                           : "bg-tier-1-paisa text-tier-1-paisa-foreground"
                       )}

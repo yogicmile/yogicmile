@@ -66,8 +66,6 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     dashboard: 2,
     rewards: 3,
   };
-  
-  const walletBalance = 24.50; // Example balance in rupees
 
   return (
     <div className="min-h-screen bg-background">
@@ -86,7 +84,6 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             activeTab={getActiveTab()}
             onTabChange={handleTabChange}
             notificationCounts={notificationCounts}
-            walletBalance={walletBalance}
           />
           {location.pathname !== '/help' && <FloatingHelpButton />}
         </>
