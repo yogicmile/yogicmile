@@ -4,36 +4,129 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TransactionHistory } from '@/components/TransactionHistory';
-import { useYogicData } from '@/hooks/use-yogic-data';
 import { CountdownTimer } from '@/components/CountdownTimer';
 import { DailyRedeemModal } from '@/components/DailyRedeemModal';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface Transaction {
+  id: string;
+  type: 'earning' | 'redemption' | 'referral' | 'spin';
+  amount: number;
+  date: string;
+  description: string;
+  icon: string;
+  status: 'completed' | 'pending' | 'failed' | 'expired';
+}
 
 export const WalletPage = () => {
   const navigate = useNavigate();
-  const yogicData = useYogicData();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('all');
   const [showDailyRedeem, setShowDailyRedeem] = useState(false);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [todaysPendingCoins, setTodaysPendingCoins] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     document.title = 'Wallet | Yogic Mile';
+    loadWalletData();
   }, []);
 
-  // Mock transaction data with proper structure
-  const mockTransactions = [
-    { id: 'TXN001', type: 'earning' as const, amount: 285, date: new Date().toISOString(), description: 'Daily Steps: 7,125 steps', icon: '👣', status: 'completed' as const },
-    { id: 'TXN002', type: 'redemption' as const, amount: -10000, date: new Date(Date.now() - 86400000).toISOString(), description: 'Amazon ₹100 Voucher', icon: '🛒', status: 'completed' as const },
-    { id: 'TXN003', type: 'referral' as const, amount: 500, date: new Date(Date.now() - 172800000).toISOString(), description: 'Referral Bonus: Friend joined', icon: '👥', status: 'completed' as const },
-    { id: 'TXN004', type: 'spin' as const, amount: 50, date: new Date(Date.now() - 259200000).toISOString(), description: 'Spin Wheel Bonus', icon: '🎡', status: 'completed' as const },
-    { id: 'TXN005', type: 'earning' as const, amount: 320, date: new Date(Date.now() - 345600000).toISOString(), description: 'Daily Steps: 8,000 steps', icon: '👣', status: 'completed' as const },
-  ];
+  const loadWalletData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-  const walletBalance = 52341; // 52,341 paisa = ₹523.41
-  const todaysPendingCoins = 285; // 285 paisa = ₹2.85
+      // Fetch wallet balance
+      const { data: wallet } = await supabase
+        .from('wallet_balances')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      setWalletBalance(wallet?.total_balance || 0);
+      
+      // Calculate today's pending coins from step logs
+      const today = new Date().toISOString().split('T')[0];
+      const { data: todaySteps } = await supabase
+        .from('step_logs')
+        .select('coins_earned')
+        .eq('user_id', user.id)
+        .eq('date', today)
+        .single();
+
+      setTodaysPendingCoins(todaySteps?.coins_earned || 0);
+
+      // Fetch transactions
+      const { data: txns } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      const formattedTransactions: Transaction[] = (txns || []).map(txn => ({
+        id: txn.id,
+        type: txn.type as 'earning' | 'redemption' | 'referral' | 'spin',
+        amount: txn.amount,
+        date: txn.created_at,
+        description: txn.description || '',
+        icon: getTransactionIcon(txn.type),
+        status: (txn.status || 'completed') as 'completed' | 'pending' | 'failed' | 'expired'
+      }));
+
+      setTransactions(formattedTransactions);
+    } catch (error) {
+      console.error('Error loading wallet data:', error);
+      toast({ title: "Error loading wallet data", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getTransactionIcon = (type: string) => {
+    switch (type) {
+      case 'earning': return '👣';
+      case 'redemption': return '🛒';
+      case 'referral': return '👥';
+      case 'spin_wheel': return '🎡';
+      default: return '💰';
+    }
+  };
+
   const todaysPendingRupees = (todaysPendingCoins / 100).toFixed(2);
   const balanceInRupees = (walletBalance / 100).toFixed(2);
 
   const handleRefresh = () => {
-    yogicData.refreshData();
+    loadWalletData();
+  };
+
+  const handleDailyRedeem = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Update wallet balance
+      const { error } = await supabase
+        .from('wallet_balances')
+        .update({
+          total_balance: walletBalance + todaysPendingCoins,
+          pending_balance: 0,
+          last_updated: new Date().toISOString()
+        })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({ title: "Coins redeemed successfully!" });
+      setShowDailyRedeem(false);
+      loadWalletData();
+    } catch (error) {
+      console.error('Error redeeming coins:', error);
+      toast({ title: "Error redeeming coins", variant: "destructive" });
+    }
   };
 
   return (
@@ -128,23 +221,23 @@ export const WalletPage = () => {
           </TabsList>
 
           <TabsContent value="all" className="space-y-4">
-            <TransactionHistory transactions={mockTransactions} />
+            <TransactionHistory transactions={transactions} />
           </TabsContent>
           
           <TabsContent value="earnings" className="space-y-4">
-            <TransactionHistory transactions={mockTransactions.filter(t => t.type === 'earning')} />
+            <TransactionHistory transactions={transactions.filter(t => t.type === 'earning')} />
           </TabsContent>
           
           <TabsContent value="redemptions" className="space-y-4">
-            <TransactionHistory transactions={mockTransactions.filter(t => t.type === 'redemption')} />
+            <TransactionHistory transactions={transactions.filter(t => t.type === 'redemption')} />
           </TabsContent>
           
           <TabsContent value="referrals" className="space-y-4">
-            <TransactionHistory transactions={mockTransactions.filter(t => t.type === 'referral')} />
+            <TransactionHistory transactions={transactions.filter(t => t.type === 'referral')} />
           </TabsContent>
           
           <TabsContent value="week" className="space-y-4">
-            <TransactionHistory transactions={mockTransactions.filter(t => {
+            <TransactionHistory transactions={transactions.filter(t => {
               const transactionDate = new Date(t.date);
               const weekAgo = new Date();
               weekAgo.setDate(weekAgo.getDate() - 7);
@@ -153,7 +246,7 @@ export const WalletPage = () => {
           </TabsContent>
           
           <TabsContent value="month" className="space-y-4">
-            <TransactionHistory transactions={mockTransactions.filter(t => {
+            <TransactionHistory transactions={transactions.filter(t => {
               const transactionDate = new Date(t.date);
               const monthAgo = new Date();
               monthAgo.setMonth(monthAgo.getMonth() - 1);
@@ -180,10 +273,7 @@ export const WalletPage = () => {
         open={showDailyRedeem}
         onOpenChange={setShowDailyRedeem}
         todaysEarnings={todaysPendingCoins}
-        onConfirm={() => {
-          // Handle daily redeem logic
-          setShowDailyRedeem(false);
-        }}
+        onConfirm={handleDailyRedeem}
       />
     </div>
   );
