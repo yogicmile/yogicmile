@@ -170,101 +170,124 @@ export const WalletPage = () => {
 
       {/* Content */}
       <div className="px-4 py-4 space-y-6">
-        {/* Balance Card */}
-        <div className="bg-gradient-to-br from-tier-1-paisa via-tier-2-rupaya to-tier-1-paisa p-6 rounded-3xl text-white shadow-xl relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-4 right-4 w-32 h-32 rounded-full border-2 border-white/20"></div>
-            <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full border border-white/10"></div>
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tier-1-paisa mx-auto"></div>
+            <p className="text-muted-foreground mt-4">Loading wallet...</p>
           </div>
-          
-          <div className="relative z-10">
-            <div className="text-center mb-4">
-              <div className="text-3xl font-bold mb-1">
-                {walletBalance.toLocaleString()} paisa = ₹{balanceInRupees}
+        ) : (
+          <>
+            {/* Balance Card */}
+            <div className="bg-gradient-to-br from-tier-1-paisa via-tier-2-rupaya to-tier-1-paisa p-6 rounded-3xl text-white shadow-xl relative overflow-hidden">
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-4 right-4 w-32 h-32 rounded-full border-2 border-white/20"></div>
+                <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full border border-white/10"></div>
               </div>
-              <div className="text-white/80 text-sm">Available Balance</div>
-            </div>
-            
-            {todaysPendingCoins > 0 && (
-              <div className="bg-white/10 rounded-2xl p-4 text-center mb-4">
-                <div className="text-lg font-bold text-yellow-200">
-                  {todaysPendingCoins} paisa (₹{todaysPendingRupees}) - Ready to redeem
+              
+              <div className="relative z-10">
+                <div className="text-center mb-4">
+                  <div className="text-4xl font-bold mb-1">
+                    ₹{balanceInRupees}
+                  </div>
+                  <div className="text-white/80 text-sm">Available Balance</div>
+                  <div className="text-white/60 text-xs mt-1">
+                    {walletBalance.toLocaleString()} paisa
+                  </div>
                 </div>
-                <div className="text-white/70 text-sm">Today's Pending Coins</div>
+                
+                {todaysPendingCoins > 0 && (
+                  <div className="bg-white/10 rounded-2xl p-4 text-center">
+                    <div className="text-lg font-bold text-yellow-200">
+                      ₹{todaysPendingRupees}
+                    </div>
+                    <div className="text-white/70 text-sm">Today's Earnings - Ready to Redeem</div>
+                    <div className="text-white/50 text-xs mt-1">
+                      {todaysPendingCoins} paisa
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Countdown Timer */}
-        <CountdownTimer />
-
-        {/* Redeem Today's Coins CTA */}
-        {todaysPendingCoins > 0 && (
-          <Button 
-            onClick={() => setShowDailyRedeem(true)}
-            className="w-full py-3 text-lg font-bold bg-gradient-to-r from-tier-1-paisa to-tier-2-rupaya hover:from-tier-2-rupaya hover:to-tier-1-paisa"
-          >
-            Redeem Today's Coins - ₹{todaysPendingRupees}
-          </Button>
+            </div>
+          </>
         )}
 
-        {/* Transaction History with Filter Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6 text-xs">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="earnings">Earnings</TabsTrigger>
-            <TabsTrigger value="redemptions">Redemptions</TabsTrigger>
-            <TabsTrigger value="referrals">Referrals</TabsTrigger>
-            <TabsTrigger value="week">This Week</TabsTrigger>
-            <TabsTrigger value="month">This Month</TabsTrigger>
-          </TabsList>
+        {!loading && (
+          <>
+            {/* Countdown Timer */}
+            <CountdownTimer />
 
-          <TabsContent value="all" className="space-y-4">
-            <TransactionHistory transactions={transactions} />
-          </TabsContent>
-          
-          <TabsContent value="earnings" className="space-y-4">
-            <TransactionHistory transactions={transactions.filter(t => t.type === 'earning')} />
-          </TabsContent>
-          
-          <TabsContent value="redemptions" className="space-y-4">
-            <TransactionHistory transactions={transactions.filter(t => t.type === 'redemption')} />
-          </TabsContent>
-          
-          <TabsContent value="referrals" className="space-y-4">
-            <TransactionHistory transactions={transactions.filter(t => t.type === 'referral')} />
-          </TabsContent>
-          
-          <TabsContent value="week" className="space-y-4">
-            <TransactionHistory transactions={transactions.filter(t => {
-              const transactionDate = new Date(t.date);
-              const weekAgo = new Date();
-              weekAgo.setDate(weekAgo.getDate() - 7);
-              return transactionDate >= weekAgo;
-            })} />
-          </TabsContent>
-          
-          <TabsContent value="month" className="space-y-4">
-            <TransactionHistory transactions={transactions.filter(t => {
-              const transactionDate = new Date(t.date);
-              const monthAgo = new Date();
-              monthAgo.setMonth(monthAgo.getMonth() - 1);
-              return transactionDate >= monthAgo;
-            })} />
-          </TabsContent>
-        </Tabs>
+            {/* Redeem Today's Coins CTA */}
+            {todaysPendingCoins > 0 && (
+              <Button 
+                onClick={() => setShowDailyRedeem(true)}
+                className="w-full py-3 text-lg font-bold bg-gradient-to-r from-tier-1-paisa to-tier-2-rupaya hover:from-tier-2-rupaya hover:to-tier-1-paisa"
+              >
+                Redeem Today's Earnings - ₹{todaysPendingRupees}
+              </Button>
+            )}
+          </>
+        )}
 
-        {/* Export CSV Section */}
-        <div className="bg-secondary/30 rounded-xl p-4 text-center">
-          <Button variant="outline" size="sm" className="w-full">
-            <Download className="w-4 h-4 mr-2" />
-            Export CSV
-          </Button>
-          <p className="text-xs text-muted-foreground mt-2">
-            Download your complete transaction history as CSV
-          </p>
-        </div>
+        {!loading && (
+          <>
+            {/* Transaction History with Filter Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+              <TabsList className="grid w-full grid-cols-6 text-xs">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="earnings">Earnings</TabsTrigger>
+                <TabsTrigger value="redemptions">Redemptions</TabsTrigger>
+                <TabsTrigger value="referrals">Referrals</TabsTrigger>
+                <TabsTrigger value="week">This Week</TabsTrigger>
+                <TabsTrigger value="month">This Month</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="all" className="space-y-4">
+                <TransactionHistory transactions={transactions} />
+              </TabsContent>
+              
+              <TabsContent value="earnings" className="space-y-4">
+                <TransactionHistory transactions={transactions.filter(t => t.type === 'earning')} />
+              </TabsContent>
+              
+              <TabsContent value="redemptions" className="space-y-4">
+                <TransactionHistory transactions={transactions.filter(t => t.type === 'redemption')} />
+              </TabsContent>
+              
+              <TabsContent value="referrals" className="space-y-4">
+                <TransactionHistory transactions={transactions.filter(t => t.type === 'referral')} />
+              </TabsContent>
+              
+              <TabsContent value="week" className="space-y-4">
+                <TransactionHistory transactions={transactions.filter(t => {
+                  const transactionDate = new Date(t.date);
+                  const weekAgo = new Date();
+                  weekAgo.setDate(weekAgo.getDate() - 7);
+                  return transactionDate >= weekAgo;
+                })} />
+              </TabsContent>
+              
+              <TabsContent value="month" className="space-y-4">
+                <TransactionHistory transactions={transactions.filter(t => {
+                  const transactionDate = new Date(t.date);
+                  const monthAgo = new Date();
+                  monthAgo.setMonth(monthAgo.getMonth() - 1);
+                  return transactionDate >= monthAgo;
+                })} />
+              </TabsContent>
+            </Tabs>
+
+            {/* Export CSV Section */}
+            <div className="bg-secondary/30 rounded-xl p-4 text-center">
+              <Button variant="outline" size="sm" className="w-full">
+                <Download className="w-4 h-4 mr-2" />
+                Export Transaction History
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">
+                Download your complete transaction history as CSV
+              </p>
+            </div>
+          </>
+        )}
 
       </div>
 
