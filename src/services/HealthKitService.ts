@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { Preferences } from '@capacitor/preferences';
+import { CapacitorHealthkit, QueryOutput, ActivityData } from '@perfood/capacitor-healthkit';
 
 export interface HealthData {
   steps: number;
@@ -44,30 +45,19 @@ export class HealthKitService {
     }
 
     try {
-      // For iOS HealthKit integration
-      if (Capacitor.getPlatform() === 'ios') {
-        // This would use @capacitor-community/health-kit in production
-        // For now, simulate the permission request
-        const granted = await this.simulatePermissionRequest();
-        this.permissions = {
-          granted,
-          steps: granted,
-          distance: granted,
-          workouts: granted,
-        };
-      }
+      // For iOS HealthKit and Android Health Connect
+      await CapacitorHealthkit.requestAuthorization({
+        all: [],
+        read: ['steps', 'distance', 'calories', 'activity'],
+        write: []
+      });
       
-      // For Android Google Fit integration
-      if (Capacitor.getPlatform() === 'android') {
-        // This would use Google Fit API in production
-        const granted = await this.simulatePermissionRequest();
-        this.permissions = {
-          granted,
-          steps: granted,
-          distance: granted,
-          workouts: granted,
-        };
-      }
+      this.permissions = {
+        granted: true,
+        steps: true,
+        distance: true,
+        workouts: true,
+      };
 
       await this.savePermissionsToStorage();
       return this.permissions;
@@ -84,7 +74,26 @@ export class HealthKitService {
 
     try {
       if (Capacitor.isNativePlatform()) {
-        return await this.getNativeSteps();
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        
+        const result: QueryOutput<ActivityData> = await CapacitorHealthkit.queryHKitSampleType<ActivityData>({
+          sampleName: 'steps',
+          startDate: startOfDay.toISOString(),
+          endDate: now.toISOString(),
+          limit: 1000
+        });
+
+        if (result.resultData && result.resultData.length > 0) {
+          const totalSteps = result.resultData.reduce((sum, sample: any) => {
+            // Extract numeric value from the sample data
+            const stepValue = sample.count || sample.value || sample.qty || 0;
+            return sum + (parseFloat(stepValue.toString()) || 0);
+          }, 0);
+          return Math.floor(totalSteps);
+        }
+        
+        return 0;
       } else {
         // Web fallback - return simulated data
         return await this.getStoredSteps();
@@ -101,23 +110,64 @@ export class HealthKitService {
     }
 
     try {
-      const history: HealthData[] = [];
-      const today = new Date();
-      
-      for (let i = 0; i < days; i++) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
+      if (!Capacitor.isNativePlatform()) {
+        // Web fallback
+        const history: HealthData[] = [];
+        const today = new Date();
         
-        const steps = await this.getStepsForDate(date);
+        for (let i = 0; i < days; i++) {
+          const date = new Date(today);
+          date.setDate(date.getDate() - i);
+          const steps = await this.getStepsForDate(date);
+          history.push({
+            steps,
+            distance: steps * 0.0008,
+            activeEnergyBurned: steps * 0.04,
+            timestamp: date,
+          });
+        }
+        return history.reverse();
+      }
+
+      const history: HealthData[] = [];
+      const now = new Date();
+      const startDate = new Date(now);
+      startDate.setDate(startDate.getDate() - days);
+      
+      const result: QueryOutput<ActivityData> = await CapacitorHealthkit.queryHKitSampleType<ActivityData>({
+        sampleName: 'steps',
+        startDate: startDate.toISOString(),
+        endDate: now.toISOString(),
+        limit: 10000
+      });
+
+      // Group by day
+      const dailySteps = new Map<string, number>();
+      if (result.resultData) {
+        result.resultData.forEach((sample: any) => {
+          const date = new Date(sample.startDate).toISOString().split('T')[0];
+          const stepValue = sample.count || sample.value || sample.qty || 0;
+          const steps = parseFloat(stepValue.toString() || '0');
+          dailySteps.set(date, (dailySteps.get(date) || 0) + steps);
+        });
+      }
+
+      // Create history array
+      for (let i = 0; i < days; i++) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - i);
+        const dateKey = date.toISOString().split('T')[0];
+        const steps = Math.floor(dailySteps.get(dateKey) || 0);
+        
         history.push({
           steps,
-          distance: steps * 0.0008, // Approximate distance in km
-          activeEnergyBurned: steps * 0.04, // Approximate calories
+          distance: steps * 0.0008,
+          activeEnergyBurned: steps * 0.04,
           timestamp: date,
         });
       }
 
-      return history.reverse(); // Return oldest to newest
+      return history.reverse();
     } catch (error) {
       console.error('Failed to get step history:', error);
       return [];
@@ -167,10 +217,7 @@ export class HealthKitService {
   }
 
   private async getNativeSteps(): Promise<number> {
-    // This would integrate with actual HealthKit/Google Fit APIs
-    // For development, return stored or simulated data
-    const stored = await this.getStoredSteps();
-    return stored > 0 ? stored : this.getSimulatedSteps();
+    return await this.getTodaySteps();
   }
 
   private async getStepsForDate(date: Date): Promise<number> {
@@ -197,13 +244,6 @@ export class HealthKitService {
     const today = new Date().toISOString().split('T')[0];
     const { value } = await Preferences.get({ key: `steps_${today}` });
     return value ? parseInt(value, 10) : 0;
-  }
-
-  private async simulatePermissionRequest(): Promise<boolean> {
-    // Simulate user permission dialog
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(true), 1000);
-    });
   }
 
   private async savePermissionsToStorage(): Promise<void> {
@@ -234,7 +274,7 @@ export class HealthKitService {
     }
     
     if (Capacitor.getPlatform() === 'android') {
-      return 'Google Fit';
+      return 'Health Connect';
     }
     
     return 'Unknown';

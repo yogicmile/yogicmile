@@ -7,6 +7,7 @@ import { App } from '@capacitor/app';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { HealthKitService } from '@/services/HealthKitService';
 
 export interface NativeStepData {
   dailySteps: number;
@@ -59,6 +60,9 @@ export const useNativeStepTracking = () => {
   const gpsWatchId = useRef<string | null>(null);
   const syncInterval = useRef<NodeJS.Timeout | null>(null);
   const stepQueue = useRef<StepEvent[]>([]);
+  const healthKit = useRef(HealthKitService.getInstance());
+  const lastStepCount = useRef(0);
+  const stepCheckInterval = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize native step tracking
   useEffect(() => {
@@ -85,11 +89,17 @@ export const useNativeStepTracking = () => {
       // Request permissions
       await requestPermissions();
       
+      // Request HealthKit permissions
+      const healthPerms = await healthKit.current.requestPermissions();
+      
       // Load stored data
       await loadStoredData();
       
-      // Start GPS tracking
+      // Start GPS tracking for speed validation
       await startGPSTracking();
+      
+      // Start polling native step data
+      startStepPolling();
       
       // Set up app state listeners
       setupAppStateListeners();
@@ -99,9 +109,10 @@ export const useNativeStepTracking = () => {
       // Only show welcome message on first setup
       const { value: hasShownSetup } = await Preferences.get({ key: TRACKING_SETUP_KEY });
       if (!hasShownSetup) {
+        const source = healthKit.current.getHealthDataSource();
         toast({
           title: "Native Tracking Active",
-          description: "Real-time step counting enabled",
+          description: `Connected to ${source}`,
         });
         await Preferences.set({ key: TRACKING_SETUP_KEY, value: 'true' });
       }
@@ -196,11 +207,56 @@ export const useNativeStepTracking = () => {
     }
   };
 
+  const startStepPolling = () => {
+    // Poll step data every 30 seconds
+    stepCheckInterval.current = setInterval(async () => {
+      try {
+        const currentSteps = await healthKit.current.getTodaySteps();
+        
+        if (currentSteps > lastStepCount.current) {
+          const newSteps = currentSteps - lastStepCount.current;
+          lastStepCount.current = currentSteps;
+          
+          // Update step data with new steps from health app
+          const capped = Math.min(currentSteps, MAX_DAILY_STEPS);
+          await saveToStorage({
+            dailySteps: capped,
+            lifetimeSteps: stepData.lifetimeSteps + newSteps,
+            pendingSteps: stepData.pendingSteps + newSteps,
+          });
+
+          // Milestone notifications
+          if (capped % 1000 === 0 && newSteps > 0) {
+            await Haptics.impact({ style: ImpactStyle.Medium });
+            
+            if (permissions.notifications) {
+              await LocalNotifications.schedule({
+                notifications: [{
+                  id: Date.now(),
+                  title: "🎉 Milestone Achieved!",
+                  body: `${capped} steps completed`,
+                  schedule: { at: new Date(Date.now() + 100) },
+                }]
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Step polling error:', error);
+      }
+    }, 30000); // Check every 30 seconds
+  };
+
   const setupAppStateListeners = () => {
     App.addListener('appStateChange', ({ isActive }) => {
       if (isActive) {
         // App became active - sync any pending data
         syncPendingSteps();
+        // Refresh step count immediately
+        if (stepCheckInterval.current) {
+          clearInterval(stepCheckInterval.current);
+          startStepPolling();
+        }
       } else {
         // App backgrounded - save current state
         saveToStorage(stepData);
@@ -320,6 +376,9 @@ export const useNativeStepTracking = () => {
     }
     if (syncInterval.current) {
       clearInterval(syncInterval.current);
+    }
+    if (stepCheckInterval.current) {
+      clearInterval(stepCheckInterval.current);
     }
     setIsTracking(false);
   };
