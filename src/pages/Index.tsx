@@ -56,12 +56,12 @@ const Index = () => {
           {/* Today's Summary Card */}
           <div className="px-4 pb-4">
             <TodaysSummaryCard
-              currentSteps={fitnessData.dailyProgress.currentSteps}
+              currentSteps={nativeSteps.stepData.dailySteps || fitnessData.dailyProgress.currentSteps}
               dailyGoal={fitnessData.dailyProgress.dailyGoal}
-              coinsEarned={fitnessData.dailyProgress.coinsEarnedToday}
-              distance={fitnessData.dailyProgress.distance}
-              activeMinutes={fitnessData.dailyProgress.activeMinutes}
-              isGoalReached={fitnessData.dailyProgress.currentSteps >= fitnessData.dailyProgress.dailyGoal}
+              coinsEarned={Math.floor((nativeSteps.stepData.dailySteps || fitnessData.dailyProgress.coinsEarnedToday) / 25)}
+              distance={((nativeSteps.stepData.dailySteps || 0) * 0.0008) || fitnessData.dailyProgress.distance}
+              activeMinutes={Math.floor((nativeSteps.stepData.dailySteps || 0) / 100) || fitnessData.dailyProgress.activeMinutes}
+              isGoalReached={(nativeSteps.stepData.dailySteps || fitnessData.dailyProgress.currentSteps) >= fitnessData.dailyProgress.dailyGoal}
               hasRedeemedToday={fitnessData.dailyProgress.coinsRedeemedToday > 0}
               onClaimReward={handleClaimReward}
               coinBalance={fitnessData.wallet.mockData.totalBalance}
