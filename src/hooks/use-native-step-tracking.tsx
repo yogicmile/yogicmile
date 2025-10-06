@@ -207,7 +207,61 @@ export const useNativeStepTracking = () => {
     }
   };
 
-  const startStepPolling = () => {
+  // Phase definitions (matching useYogicData)
+  const phaseDefinitions = [
+    { id: 1, rate: 1 },
+    { id: 2, rate: 2 },
+    { id: 3, rate: 3 },
+    { id: 4, rate: 5 },
+    { id: 5, rate: 7 },
+    { id: 6, rate: 10 },
+    { id: 7, rate: 15 },
+    { id: 8, rate: 20 },
+    { id: 9, rate: 30 },
+  ];
+
+  // Sync steps to database
+  const syncStepsToDatabase = useCallback(async (steps: number) => {
+    if (isGuest || !user) return;
+
+    try {
+      const cappedSteps = Math.min(steps, MAX_DAILY_STEPS);
+      const units = Math.floor(cappedSteps / 25);
+      
+      // Get current phase from database
+      const { data: userPhaseData } = await supabase
+        .from('user_phases')
+        .select('current_phase')
+        .eq('user_id', user.id)
+        .single();
+      
+      const currentPhase = userPhaseData?.current_phase || 1;
+      
+      // Get phase rate from local definitions
+      const phaseRate = phaseDefinitions.find(p => p.id === currentPhase)?.rate || 1;
+      const paisaEarned = units * phaseRate;
+
+      const today = new Date().toISOString().split('T')[0];
+
+      // Update or insert today's steps
+      await supabase
+        .from('daily_steps')
+        .upsert({
+          user_id: user.id,
+          date: today,
+          steps: steps,
+          capped_steps: cappedSteps,
+          units_earned: units,
+          paisa_earned: paisaEarned,
+          phase_id: currentPhase,
+          phase_rate: phaseRate,
+        });
+    } catch (error) {
+      console.error('Error syncing steps to database:', error);
+    }
+  }, [user, isGuest]);
+
+  const startStepPolling = useCallback(() => {
     // Poll step data every 30 seconds
     stepCheckInterval.current = setInterval(async () => {
       try {
@@ -224,6 +278,9 @@ export const useNativeStepTracking = () => {
             lifetimeSteps: stepData.lifetimeSteps + newSteps,
             pendingSteps: stepData.pendingSteps + newSteps,
           });
+
+          // Sync to database
+          await syncStepsToDatabase(currentSteps);
 
           // Milestone notifications
           if (capped % 1000 === 0 && newSteps > 0) {
@@ -245,7 +302,7 @@ export const useNativeStepTracking = () => {
         console.error('Step polling error:', error);
       }
     }, 30000); // Check every 30 seconds
-  };
+  }, [stepData, permissions, syncStepsToDatabase]);
 
   const setupAppStateListeners = () => {
     App.addListener('appStateChange', ({ isActive }) => {

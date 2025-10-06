@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-import { useFitnessData } from '@/hooks/use-fitness-data';
+import { useYogicData } from '@/hooks/use-yogic-data';
 
 interface NavigationCard {
   id: string;
@@ -17,16 +17,16 @@ interface NavigationCard {
 
 export const EnhancedNavigationCards = () => {
   const navigate = useNavigate();
-  const fitnessData = useFitnessData();
+  const yogicData = useYogicData();
 
   const navigationCards: NavigationCard[] = [
     {
       id: 'wallet',
       title: 'My Wallet',
-      subtitle: `Balance: ${fitnessData.wallet.mockData.totalBalance} coins`,
+      subtitle: `Balance: ₹${(yogicData.wallet.totalBalance / 100).toFixed(2)}`,
       icon: '💰',
       yogicIcon: '💪💳',
-      badge: fitnessData.wallet.mockData.pendingRedemptions > 0 ? fitnessData.wallet.mockData.pendingRedemptions : null,
+      badge: null,
       gradient: 'from-deep-teal/20 via-serene-blue/10 to-soft-lavender/20',
       description: 'Manage your earnings and transaction history',
       isNew: false

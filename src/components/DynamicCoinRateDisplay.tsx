@@ -2,18 +2,17 @@ import React from 'react';
 import { TrendingUp, Target, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useCoinRateSystem } from '@/hooks/use-coin-rate-system';
+import { useYogicData } from '@/hooks/use-yogic-data';
 
 export function DynamicCoinRateDisplay() {
-  const { 
-    currentTierData, 
-    dailySteps, 
-    calculateBaseEarnings,
-    isDailyCapExceeded,
-    getDailyLimitMessage
-  } = useCoinRateSystem();
+  const yogicData = useYogicData();
+  const currentPhase = yogicData.phases.currentPhase;
+  const dailySteps = yogicData.dailyProgress.currentSteps;
+  const coinsEarned = yogicData.dailyProgress.coinsEarnedToday;
 
-  const todaysEarnings = calculateBaseEarnings(dailySteps);
+  const cappedSteps = Math.min(dailySteps, 12000);
+  const units = Math.floor(cappedSteps / 25);
+  const isDailyCapExceeded = dailySteps > 12000;
 
   return (
     <div className="space-y-4">
@@ -22,29 +21,29 @@ export function DynamicCoinRateDisplay() {
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-primary flex items-center gap-2">
-              <div className="text-2xl">{currentTierData.symbol}</div>
-              <span>Current Rate</span>
+              <div className="text-2xl">💎</div>
+              <span>Current Phase</span>
             </h3>
             <Badge variant="secondary" className="bg-primary/20 text-primary">
-              {currentTierData.name}
+              Phase {currentPhase}
             </Badge>
           </div>
 
           <div className="text-center space-y-1">
-            <div className="text-2xl font-bold text-primary">₹{todaysEarnings.rupeesEarned.toFixed(2)}</div>
-            <div className="text-sm text-muted-foreground">{todaysEarnings.paisaEarned} paisa earned today</div>
+            <div className="text-2xl font-bold text-primary">₹{(coinsEarned / 100).toFixed(2)}</div>
+            <div className="text-sm text-muted-foreground">{coinsEarned} paisa earned today</div>
             <div className="text-xs text-muted-foreground">
-              {todaysEarnings.cappedSteps.toLocaleString()} steps = {todaysEarnings.units} units × {currentTierData.rate} paisa
+              {cappedSteps.toLocaleString()} steps = {units} units × phase rate
             </div>
           </div>
 
-          {isDailyCapExceeded(dailySteps) ? (
+          {isDailyCapExceeded ? (
             <div className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 p-2 rounded-md border border-amber-200 dark:border-amber-800 mt-4">
               ⚠️ Daily limit reached! Steps beyond 12,000 won't earn coins but are still healthy.
             </div>
           ) : (
             <div className="text-xs text-blue-600 bg-blue-50 dark:bg-blue-950/30 p-2 rounded-md border border-blue-200 dark:border-blue-800 mt-4">
-              {getDailyLimitMessage()}
+              📝 Daily earning limit: 12,000 steps. Steps beyond this won't earn coins but are still great for health!
             </div>
           )}
 
@@ -56,8 +55,8 @@ export function DynamicCoinRateDisplay() {
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Base Rate:</span>
-                <span className="font-medium">{currentTierData.rate} paisa/25 steps</span>
+                <span className="text-muted-foreground">Current Phase:</span>
+                <span className="font-medium">Phase {currentPhase}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Daily Cap:</span>
@@ -79,14 +78,14 @@ export function DynamicCoinRateDisplay() {
           <div className="space-y-3">
             {/* Examples */}
             {[8000, 10000, 12000].map((steps) => {
-              const earnings = calculateBaseEarnings(steps);
+              const units = Math.floor(steps / 25);
               return (
                 <div key={steps} className="flex justify-between items-center bg-white/30 dark:bg-black/30 rounded-lg p-2">
                   <span className="text-sm text-muted-foreground">
                     {steps.toLocaleString()} steps
                   </span>
                   <span className="font-medium text-secondary">
-                    ₹{earnings.rupeesEarned.toFixed(2)}
+                    {units} units
                   </span>
                 </div>
               );
@@ -95,7 +94,7 @@ export function DynamicCoinRateDisplay() {
 
           <div className="text-center mt-3">
             <p className="text-xs text-muted-foreground">
-              Based on {currentTierData.name} rate: {currentTierData.rate} paisa per 25 steps
+              Every 25 steps = 1 unit. Earnings vary by phase.
             </p>
           </div>
         </div>

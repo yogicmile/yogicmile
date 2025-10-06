@@ -5,12 +5,12 @@ import { InteractiveProgressRing } from '@/components/InteractiveProgressRing';
 import { EnhancedNavigationCards } from '@/components/EnhancedNavigationCards';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PageLoading } from '@/components/LoadingStates';
-import { useFitnessData } from '@/hooks/use-fitness-data';
+import { useYogicData } from '@/hooks/use-yogic-data';
 import { useNativeStepTracking } from '@/hooks/use-native-step-tracking';
 
 const Index = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const fitnessData = useFitnessData();
+  const yogicData = useYogicData();
   const nativeSteps = useNativeStepTracking();
 
   useEffect(() => {
@@ -21,17 +21,21 @@ const Index = () => {
 
   const handleClaimReward = async (): Promise<boolean> => {
     try {
-      await fitnessData.redeemDailyCoins(10);
-      return true;
+      const success = await yogicData.redeemDailyCoins();
+      return success;
     } catch {
       return false;
     }
   };
 
   // Show loading screen during initial load
-  if (isInitialLoading) {
+  if (isInitialLoading || yogicData.isLoading) {
     return <PageLoading />;
   }
+
+  // Use native steps if available, otherwise use database steps
+  const currentSteps = nativeSteps.stepData.dailySteps || yogicData.dailyProgress.currentSteps;
+  const lifetimeSteps = nativeSteps.stepData.lifetimeSteps || yogicData.user.totalLifetimeSteps;
 
   return (
     <ErrorBoundary>
@@ -46,25 +50,25 @@ const Index = () => {
           {/* Interactive Progress Ring */}
           <div className="px-4 pb-4">
             <InteractiveProgressRing
-              dailySteps={nativeSteps.stepData.dailySteps || fitnessData.dailyProgress.currentSteps}
-              lifetimeSteps={nativeSteps.stepData.lifetimeSteps || fitnessData.user.totalLifetimeSteps}
-              goalSteps={fitnessData.dailyProgress.dailyGoal}
-              currentTier={fitnessData.user.currentTier}
+              dailySteps={currentSteps}
+              lifetimeSteps={lifetimeSteps}
+              goalSteps={yogicData.dailyProgress.dailyGoal}
+              currentTier={yogicData.phases.currentPhase}
             />
           </div>
 
           {/* Today's Summary Card */}
           <div className="px-4 pb-4">
             <TodaysSummaryCard
-              currentSteps={nativeSteps.stepData.dailySteps || fitnessData.dailyProgress.currentSteps}
-              dailyGoal={fitnessData.dailyProgress.dailyGoal}
-              coinsEarned={Math.floor((nativeSteps.stepData.dailySteps || fitnessData.dailyProgress.coinsEarnedToday) / 25)}
-              distance={((nativeSteps.stepData.dailySteps || 0) * 0.0008) || fitnessData.dailyProgress.distance}
-              activeMinutes={Math.floor((nativeSteps.stepData.dailySteps || 0) / 100) || fitnessData.dailyProgress.activeMinutes}
-              isGoalReached={(nativeSteps.stepData.dailySteps || fitnessData.dailyProgress.currentSteps) >= fitnessData.dailyProgress.dailyGoal}
-              hasRedeemedToday={fitnessData.dailyProgress.coinsRedeemedToday > 0}
+              currentSteps={currentSteps}
+              dailyGoal={yogicData.dailyProgress.dailyGoal}
+              coinsEarned={yogicData.dailyProgress.coinsEarnedToday}
+              distance={yogicData.dailyProgress.distance}
+              activeMinutes={yogicData.dailyProgress.activeMinutes}
+              isGoalReached={currentSteps >= yogicData.dailyProgress.dailyGoal}
+              hasRedeemedToday={yogicData.dailyProgress.isRedeemed}
               onClaimReward={handleClaimReward}
-              coinBalance={fitnessData.wallet.mockData.totalBalance}
+              coinBalance={yogicData.wallet.totalBalance}
               className="animate-fade-in"
             />
           </div>
