@@ -63,7 +63,6 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
   // Mock data for navigation
   const notificationCounts = {
-    dashboard: 2,
     rewards: 3,
   };
 
