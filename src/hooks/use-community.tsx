@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { LeaderboardService } from '@/services/LeaderboardService';
 import type { 
   UserProfile, 
   Friendship, 
@@ -182,19 +183,51 @@ export const useCommunity = () => {
     if (!userProfile) return;
 
     try {
-      const { data, error } = await supabase
+      const { data: friendshipsData, error: friendshipsError } = await supabase
         .from('friendships')
         .select('*')
         .or(`requester_id.eq.${userProfile.user_id},addressee_id.eq.${userProfile.user_id}`)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (friendshipsError) throw friendshipsError;
 
-      setFriends((data || []) as FriendshipWithProfile[]);
+      // Get unique user IDs from friendships
+      const userIds = new Set<string>();
+      friendshipsData?.forEach(friendship => {
+        userIds.add(friendship.requester_id);
+        userIds.add(friendship.addressee_id);
+      });
+
+      // Fetch all related profiles
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .in('user_id', Array.from(userIds));
+
+      if (profilesError) throw profilesError;
+
+      // Create profile lookup map
+      const profilesMap = new Map(
+        profilesData?.map(profile => [profile.user_id, profile as UserProfile]) || []
+      );
+
+      // Attach profiles to friendships
+      const friendshipsWithProfiles = friendshipsData?.map(friendship => ({
+        ...friendship,
+        requester_profile: profilesMap.get(friendship.requester_id),
+        addressee_profile: profilesMap.get(friendship.addressee_id),
+      })) || [];
+
+      setFriends(friendshipsWithProfiles as FriendshipWithProfile[]);
     } catch (error) {
       console.error('Error loading friends:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load friends list",
+        variant: "destructive"
+      });
     }
-  }, [userProfile]);
+  }, [userProfile, toast]);
 
   // Get leaderboards
   const getLeaderboards = useCallback(async (period: 'weekly' | 'monthly' | 'all_time', category: 'global' | 'friends' | 'local') => {
@@ -215,14 +248,39 @@ export const useCommunity = () => {
         
         if (friendIds.length > 0) {
           query = query.in('user_id', friendIds);
+        } else {
+          // No friends yet, return empty
+          return [];
         }
       }
 
-      const { data, error } = await query;
+      const { data: leaderboardData, error: leaderboardError } = await query;
 
-      if (error) throw error;
+      if (leaderboardError) throw leaderboardError;
 
-      return data || [];
+      // Get unique user IDs from leaderboard
+      const userIds = [...new Set(leaderboardData?.map(entry => entry.user_id) || [])];
+      
+      // Fetch user profiles
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .in('user_id', userIds);
+      
+      if (profilesError) throw profilesError;
+
+      // Create profile lookup map
+      const profilesMap = new Map(
+        profilesData?.map(profile => [profile.user_id, profile as UserProfile]) || []
+      );
+
+      // Attach profiles to leaderboard entries
+      const leaderboardWithProfiles = leaderboardData?.map(entry => ({
+        ...entry,
+        user_profile: profilesMap.get(entry.user_id),
+      })) || [];
+
+      return leaderboardWithProfiles;
     } catch (error) {
       console.error('Error loading leaderboards:', error);
       return [];
@@ -278,6 +336,32 @@ export const useCommunity = () => {
     }
   }, [userProfile, loadFriends]);
 
+  // Set up real-time subscriptions for community updates
+  useEffect(() => {
+    if (!userProfile) return;
+
+    // Subscribe to friendship changes
+    const friendshipsChannel = supabase
+      .channel('friendships-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'friendships',
+          filter: `requester_id=eq.${userProfile.user_id},addressee_id=eq.${userProfile.user_id}`,
+        },
+        () => {
+          loadFriends(); // Refresh friends list on any change
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(friendshipsChannel);
+    };
+  }, [userProfile, loadFriends]);
+
   return {
     loading,
     userProfile,
@@ -289,6 +373,7 @@ export const useCommunity = () => {
     respondToFriendRequest,
     loadFriends,
     getLeaderboards,
-    getCommunityStats
+    getCommunityStats,
+    populateLeaderboards: LeaderboardService.manualPopulate, // Expose for manual trigger
   };
 };

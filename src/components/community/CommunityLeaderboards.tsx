@@ -241,7 +241,7 @@ export const CommunityLeaderboards = () => {
       </Card>
 
       {/* Refresh Button */}
-      <div className="text-center">
+      <div className="text-center space-y-2">
         <Button
           onClick={loadLeaderboards}
           disabled={loading}
@@ -251,6 +251,11 @@ export const CommunityLeaderboards = () => {
           <TrendingUp className="w-4 h-4 mr-2" />
           {loading ? 'Updating...' : 'Refresh Rankings'}
         </Button>
+        {leaderboards.length === 0 && (
+          <p className="text-xs text-muted-foreground">
+            Leaderboards are populated automatically based on step data
+          </p>
+        )}
       </div>
     </div>
   );
