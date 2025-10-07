@@ -4,6 +4,7 @@ import { Geolocation } from '@capacitor/geolocation';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -262,6 +263,11 @@ export const useNativeStepTracking = () => {
   }, [user, isGuest]);
 
   const startStepPolling = useCallback(() => {
+    // Only poll on native platforms (iOS/Android)
+    if (!Capacitor.isNativePlatform()) {
+      return; // Don't poll in web mode
+    }
+    
     // Poll step data every 30 seconds
     stepCheckInterval.current = setInterval(async () => {
       try {

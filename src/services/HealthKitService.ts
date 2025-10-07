@@ -234,10 +234,8 @@ export class HealthKitService {
   }
 
   private getSimulatedSteps(): number {
-    const hour = new Date().getHours();
-    const baseSteps = hour * 300; // 300 steps per hour on average
-    const variance = Math.floor(Math.random() * 500) - 250;
-    return Math.max(0, baseSteps + variance);
+    // Return stored steps only - no automatic simulation
+    return 0;
   }
 
   private async getStoredSteps(): Promise<number> {
