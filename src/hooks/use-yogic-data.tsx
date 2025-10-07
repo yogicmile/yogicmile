@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { PHASE_DEFINITIONS } from '@/constants/phases';
 
 interface YogicData {
   // User data
@@ -40,17 +41,7 @@ interface YogicData {
   };
 }
 
-const phaseDefinitions = [
-  { id: 1, name: 'Paisa Phase', symbol: '🟡', rate: 1, stepRequirement: 200000, timeLimit: 60 },
-  { id: 2, name: 'Coin Phase', symbol: '🪙', rate: 2, stepRequirement: 300000, timeLimit: 60 },
-  { id: 3, name: 'Token Phase', symbol: '🎟️', rate: 3, stepRequirement: 400000, timeLimit: 60 },
-  { id: 4, name: 'Gem Phase', symbol: '💎', rate: 5, stepRequirement: 500000, timeLimit: 60 },
-  { id: 5, name: 'Diamond Phase', symbol: '💠', rate: 7, stepRequirement: 600000, timeLimit: 60 },
-  { id: 6, name: 'Crown Phase', symbol: '👑', rate: 10, stepRequirement: 800000, timeLimit: 60 },
-  { id: 7, name: 'Emperor Phase', symbol: '🏵️', rate: 15, stepRequirement: 1000000, timeLimit: 60 },
-  { id: 8, name: 'Legend Phase', symbol: '🏅', rate: 20, stepRequirement: 1200000, timeLimit: 60 },
-  { id: 9, name: 'Immortal Phase', symbol: '🏆', rate: 30, stepRequirement: 1500000, timeLimit: 60 },
-];
+const phaseDefinitions = PHASE_DEFINITIONS;
 
 export const useYogicData = () => {
   const { user, isGuest } = useAuth();
@@ -246,15 +237,42 @@ export const useYogicData = () => {
       }));
 
       // Check for phase progression
-      const newLifetimeSteps = yogicData.user.totalLifetimeSteps + Math.max(0, newSteps - yogicData.dailyProgress.currentSteps);
-      const currentPhaseSteps = yogicData.phases.currentPhaseSteps + Math.max(0, newSteps - yogicData.dailyProgress.currentSteps);
+      const stepDiff = Math.max(0, newSteps - yogicData.dailyProgress.currentSteps);
+      const newLifetimeSteps = yogicData.user.totalLifetimeSteps + stepDiff;
+      const newCurrentPhaseSteps = yogicData.phases.currentPhaseSteps + stepDiff;
       
-      if (currentPhaseSteps >= yogicData.phases.phaseTarget) {
-        // Phase advancement logic would go here
-        toast({
-          title: "🎉 Phase Advanced!",
-          description: `Congratulations! You've reached the next phase!`,
-        });
+      // Update user_phases with new lifetime and phase steps
+      await supabase
+        .from('user_phases')
+        .update({
+          total_lifetime_steps: newLifetimeSteps,
+          current_phase_steps: newCurrentPhaseSteps,
+        })
+        .eq('user_id', user.id);
+      
+      // Check if user should advance to next phase
+      if (newCurrentPhaseSteps >= yogicData.phases.phaseTarget && currentPhase < 9) {
+        const nextPhase = currentPhase + 1;
+        const nextPhaseInfo = phaseDefinitions.find(p => p.id === nextPhase);
+        
+        if (nextPhaseInfo) {
+          await supabase
+            .from('user_phases')
+            .update({
+              current_phase: nextPhase,
+              current_phase_steps: 0,
+              phase_start_date: new Date().toISOString(),
+            })
+            .eq('user_id', user.id);
+
+          toast({
+            title: `🎉 ${nextPhaseInfo.symbol} Phase ${nextPhase} Unlocked!`,
+            description: `${nextPhaseInfo.name} - Earn ${nextPhaseInfo.rate}x paisa per 25 steps!`,
+          });
+
+          // Refresh data to show new phase
+          await loadUserData();
+        }
       }
     } catch (error) {
       console.error('Error updating steps:', error);
@@ -341,21 +359,31 @@ export const useYogicData = () => {
     loadUserData();
   }, [loadUserData]);
 
-  // Simulate step increments for demo (remove in production)
+  // Real-time database subscriptions for authenticated users
   useEffect(() => {
-    if (isGuest) {
-      const interval = setInterval(() => {
-        setYogicData(prev => ({
-          ...prev,
-          dailyProgress: {
-            ...prev.dailyProgress,
-            currentSteps: Math.min(prev.dailyProgress.currentSteps + Math.floor(Math.random() * 50), 15000),
-          },
-        }));
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [isGuest]);
+    if (isGuest || !user) return;
+
+    // Subscribe to daily_steps changes
+    const stepsChannel = supabase
+      .channel('daily-steps-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'daily_steps',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          loadUserData(); // Refresh data when steps update
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(stepsChannel);
+    };
+  }, [isGuest, user, loadUserData]);
 
   return {
     ...yogicData,

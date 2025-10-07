@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { HealthKitService } from '@/services/HealthKitService';
+import { PHASE_DEFINITIONS, MAX_DAILY_STEPS, STEPS_PER_UNIT } from '@/constants/phases';
 
 export interface NativeStepData {
   dailySteps: number;
@@ -29,9 +30,7 @@ export interface StepEvent {
   validated: boolean;
 }
 
-const MAX_DAILY_STEPS = 12000;
 const MAX_WALKING_SPEED = 12; // km/h
-const STEPS_TO_PAISA = 25;
 const STORAGE_KEY = 'native-step-data';
 const TRACKING_SETUP_KEY = 'native-tracking-setup-shown';
 const SYNC_INTERVAL = 60000; // 1 minute
@@ -208,18 +207,7 @@ export const useNativeStepTracking = () => {
     }
   };
 
-  // Phase definitions (matching useYogicData)
-  const phaseDefinitions = [
-    { id: 1, rate: 1 },
-    { id: 2, rate: 2 },
-    { id: 3, rate: 3 },
-    { id: 4, rate: 5 },
-    { id: 5, rate: 7 },
-    { id: 6, rate: 10 },
-    { id: 7, rate: 15 },
-    { id: 8, rate: 20 },
-    { id: 9, rate: 30 },
-  ];
+  // Use centralized phase definitions
 
   // Sync steps to database
   const syncStepsToDatabase = useCallback(async (steps: number) => {
@@ -238,8 +226,8 @@ export const useNativeStepTracking = () => {
       
       const currentPhase = userPhaseData?.current_phase || 1;
       
-      // Get phase rate from local definitions
-      const phaseRate = phaseDefinitions.find(p => p.id === currentPhase)?.rate || 1;
+      // Get phase rate from centralized definitions
+      const phaseRate = PHASE_DEFINITIONS.find(p => p.id === currentPhase)?.rate || 1;
       const paisaEarned = units * phaseRate;
 
       const today = new Date().toISOString().split('T')[0];
@@ -408,7 +396,7 @@ export const useNativeStepTracking = () => {
         lastSyncTime: new Date(),
       });
 
-      const coinsEarned = Math.floor(stepData.pendingSteps / STEPS_TO_PAISA);
+      const coinsEarned = Math.floor(stepData.pendingSteps / STEPS_PER_UNIT);
       if (coinsEarned > 0) {
         toast({
           title: "Steps Synced!",
