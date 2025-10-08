@@ -48,16 +48,19 @@ export const WalletPage = () => {
 
       setWalletBalance(wallet?.total_balance || 0);
       
-      // Calculate today's pending coins from step logs
+      // Calculate today's pending coins from daily_steps
       const today = new Date().toISOString().split('T')[0];
       const { data: todaySteps } = await supabase
-        .from('step_logs')
-        .select('coins_earned')
+        .from('daily_steps')
+        .select('paisa_earned, is_redeemed')
         .eq('user_id', user.id)
         .eq('date', today)
         .single();
 
-      setTodaysPendingCoins(todaySteps?.coins_earned || 0);
+      // Only show pending coins if not already redeemed
+      setTodaysPendingCoins(
+        todaySteps && !todaySteps.is_redeemed ? todaySteps.paisa_earned : 0
+      );
 
       // Fetch transactions
       const { data: txns } = await supabase
@@ -108,24 +111,65 @@ export const WalletPage = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      const today = new Date().toISOString().split('T')[0];
+
+      // Mark today's earnings as redeemed in daily_steps
+      const { error: stepError } = await supabase
+        .from('daily_steps')
+        .update({ 
+          is_redeemed: true, 
+          redeemed_at: new Date().toISOString() 
+        })
+        .eq('user_id', user.id)
+        .eq('date', today)
+        .eq('is_redeemed', false);
+
+      if (stepError) throw stepError;
+
+      // Add transaction record
+      const { error: txnError } = await supabase.from('transactions').insert({
+        user_id: user.id,
+        type: 'earning',
+        amount: todaysPendingCoins,
+        description: `Daily earnings redeemed - ${new Date().toLocaleDateString()}`,
+        status: 'completed'
+      });
+
+      if (txnError) throw txnError;
+
       // Update wallet balance
-      const { error } = await supabase
+      const newBalance = walletBalance + todaysPendingCoins;
+      const newTotalEarned = (await supabase
+        .from('wallet_balances')
+        .select('total_earned')
+        .eq('user_id', user.id)
+        .single()).data?.total_earned || 0;
+
+      const { error: walletError } = await supabase
         .from('wallet_balances')
         .update({
-          total_balance: walletBalance + todaysPendingCoins,
-          pending_balance: 0,
+          total_balance: newBalance,
+          total_earned: newTotalEarned + todaysPendingCoins,
           last_updated: new Date().toISOString()
         })
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (walletError) throw walletError;
 
-      toast({ title: "Coins redeemed successfully!" });
+      toast({ 
+        title: "Coins redeemed successfully!",
+        description: `₹${(todaysPendingCoins / 100).toFixed(2)} added to wallet`
+      });
+      
       setShowDailyRedeem(false);
       loadWalletData();
     } catch (error) {
       console.error('Error redeeming coins:', error);
-      toast({ title: "Error redeeming coins", variant: "destructive" });
+      toast({ 
+        title: "Error redeeming coins", 
+        description: "Please try again later",
+        variant: "destructive" 
+      });
     }
   };
 
