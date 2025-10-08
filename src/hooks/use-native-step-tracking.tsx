@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { HealthKitService } from '@/services/HealthKitService';
 import { PHASE_DEFINITIONS, MAX_DAILY_STEPS, STEPS_PER_UNIT } from '@/constants/phases';
+import { useGamification } from '@/hooks/use-gamification';
 
 export interface NativeStepData {
   dailySteps: number;
@@ -39,6 +40,7 @@ const GPS_UPDATE_INTERVAL = 10000; // 10 seconds
 export const useNativeStepTracking = () => {
   const { user, isGuest } = useAuth();
   const { toast } = useToast();
+  const { updateChallengeProgress } = useGamification();
   const [stepData, setStepData] = useState<NativeStepData>({
     dailySteps: 0,
     lifetimeSteps: 0,
@@ -232,6 +234,17 @@ export const useNativeStepTracking = () => {
 
       const today = new Date().toISOString().split('T')[0];
 
+      // Get previous step count for the day
+      const { data: previousData } = await supabase
+        .from('daily_steps')
+        .select('steps')
+        .eq('user_id', user.id)
+        .eq('date', today)
+        .single();
+
+      const previousSteps = previousData?.steps || 0;
+      const stepsAdded = steps - previousSteps;
+
       // Update or insert today's steps
       await supabase
         .from('daily_steps')
@@ -245,10 +258,15 @@ export const useNativeStepTracking = () => {
           phase_id: currentPhase,
           phase_rate: phaseRate,
         });
+
+      // Update challenge progress if there are new steps
+      if (stepsAdded > 0 && updateChallengeProgress) {
+        await updateChallengeProgress(stepsAdded);
+      }
     } catch (error) {
       console.error('Error syncing steps to database:', error);
     }
-  }, [user, isGuest]);
+  }, [user, isGuest, updateChallengeProgress]);
 
   const startStepPolling = useCallback(() => {
     // Only poll on native platforms (iOS/Android)

@@ -304,48 +304,146 @@ export function useGamification() {
   const joinSeasonalChallenge = async (challengeId: string) => {
     try {
       const user = await getCurrentUser();
-      if (!user) return;
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to join challenges",
+          variant: "destructive",
+        });
+        return;
+      }
 
+      // Check if already participating
+      const { data: existingParticipation } = await supabase
+        .from('seasonal_challenge_participants')
+        .select('id')
+        .eq('challenge_id', challengeId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (existingParticipation) {
+        toast({
+          title: "Already Joined",
+          description: "You're already participating in this challenge",
+        });
+        return;
+      }
+
+      // Insert participation
       const { error } = await supabase
         .from('seasonal_challenge_participants')
         .insert({
           challenge_id: challengeId,
           user_id: user.id,
-          progress: 0
+          progress: 0,
+          completed: false
         });
 
       if (error) throw error;
 
-      // Update participant count manually
-      const { data: challengeData } = await supabase
+      // Increment participant count
+      const { data: challenge } = await supabase
         .from('seasonal_challenges')
         .select('participant_count')
         .eq('id', challengeId)
         .single();
 
-      if (challengeData) {
-        const { error: updateError } = await supabase
+      if (challenge) {
+        await supabase
           .from('seasonal_challenges')
-          .update({ participant_count: (challengeData.participant_count || 0) + 1 })
+          .update({ 
+            participant_count: (challenge.participant_count || 0) + 1 
+          })
           .eq('id', challengeId);
-
-        if (updateError) console.warn('Failed to update participant count:', updateError);
       }
 
       await loadUserChallengeParticipation();
       await loadSeasonalChallenges();
 
       toast({
-        title: "Challenge Joined!",
-        description: "You've successfully joined the seasonal challenge",
+        title: "Challenge Joined! 🎯",
+        description: "Start walking to make progress",
       });
     } catch (error) {
       console.error('Error joining challenge:', error);
       toast({
         title: "Error",
-        description: "Failed to join challenge",
+        description: "Failed to join challenge. Please try again.",
         variant: "destructive",
       });
+    }
+  };
+
+  // Update challenge progress (called after daily steps are recorded)
+  const updateChallengeProgress = async (stepsAdded: number) => {
+    try {
+      const user = await getCurrentUser();
+      if (!user) return;
+
+      // Get active participations
+      const { data: participations, error: fetchError } = await supabase
+        .from('seasonal_challenge_participants')
+        .select(`
+          *,
+          challenge:seasonal_challenges(*)
+        `)
+        .eq('user_id', user.id)
+        .eq('completed', false);
+
+      if (fetchError) throw fetchError;
+      if (!participations || participations.length === 0) return;
+
+      // Update progress for each active challenge
+      for (const participation of participations) {
+        const challenge = participation.challenge as any;
+        if (!challenge) continue;
+
+        // Check if challenge is still active
+        const now = new Date();
+        const endDate = new Date(challenge.end_date);
+        if (now > endDate) continue;
+
+        const newProgress = participation.progress + stepsAdded;
+        const isCompleted = newProgress >= challenge.goal_target;
+
+        // Update participation
+        const { error: updateError } = await supabase
+          .from('seasonal_challenge_participants')
+          .update({
+            progress: newProgress,
+            completed: isCompleted,
+            completion_date: isCompleted ? new Date().toISOString() : null
+          })
+          .eq('id', participation.id);
+
+        if (updateError) {
+          console.error('Error updating challenge progress:', updateError);
+          continue;
+        }
+
+        // If completed, award rewards
+        if (isCompleted) {
+          toast({
+            title: "Challenge Completed! 🏆",
+            description: `You've completed ${challenge.name}! Rewards: ${challenge.reward_description}`,
+          });
+
+          // Award coins if specified
+          if (challenge.reward_coins > 0) {
+            await supabase.from('transactions').insert({
+              user_id: user.id,
+              type: 'challenge_reward',
+              amount: challenge.reward_coins,
+              description: `Completed ${challenge.name}`
+            });
+          }
+        }
+      }
+
+      // Reload participation data
+      await loadUserChallengeParticipation();
+    } catch (error) {
+      console.error('Error updating challenge progress:', error);
     }
   };
 
@@ -484,6 +582,62 @@ export function useGamification() {
     }
   };
 
+  // Set up real-time subscriptions for challenges
+  useEffect(() => {
+    const getCurrentUserId = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user?.id;
+    };
+
+    let challengesChannel: any;
+    let participationChannel: any;
+
+    const setupSubscriptions = async () => {
+      const userId = await getCurrentUserId();
+      if (!userId) return;
+
+      // Subscribe to seasonal challenges changes
+      challengesChannel = supabase
+        .channel('seasonal-challenges-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'seasonal_challenges',
+          },
+          () => {
+            loadSeasonalChallenges();
+          }
+        )
+        .subscribe();
+
+      // Subscribe to user's challenge participation changes
+      participationChannel = supabase
+        .channel('challenge-participation-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'seasonal_challenge_participants',
+            filter: `user_id=eq.${userId}`,
+          },
+          () => {
+            loadUserChallengeParticipation();
+          }
+        )
+        .subscribe();
+    };
+
+    setupSubscriptions();
+
+    return () => {
+      if (challengesChannel) supabase.removeChannel(challengesChannel);
+      if (participationChannel) supabase.removeChannel(participationChannel);
+    };
+  }, [loadSeasonalChallenges, loadUserChallengeParticipation]);
+
   // Initialize data on mount
   useEffect(() => {
     const initializeData = async () => {
@@ -526,6 +680,7 @@ export function useGamification() {
 
     // Actions
     joinSeasonalChallenge,
+    updateChallengeProgress,
     updateGamificationSettings,
     completeOnboardingStep,
     checkAchievements,

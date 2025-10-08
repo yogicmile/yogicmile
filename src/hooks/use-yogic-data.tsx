@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { PHASE_DEFINITIONS } from '@/constants/phases';
+import { useGamification } from '@/hooks/use-gamification';
 
 interface YogicData {
   // User data
