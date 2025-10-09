@@ -4,10 +4,9 @@ const config: CapacitorConfig = {
   appId: 'app.lovable.4741923f866e4468918a6e7c1c4ebf2e',
   appName: 'yogicmile',
   webDir: 'dist',
-  server: {
-    url: 'https://yogicmile.com',
-    cleartext: true
-  },
+  // Production: Web assets bundled in app for offline support
+  // For development hot-reload, temporarily add:
+  // server: { url: 'https://yogicmile.netlify.app', cleartext: true }
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
