@@ -46,13 +46,29 @@ export const ReferralCard = () => {
       setIsLoading(true);
 
       // Get user's referral code
-      const { data: userProfile } = await supabase
+      const { data: userProfile, error: profileError } = await supabase
         .from('users')
         .select('referral_code, mobile_number')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (!userProfile) return;
+      if (profileError) {
+        console.error('Error fetching user profile:', profileError);
+        toast({
+          title: "Error loading referral data",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!userProfile) {
+        toast({
+          title: "Profile not found",
+          description: "Please complete your profile setup",
+          variant: "destructive"
+        });
+        return;
+      }
 
       // Get referral relationships where this user is the referrer
       const { data: referrals } = await supabase

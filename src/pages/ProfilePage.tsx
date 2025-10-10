@@ -19,6 +19,7 @@ export const ProfilePage = () => {
   const [userStats, setUserStats] = useState({
     totalSteps: 0,
     totalCoins: 0,
+    totalEarned: 0,
     currentStreak: 0,
     joinDate: '',
     currentPhase: 'Paisa Phase 🪙',
@@ -33,45 +34,76 @@ export const ProfilePage = () => {
 
   const loadUserData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      setLoading(true);
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        setLoading(false);
+        toast({ 
+          title: "Authentication required", 
+          description: "Please log in to view your profile",
+          variant: "destructive" 
+        });
+        navigate('/login');
+        return;
+      }
 
       // Fetch wallet balance
-      const { data: wallet } = await supabase
+      const { data: wallet, error: walletError } = await supabase
         .from('wallet_balances')
         .select('total_balance, total_earned')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      // Fetch total steps
-      const { data: steps } = await supabase
-        .from('step_logs')
+      if (walletError) {
+        console.error('Error fetching wallet:', walletError);
+      }
+
+      // Fetch total steps from daily_steps table
+      const { data: steps, error: stepsError } = await supabase
+        .from('daily_steps')
         .select('steps')
         .eq('user_id', user.id);
+
+      if (stepsError) {
+        console.error('Error fetching steps:', stepsError);
+      }
 
       const totalSteps = steps?.reduce((sum, log) => sum + log.steps, 0) || 0;
 
       // Fetch user phase
-      const { data: userPhase } = await supabase
+      const { data: userPhase, error: phaseError } = await supabase
         .from('user_phases')
         .select('current_phase, created_at')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
+
+      if (phaseError) {
+        console.error('Error fetching phase:', phaseError);
+      }
 
       // Fetch profile
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('full_name')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      // Calculate streak (simplified - you may want more complex logic)
-      const { data: recentLogs } = await supabase
-        .from('step_logs')
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+      }
+
+      // Calculate streak from daily_steps table
+      const { data: recentLogs, error: logsError } = await supabase
+        .from('daily_steps')
         .select('date')
         .eq('user_id', user.id)
         .order('date', { ascending: false })
         .limit(30);
+
+      if (logsError) {
+        console.error('Error fetching recent logs:', logsError);
+      }
 
       let currentStreak = 0;
       if (recentLogs && recentLogs.length > 0) {
@@ -92,6 +124,7 @@ export const ProfilePage = () => {
       setUserStats({
         totalSteps: totalSteps,
         totalCoins: wallet?.total_balance || 0,
+        totalEarned: wallet?.total_earned || 0,
         currentStreak: currentStreak,
         joinDate: userPhase?.created_at ? new Date(userPhase.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently',
         currentPhase: String(userPhase?.current_phase || 'Paisa Phase 🪙'),
@@ -99,6 +132,11 @@ export const ProfilePage = () => {
       });
     } catch (error) {
       console.error('Error loading user data:', error);
+      toast({ 
+        title: "Error loading profile", 
+        description: "Some data may not be available",
+        variant: "destructive" 
+      });
     } finally {
       setLoading(false);
     }
@@ -158,6 +196,17 @@ export const ProfilePage = () => {
     }
   ];
 
+  if (loading) {
+    return (
+      <div className="mobile-container bg-background p-4 pb-24 safe-bottom flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mobile-container bg-background p-4 pb-24 safe-bottom">
       <div className="w-full space-y-6">
@@ -210,7 +259,7 @@ export const ProfilePage = () => {
             <CardContent className="p-3 sm:p-4 text-center">
               <div className="flex items-center justify-center gap-1">
                 <Trophy className="w-4 h-4 text-muted-foreground" />
-                <p className="text-lg font-bold text-foreground">{userStats.totalCoins}</p>
+                <p className="text-lg font-bold text-foreground">{userStats.totalEarned.toLocaleString()}</p>
               </div>
               <p className="text-sm text-muted-foreground">Total Earned</p>
             </CardContent>
