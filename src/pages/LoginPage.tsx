@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MobileOTPLogin } from '@/components/MobileOTPLogin';
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; // Disabled for testing
+// import { MobileOTPLogin } from '@/components/MobileOTPLogin'; // Disabled for testing
 import { EmailPasswordLogin } from '@/components/EmailPasswordLogin';
 import { useAuth } from '@/contexts/AuthContext';
-import { Mail, Smartphone, LogIn } from 'lucide-react';
+import { Mail } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { enterGuestMode } = useAuth();
-  const [activeTab, setActiveTab] = useState("otp");
 
   const handleLoginSuccess = () => {
     navigate('/');
@@ -19,14 +18,6 @@ export default function LoginPage() {
 
   const handleSwitchToSignup = () => {
     navigate('/signup');
-  };
-
-  const handleSwitchToOTP = () => {
-    setActiveTab("otp");
-  };
-
-  const handleSwitchToEmail = () => {
-    setActiveTab("email");
   };
 
   const handleGuestMode = () => {
@@ -50,35 +41,19 @@ export default function LoginPage() {
         </CardHeader>
 
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="otp" className="flex items-center gap-2">
-                <Smartphone className="h-4 w-4" />
-                Mobile OTP
-              </TabsTrigger>
-              <TabsTrigger value="email" className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Email Login
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="otp" className="mt-6">
-              <MobileOTPLogin
-                onSuccess={handleLoginSuccess}
-                onSwitchToSignup={handleSwitchToSignup}
-                className="border-0 shadow-none"
-              />
-            </TabsContent>
-
-            <TabsContent value="email" className="mt-6">
-              <EmailPasswordLogin
-                onSuccess={handleLoginSuccess}
-                onSwitchToOTP={handleSwitchToOTP}
-                onSwitchToSignup={handleSwitchToSignup}
-                className="border-0 shadow-none"
-              />
-            </TabsContent>
-          </Tabs>
+          {/* OTP Login temporarily disabled - using email/password only for testing */}
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-700">
+              📧 Email & Password login only (OTP disabled for testing)
+            </p>
+          </div>
+          
+          <EmailPasswordLogin
+            onSuccess={handleLoginSuccess}
+            onSwitchToOTP={() => {}} // Disabled
+            onSwitchToSignup={handleSwitchToSignup}
+            className="border-0 shadow-none"
+          />
 
           <div className="mt-6 text-center">
             <Button

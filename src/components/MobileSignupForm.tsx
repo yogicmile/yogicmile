@@ -35,7 +35,7 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
   
   const [formData, setFormData] = useState<SignUpFormData>({
     mobileNumber: '',
-    authChoice: 'otp',
+    authChoice: 'password', // Force password mode for testing (OTP disabled)
     fullName: '',
     address: {
       city: '',
@@ -194,7 +194,8 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
               )}
             </div>
 
-            {/* Authentication Choice */}
+            {/* Authentication Choice - OTP disabled for testing */}
+            {/* 
             <div className="space-y-3">
               <Label className="flex items-center gap-2">
                 <Shield className="h-4 w-4" />
@@ -223,68 +224,45 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
                 </div>
               </RadioGroup>
             </div>
+            */}
 
-            {/* Email (if password chosen) */}
-            {formData.authChoice === 'password' && (
-              <div className="space-y-2">
-                <Label htmlFor="email" className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email Address *
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your.email@example.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={errors.email ? "border-red-500" : ""}
-                />
-                {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email}</p>
-                )}
-              </div>
-            )}
+            {/* Email - Required for password authentication */}
+            <div className="space-y-2">
+              <Label htmlFor="email" className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Email Address *
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your.email@example.com"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                className={errors.email ? "border-red-500" : ""}
+              />
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email}</p>
+              )}
+            </div>
 
-            {/* Password (if password chosen) */}
-            {formData.authChoice === 'password' && (
-              <div className="space-y-2">
-                <Label htmlFor="password" className="flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  Password *
-                </Label>
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Minimum 8 characters"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={errors.password ? "border-red-500" : ""}
-                />
-                {errors.password && (
-                  <p className="text-sm text-red-500">{errors.password}</p>
-                )}
-              </div>
-            )}
-
-            {/* Email (optional for OTP users) */}
-            {formData.authChoice === 'otp' && (
-              <div className="space-y-2">
-                <Label htmlFor="emailOptional" className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email Address <span className="text-muted-foreground">(optional)</span>
-                </Label>
-                <Input
-                  id="emailOptional"
-                  type="email"
-                  placeholder="For voucher delivery and updates"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  📧 We'll send special offers and vouchers here
-                </p>
-              </div>
-            )}
+            {/* Password - Required */}
+            <div className="space-y-2">
+              <Label htmlFor="password" className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Password *
+              </Label>
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Minimum 8 characters"
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                className={errors.password ? "border-red-500" : ""}
+              />
+              {errors.password && (
+                <p className="text-sm text-red-500">{errors.password}</p>
+              )}
+            </div>
 
             {/* Address Section */}
             <div className="space-y-3">

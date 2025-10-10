@@ -1,37 +1,25 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MobileSignupForm } from "@/components/MobileSignupForm";
-import { MobileOTPLogin } from "@/components/MobileOTPLogin";
+// import { MobileOTPLogin } from "@/components/MobileOTPLogin"; // Disabled for testing
 import { useAuth } from "@/contexts/AuthContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserPlus, LogIn } from "lucide-react";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Disabled for testing
+import { UserPlus } from "lucide-react";
 
 export default function SignupPage() {
   const navigate = useNavigate();
   const { enterGuestMode } = useAuth();
-  const [activeTab, setActiveTab] = useState("signup");
 
-  const handleSignupSuccess = (mobileNumber: string) => {
+  const handleSignupSuccess = () => {
+    // After successful signup with email/password, user will receive verification email
     navigate('/login');
-  };
-
-  const handleLoginSuccess = () => {
-    navigate('/');
   };
 
   const handleGuestMode = () => {
     enterGuestMode();
     navigate('/');
-  };
-
-  const handleSwitchToLogin = () => {
-    setActiveTab("login");
-  };
-
-  const handleSwitchToSignup = () => {
-    setActiveTab("signup");
   };
 
   return (
@@ -50,33 +38,17 @@ export default function SignupPage() {
         </CardHeader>
 
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signup" className="flex items-center gap-2">
-                <UserPlus className="h-4 w-4" />
-                Sign Up
-              </TabsTrigger>
-              <TabsTrigger value="login" className="flex items-center gap-2">
-                <LogIn className="h-4 w-4" />
-                Login
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="signup" className="mt-6">
-              <MobileSignupForm 
-                onSuccess={handleSignupSuccess}
-                className="border-0 shadow-none"
-              />
-            </TabsContent>
-
-            <TabsContent value="login" className="mt-6">
-              <MobileOTPLogin
-                onSuccess={handleLoginSuccess}
-                onSwitchToSignup={handleSwitchToSignup}
-                className="border-0 shadow-none"
-              />
-            </TabsContent>
-          </Tabs>
+          {/* OTP Login temporarily disabled - using email/password only for testing */}
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-700">
+              📧 Email & Password signup only (OTP disabled for testing)
+            </p>
+          </div>
+          
+          <MobileSignupForm 
+            onSuccess={handleSignupSuccess}
+            className="border-0 shadow-none"
+          />
 
           <div className="mt-6 text-center">
             <Button
