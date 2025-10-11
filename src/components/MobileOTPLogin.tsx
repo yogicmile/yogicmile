@@ -94,7 +94,7 @@ export const MobileOTPLogin: React.FC<MobileOTPLoginProps> = ({
               Mobile Login
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Enter your mobile number to receive OTP
+              Enter your mobile number to receive OTP via WhatsApp
             </p>
           </CardHeader>
           <CardContent>
@@ -117,7 +117,7 @@ export const MobileOTPLogin: React.FC<MobileOTPLoginProps> = ({
                   <p className="text-sm text-red-500">{error}</p>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  📱 We'll send a 6-digit OTP to verify your number
+                  📱 We'll send a 6-digit OTP via WhatsApp to verify your number
                 </p>
               </div>
 
@@ -167,7 +167,7 @@ export const MobileOTPLogin: React.FC<MobileOTPLoginProps> = ({
             Verify OTP
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Enter the 6-digit code sent to
+            Enter the 6-digit code sent via WhatsApp to
           </p>
           <p className="text-sm font-medium">{mobileNumber}</p>
         </CardHeader>

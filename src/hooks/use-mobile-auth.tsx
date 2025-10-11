@@ -253,15 +253,15 @@ export const useMobileAuth = () => {
 
       const formatted = formatMobileNumber(mobileNumber);
       
-      // Get client IP and user agent for security logging
-      const clientIP = null; // Browser doesn't expose real IP
+      // Get user agent for security logging
       const userAgent = navigator.userAgent;
 
-      // Generate OTP with rate limiting and audit logging
-      const { data, error } = await supabase.rpc('generate_otp_with_rate_limit', {
-        p_mobile_number: formatted,
-        p_ip_address: clientIP,
-        p_user_agent: userAgent
+      // Generate and send OTP via WhatsApp using edge function
+      const { data, error } = await supabase.functions.invoke('generate-whatsapp-otp', {
+        body: {
+          mobileNumber: formatted,
+          userAgent: userAgent
+        }
       });
 
       if (error) throw error;
@@ -279,7 +279,7 @@ export const useMobileAuth = () => {
       
       toast({
         title: "OTP Sent! 📱",
-        description: response.message || "Check your SMS for 6-digit code",
+        description: "Check your WhatsApp for 6-digit code",
       });
 
       return { success: true };
