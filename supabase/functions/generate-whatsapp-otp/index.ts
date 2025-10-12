@@ -175,9 +175,15 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     // Send OTP via WhatsApp
-    const formattedNumber = mobileNumber.startsWith('+') ? mobileNumber : `+${mobileNumber}`;
-    const whatsappNumber = `whatsapp:${formattedNumber}`;
-    const fromNumber = `whatsapp:${TWILIO_WHATSAPP_NUMBER}`;
+    const normalizedTo = mobileNumber.replace(/\s+/g, '');
+    const e164To = normalizedTo.startsWith('+') ? normalizedTo : `+${normalizedTo}`;
+    const whatsappTo = e164To.startsWith('whatsapp:') ? e164To : `whatsapp:${e164To}`;
+
+    // Normalize FROM number: accept "+123..." or "whatsapp:+123..." in secret
+    const rawFrom = (TWILIO_WHATSAPP_NUMBER || '').trim();
+    const e164From = rawFrom.startsWith('whatsapp:')
+      ? rawFrom
+      : `whatsapp:${rawFrom.startsWith('+') ? rawFrom : `+${rawFrom}`}`;
 
     const message = `Your YogicMile verification code is: ${plainOTP}\n\nThis code will expire in 3 minutes.\n\nDo not share this code with anyone.`;
 
@@ -185,8 +191,8 @@ const handler = async (req: Request): Promise<Response> => {
     const auth = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
 
     const formData = new URLSearchParams();
-    formData.append('To', whatsappNumber);
-    formData.append('From', fromNumber);
+    formData.append('To', whatsappTo);
+    formData.append('From', e164From);
     formData.append('Body', message);
 
     const whatsappResponse = await fetch(twilioUrl, {
@@ -202,7 +208,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!whatsappResponse.ok) {
       console.error('Twilio API error:', whatsappData);
-      throw new Error('Failed to send WhatsApp message');
+      let errMsg = 'Failed to send WhatsApp message';
+      if (whatsappData?.code === 63007) {
+        errMsg = 'WhatsApp sender number is not configured correctly. Ensure TWILIO_WHATSAPP_NUMBER is your WhatsApp-enabled number in E.164 format (e.g., +14155238886) without the "whatsapp:" prefix.';
+      } else if (whatsappData?.code === 21608 || whatsappData?.code === 63016) {
+        errMsg = 'Recipient is not permitted. If using Twilio Sandbox, join it and use the sandbox WhatsApp number.';
+      }
+      return new Response(
+        JSON.stringify({ success: false, error: errMsg, details: whatsappData }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     console.log('WhatsApp OTP sent successfully:', whatsappData.sid);
