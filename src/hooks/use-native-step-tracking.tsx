@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { HealthKitService } from '@/services/HealthKitService';
 import { androidBackgroundService } from '@/services/AndroidBackgroundService';
+import { googleFitService } from '@/services/GoogleFitService';
 import { PHASE_DEFINITIONS, MAX_DAILY_STEPS, STEPS_PER_UNIT } from '@/constants/phases';
 import { useGamification } from '@/hooks/use-gamification';
 
@@ -22,6 +23,9 @@ export interface NativeStepData {
   lastSyncTime: Date;
   pendingSteps: number; // Steps waiting to sync
   gpsAccuracy: number;
+  googleFitSteps: number; // Steps from Google Fit
+  googleFitConnected: boolean;
+  lastGoogleFitSync: Date | null;
 }
 
 export interface StepEvent {
@@ -68,6 +72,9 @@ export const useNativeStepTracking = () => {
     lastSyncTime: new Date(),
     pendingSteps: 0,
     gpsAccuracy: 0,
+    googleFitSteps: 0,
+    googleFitConnected: false,
+    lastGoogleFitSync: null,
   });
 
   const [isTracking, setIsTracking] = useState(false);
@@ -109,8 +116,122 @@ export const useNativeStepTracking = () => {
       const platform = Capacitor.getPlatform();
       
       if (platform === 'android') {
+        // Initialize Google Fit first
+        const googleFitResult = await googleFitService.initialize();
+        const googleFitConnected = googleFitResult.success;
+        
+        if (googleFitConnected) {
+          // Subscribe to Google Fit sync updates
+          googleFitService.addSyncListener(async (syncResult) => {
+            if (syncResult.success) {
+              await saveToStorage({
+                dailySteps: Math.min(syncResult.steps, MAX_DAILY_STEPS),
+                googleFitSteps: syncResult.steps,
+                googleFitConnected: true,
+                lastGoogleFitSync: new Date(syncResult.lastSyncTime),
+              });
+              
+              // Sync to database
+              await syncStepsToDatabase(syncResult.steps);
+            }
+          });
+          
+          // Perform initial sync
+          const initialSync = await googleFitService.syncSteps();
+          if (initialSync.success) {
+            await saveToStorage({
+              dailySteps: Math.min(initialSync.steps, MAX_DAILY_STEPS),
+              googleFitSteps: initialSync.steps,
+              googleFitConnected: true,
+              lastGoogleFitSync: new Date(initialSync.lastSyncTime),
+            });
+          }
+          
+          toast({
+            title: "Google Fit Connected",
+            description: "Auto-sync enabled for accurate step tracking",
+          });
+        }
+        
         // Start Android background service
-        const result = await androidBackgroundService.startTracking();
+        const bgServiceResult = await androidBackgroundService.startTracking();
+        
+        if (!bgServiceResult.success) {
+          toast({
+            title: "Background Tracking",
+            description: bgServiceResult.message,
+            variant: "destructive",
+          });
+          
+          // Get device-specific recommendations
+          const recommendations = await androidBackgroundService.getDeviceRecommendations();
+          if (recommendations.length > 0) {
+            console.log('Device recommendations:', recommendations);
+            toast({
+              title: "Setup Required",
+              description: recommendations[0],
+              duration: 8000,
+            });
+          }
+          return;
+        }
+        
+        // Subscribe to step updates from background service
+        await androidBackgroundService.subscribeToStepUpdates(
+          async (data) => {
+            // Merge with Google Fit data if available
+            let finalSteps = data.steps;
+            if (googleFitConnected) {
+              const googleFitSteps = stepData.googleFitSteps;
+              finalSteps = Math.max(data.steps, googleFitSteps);
+            }
+            
+            const capped = Math.min(finalSteps, MAX_DAILY_STEPS);
+            await saveToStorage({
+              dailySteps: capped,
+              lifetimeSteps: stepData.lifetimeSteps + (capped - stepData.dailySteps),
+              lastSyncTime: new Date(data.timestamp),
+            });
+            
+            // Sync to database
+            await syncStepsToDatabase(finalSteps);
+            
+            // Milestone notifications
+            if (capped % 1000 === 0 && capped > stepData.dailySteps) {
+              await safeHapticImpact(ImpactStyle.Medium);
+              
+              if (permissions.notifications) {
+                await safeScheduleNotification({
+                  notifications: [{
+                    id: Date.now(),
+                    title: "🎉 Milestone Achieved!",
+                    body: `${capped} steps completed`,
+                    schedule: { at: new Date(Date.now() + 100) },
+                  }]
+                });
+              }
+            }
+          }
+        );
+        
+        // Load initial step count (prefer Google Fit if available)
+        const currentSteps = googleFitConnected 
+          ? (await googleFitService.syncSteps()).steps
+          : await androidBackgroundService.getCurrentSteps();
+        await saveToStorage({ 
+          dailySteps: Math.min(currentSteps, MAX_DAILY_STEPS),
+          googleFitConnected,
+        });
+        
+        setIsTracking(true);
+        
+        toast({
+          title: "Background Tracking Active",
+          description: googleFitConnected 
+            ? "Steps syncing with Google Fit + hardware sensor"
+            : "Steps tracking in background with persistent notification",
+        });
+        
         
         if (!result.success) {
           toast({
@@ -527,6 +648,7 @@ export const useNativeStepTracking = () => {
     
     if (platform === 'android') {
       androidBackgroundService.stopTracking();
+      googleFitService.stopAutoSync();
     }
     
     if (gpsWatchId.current) {
@@ -547,6 +669,26 @@ export const useNativeStepTracking = () => {
     }
   };
 
+  const syncWithGoogleFit = async () => {
+    if (Capacitor.getPlatform() === 'android') {
+      const result = await googleFitService.syncSteps();
+      if (result.success) {
+        await saveToStorage({
+          dailySteps: Math.min(result.steps, MAX_DAILY_STEPS),
+          googleFitSteps: result.steps,
+          lastGoogleFitSync: new Date(result.lastSyncTime),
+        });
+        
+        toast({
+          title: "Google Fit Synced",
+          description: `${result.steps} steps updated`,
+        });
+      }
+      return result;
+    }
+    return { success: false, steps: 0, lastSyncTime: 0, source: 'sensor' as const };
+  };
+
   const simulateSteps = useCallback((count: number = 50) => {
     // For testing purposes
     addStepEvent(count);
@@ -561,6 +703,7 @@ export const useNativeStepTracking = () => {
     syncPendingSteps,
     simulateSteps, // For testing
     cleanup,
-    openBatterySettings, // New: Open manufacturer-specific battery settings
+    openBatterySettings, // Open manufacturer-specific battery settings
+    syncWithGoogleFit, // Manual Google Fit sync
   };
 };
