@@ -114,15 +114,22 @@ export const useNativeStepTracking = () => {
   const initializeNativeTracking = async () => {
     try {
       const platform = Capacitor.getPlatform();
+      console.log(`[StepTracking] Initializing on platform: ${platform}`);
       
       if (platform === 'android') {
+        console.log('[StepTracking] Starting Android initialization...');
+        
         // Initialize Google Fit first
+        console.log('[StepTracking] Attempting Google Fit connection...');
         const googleFitResult = await googleFitService.initialize();
         const googleFitConnected = googleFitResult.success;
+        console.log(`[StepTracking] Google Fit: ${googleFitConnected ? 'Connected' : 'Not available'} - ${googleFitResult.message}`);
         
         if (googleFitConnected) {
+          console.log('[StepTracking] Setting up Google Fit sync listeners...');
           // Subscribe to Google Fit sync updates
           googleFitService.addSyncListener(async (syncResult) => {
+            console.log(`[StepTracking] Google Fit sync completed: ${syncResult.steps} steps`);
             if (syncResult.success) {
               await saveToStorage({
                 dailySteps: Math.min(syncResult.steps, MAX_DAILY_STEPS),
@@ -137,8 +144,10 @@ export const useNativeStepTracking = () => {
           });
           
           // Perform initial sync
+          console.log('[StepTracking] Performing initial Google Fit sync...');
           const initialSync = await googleFitService.syncSteps();
           if (initialSync.success) {
+            console.log(`[StepTracking] Initial sync successful: ${initialSync.steps} steps`);
             await saveToStorage({
               dailySteps: Math.min(initialSync.steps, MAX_DAILY_STEPS),
               googleFitSteps: initialSync.steps,
@@ -154,9 +163,12 @@ export const useNativeStepTracking = () => {
         }
         
         // Start Android background service
+        console.log('[StepTracking] Starting Android background service...');
         const bgServiceResult = await androidBackgroundService.startTracking();
+        console.log(`[StepTracking] Background service: ${bgServiceResult.success ? 'Started' : 'Failed'} - ${bgServiceResult.message}`);
         
         if (!bgServiceResult.success) {
+          console.error('[StepTracking] Background service failed:', bgServiceResult.message);
           toast({
             title: "Background Tracking",
             description: bgServiceResult.message,
@@ -177,8 +189,10 @@ export const useNativeStepTracking = () => {
         }
         
         // Subscribe to step updates from background service
+        console.log('[StepTracking] Subscribing to step updates...');
         await androidBackgroundService.subscribeToStepUpdates(
           async (data) => {
+            console.log(`[StepTracking] Step update received: ${data.steps} steps at ${new Date(data.timestamp).toLocaleTimeString()}`);
             // Merge with Google Fit data if available
             let finalSteps = data.steps;
             if (googleFitConnected) {
@@ -215,15 +229,18 @@ export const useNativeStepTracking = () => {
         );
         
         // Load initial step count (prefer Google Fit if available)
+        console.log('[StepTracking] Loading initial step count...');
         const currentSteps = googleFitConnected 
           ? (await googleFitService.syncSteps()).steps
           : await androidBackgroundService.getCurrentSteps();
+        console.log(`[StepTracking] Initial step count: ${currentSteps}`);
         await saveToStorage({ 
           dailySteps: Math.min(currentSteps, MAX_DAILY_STEPS),
           googleFitConnected,
         });
         
         setIsTracking(true);
+        console.log('[StepTracking] Android initialization complete!');
         
         toast({
           title: "Background Tracking Active",
@@ -233,14 +250,17 @@ export const useNativeStepTracking = () => {
         });
         
       } else if (platform === 'ios') {
+        console.log('[StepTracking] Starting iOS HealthKit tracking...');
         // iOS HealthKit tracking (keep existing logic unchanged)
         await requestPermissions();
         const healthPerms = await healthKit.current.requestPermissions();
+        console.log('[StepTracking] iOS permissions granted:', healthPerms);
         await loadStoredData();
         await startGPSTracking();
         startStepPolling();
         setupAppStateListeners();
         setIsTracking(true);
+        console.log('[StepTracking] iOS initialization complete!');
         
         const { value: hasShownSetup } = await Preferences.get({ key: TRACKING_SETUP_KEY });
         if (!hasShownSetup) {
@@ -253,13 +273,14 @@ export const useNativeStepTracking = () => {
         }
       } else {
         // Web platform - show info message
+        console.warn('[StepTracking] Running on web platform - native features unavailable');
         toast({
           title: "Step Tracking Unavailable",
           description: "Native step tracking requires iOS or Android device",
         });
       }
     } catch (error) {
-      console.error('Failed to initialize native tracking:', error);
+      console.error('[StepTracking] Initialization failed:', error);
       toast({
         title: "Tracking Error",
         description: "Could not start native step tracking",

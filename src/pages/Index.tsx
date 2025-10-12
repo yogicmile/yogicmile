@@ -4,6 +4,7 @@ import { TodaysSummaryCard } from '@/components/TodaysSummaryCard';
 import { InteractiveProgressRing } from '@/components/InteractiveProgressRing';
 import { EnhancedNavigationCards } from '@/components/EnhancedNavigationCards';
 import { BackgroundTrackingStatus } from '@/components/BackgroundTrackingStatus';
+import { StepTrackingValidator } from '@/components/StepTrackingValidator';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PageLoading } from '@/components/LoadingStates';
 import { useYogicData } from '@/hooks/use-yogic-data';
@@ -61,6 +62,11 @@ const Index = () => {
           {/* Background Tracking Status (Android only) */}
           <div className="px-4 pb-4">
             <BackgroundTrackingStatus />
+          </div>
+
+          {/* Step Tracking Validation Dashboard */}
+          <div className="px-4 pb-4">
+            <StepTrackingValidator />
           </div>
 
           {/* Today's Summary Card */}
