@@ -20,6 +20,12 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     const publicRoutes = ['/welcome', '/login', '/signup'];
     const isPublicRoute = publicRoutes.includes(location.pathname);
 
+    // If authenticated and trying to access welcome/login/signup, go home immediately
+    if (user && isPublicRoute) {
+      navigate('/');
+      return;
+    }
+
     // Routes that ALWAYS require authenticated user (no guest access)
     const authOnlyRoutes = ['/profile', '/wallet', '/rewards', '/settings', '/community', '/challenges'];
     const isAuthOnlyRoute = authOnlyRoutes.includes(location.pathname);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -8,7 +8,14 @@ const WelcomePage = () => {
   const navigate = useNavigate();
   
   try {
-    const { enterGuestMode } = useAuth();
+    const { enterGuestMode, user, isLoading } = useAuth();
+
+    // If authenticated, never show welcome — go home
+    useEffect(() => {
+      if (!isLoading && user) {
+        navigate('/');
+      }
+    }, [isLoading, user, navigate]);
 
     const handleGuestMode = () => {
       try {

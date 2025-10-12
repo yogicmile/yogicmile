@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,10 +10,17 @@ import { Mail } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { enterGuestMode } = useAuth();
+  const { enterGuestMode, user, isLoading } = useAuth();
+
+  // If already authenticated, push to home immediately
+  useEffect(() => {
+    if (!isLoading && user) {
+      navigate('/');
+    }
+  }, [isLoading, user, navigate]);
 
   const handleLoginSuccess = () => {
-    // Do not navigate immediately; AuthGuard will redirect to '/' once the session is active
+    // AuthGuard + the effect above will handle redirect once session is active
   };
 
   const handleSwitchToSignup = () => {
