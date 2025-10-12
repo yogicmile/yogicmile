@@ -113,19 +113,56 @@ const handler = async (req: Request): Promise<Response> => {
       throw hashError;
     }
 
-    // Get user ID
-    const { data: userData, error: userError } = await supabase
+    // Get or create user ID
+    let { data: userData, error: userError } = await supabase
       .from('users')
       .select('id')
       .eq('mobile_number', mobileNumber)
       .maybeSingle();
 
-    if (userError || !userData) {
-      console.error('User not found:', mobileNumber);
-      return new Response(
-        JSON.stringify({ success: false, error: 'User not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // If user doesn't exist, create a basic user record for OTP signup
+    if (!userData) {
+      console.log('User not found, creating new user for OTP signup:', mobileNumber);
+      
+      const { data: newUser, error: createError } = await supabase.rpc('create_user_with_mobile', {
+        p_mobile_number: mobileNumber,
+        p_full_name: 'Yogic Walker', // Default name, can be updated later
+        p_email: null,
+        p_address: null,
+        p_referred_by: null,
+        p_user_id: null
+      });
+
+      if (createError) {
+        console.error('Error creating new user:', createError);
+        return new Response(
+          JSON.stringify({ success: false, error: 'Failed to create user account' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Fetch the newly created user
+      const { data: createdUserData, error: fetchError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('mobile_number', mobileNumber)
+        .maybeSingle();
+
+      if (fetchError || !createdUserData) {
+        console.error('Error fetching newly created user:', fetchError);
+        return new Response(
+          JSON.stringify({ success: false, error: 'User creation failed' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      userData = createdUserData;
+      console.log('New user created successfully:', userData.id);
+    }
+
+    if (userError) {
+      console.error('Database error:', userError);
+      throw userError;
     }
 
     // Mark previous OTPs as used
