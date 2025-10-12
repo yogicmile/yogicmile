@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MobileSignupForm } from "@/components/MobileSignupForm";
-// import { MobileOTPLogin } from "@/components/MobileOTPLogin"; // Disabled for testing
+import { MobileOTPLogin } from "@/components/MobileOTPLogin";
 import { useAuth } from "@/contexts/AuthContext";
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Disabled for testing
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserPlus } from "lucide-react";
 
 export default function SignupPage() {
@@ -38,17 +38,31 @@ export default function SignupPage() {
         </CardHeader>
 
         <CardContent>
-          {/* OTP Login temporarily disabled - using email/password only for testing */}
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-700">
-              📧 Email & Password signup only (OTP disabled for testing)
-            </p>
-          </div>
-          
-          <MobileSignupForm 
-            onSuccess={handleSignupSuccess}
-            className="border-0 shadow-none"
-          />
+          <Tabs defaultValue="email" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="email">Email & Password</TabsTrigger>
+              <TabsTrigger value="otp">WhatsApp OTP</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="email">
+              <MobileSignupForm 
+                onSuccess={handleSignupSuccess}
+                className="border-0 shadow-none"
+              />
+            </TabsContent>
+            
+            <TabsContent value="otp">
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm text-green-700">
+                  📱 Get OTP on your WhatsApp (requires existing account)
+                </p>
+              </div>
+              <MobileOTPLogin 
+                onSuccess={handleSignupSuccess}
+                onSwitchToSignup={() => {}}
+              />
+            </TabsContent>
+          </Tabs>
 
           <div className="mt-6 text-center">
             <Button

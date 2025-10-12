@@ -2,8 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; // Disabled for testing
-// import { MobileOTPLogin } from '@/components/MobileOTPLogin'; // Disabled for testing
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MobileOTPLogin } from '@/components/MobileOTPLogin';
 import { EmailPasswordLogin } from '@/components/EmailPasswordLogin';
 import { useAuth } from '@/contexts/AuthContext';
 import { Mail } from 'lucide-react';
@@ -41,19 +41,34 @@ export default function LoginPage() {
         </CardHeader>
 
         <CardContent>
-          {/* OTP Login temporarily disabled - using email/password only for testing */}
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-700">
-              📧 Email & Password login only (OTP disabled for testing)
-            </p>
-          </div>
-          
-          <EmailPasswordLogin
-            onSuccess={handleLoginSuccess}
-            onSwitchToOTP={() => {}} // Disabled
-            onSwitchToSignup={handleSwitchToSignup}
-            className="border-0 shadow-none"
-          />
+          <Tabs defaultValue="whatsapp" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="whatsapp">WhatsApp OTP</TabsTrigger>
+              <TabsTrigger value="email">Email & Password</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="whatsapp">
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm text-green-700">
+                  📱 Get OTP on your WhatsApp
+                </p>
+              </div>
+              <MobileOTPLogin
+                onSuccess={handleLoginSuccess}
+                onSwitchToSignup={handleSwitchToSignup}
+                className="border-0 shadow-none"
+              />
+            </TabsContent>
+            
+            <TabsContent value="email">
+              <EmailPasswordLogin
+                onSuccess={handleLoginSuccess}
+                onSwitchToOTP={() => {}}
+                onSwitchToSignup={handleSwitchToSignup}
+                className="border-0 shadow-none"
+              />
+            </TabsContent>
+          </Tabs>
 
           <div className="mt-6 text-center">
             <Button
