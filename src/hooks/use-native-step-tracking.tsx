@@ -232,69 +232,6 @@ export const useNativeStepTracking = () => {
             : "Steps tracking in background with persistent notification",
         });
         
-        
-        if (!result.success) {
-          toast({
-            title: "Background Tracking",
-            description: result.message,
-            variant: "destructive",
-          });
-          
-          // Get device-specific recommendations
-          const recommendations = await androidBackgroundService.getDeviceRecommendations();
-          if (recommendations.length > 0) {
-            console.log('Device recommendations:', recommendations);
-            toast({
-              title: "Setup Required",
-              description: recommendations[0],
-              duration: 8000,
-            });
-          }
-          return;
-        }
-        
-        // Subscribe to step updates from background service
-        const listenerId = await androidBackgroundService.subscribeToStepUpdates(
-          async (data) => {
-            const capped = Math.min(data.steps, MAX_DAILY_STEPS);
-            await saveToStorage({
-              dailySteps: capped,
-              lifetimeSteps: stepData.lifetimeSteps + (capped - stepData.dailySteps),
-              lastSyncTime: new Date(data.timestamp),
-            });
-            
-            // Sync to database
-            await syncStepsToDatabase(data.steps);
-            
-            // Milestone notifications
-            if (capped % 1000 === 0 && capped > stepData.dailySteps) {
-              await safeHapticImpact(ImpactStyle.Medium);
-              
-              if (permissions.notifications) {
-                await safeScheduleNotification({
-                  notifications: [{
-                    id: Date.now(),
-                    title: "🎉 Milestone Achieved!",
-                    body: `${capped} steps completed`,
-                    schedule: { at: new Date(Date.now() + 100) },
-                  }]
-                });
-              }
-            }
-          }
-        );
-        
-        // Load initial step count
-        const todaySteps = await androidBackgroundService.getCurrentSteps();
-        await saveToStorage({ dailySteps: Math.min(todaySteps, MAX_DAILY_STEPS) });
-        
-        setIsTracking(true);
-        
-        toast({
-          title: "Background Tracking Active",
-          description: "Steps tracking in background with persistent notification",
-        });
-        
       } else if (platform === 'ios') {
         // iOS HealthKit tracking (keep existing logic unchanged)
         await requestPermissions();
