@@ -389,7 +389,7 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
               <Input
                 id="referral"
                 type="tel"
-                placeholder="Friend's 10-digit mobile number"
+                placeholder="9876543210 or 987XXXX"
                 maxLength={10}
                 value={formData.referralCode}
                 onChange={(e) => {
