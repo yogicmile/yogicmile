@@ -3,9 +3,10 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
-const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
-const TWILIO_WHATSAPP_NUMBER = Deno.env.get('TWILIO_WHATSAPP_NUMBER');
+// Twilio credentials are read inside the handler to ensure freshest values at runtime
+// const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
+// const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
+// const TWILIO_WHATSAPP_NUMBER = Deno.env.get('TWILIO_WHATSAPP_NUMBER');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -26,10 +27,27 @@ const handler = async (req: Request): Promise<Response> => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   try {
+    // Read Twilio credentials at request time
+    const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
+    const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
+    const TWILIO_WHATSAPP_NUMBER = Deno.env.get('TWILIO_WHATSAPP_NUMBER');
+
     if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_WHATSAPP_NUMBER) {
-      console.error('Missing Twilio credentials');
+      console.error('Missing Twilio credentials', {
+        has_sid: !!TWILIO_ACCOUNT_SID,
+        has_token: !!TWILIO_AUTH_TOKEN,
+        has_whatsapp: !!TWILIO_WHATSAPP_NUMBER,
+      });
       return new Response(
-        JSON.stringify({ success: false, error: 'Twilio configuration missing' }),
+        JSON.stringify({ 
+          success: false, 
+          error: 'Twilio configuration missing', 
+          missing: {
+            accountSid: !TWILIO_ACCOUNT_SID, 
+            authToken: !TWILIO_AUTH_TOKEN, 
+            whatsappFrom: !TWILIO_WHATSAPP_NUMBER 
+          } 
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

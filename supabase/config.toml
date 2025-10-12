@@ -21,3 +21,6 @@ port = 54322
 
 [functions.security-headers]
 verify_jwt = false
+
+[functions.generate-whatsapp-otp]
+verify_jwt = false
