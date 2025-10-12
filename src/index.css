@@ -9,13 +9,13 @@ All colors MUST be HSL for consistent theming
 
 @layer base {
   :root {
-    /* Yogic Mile Sky Blue Theme */
+    /* Yogic Mile Sky Blue Theme - Enhanced Contrast */
     --background: 208 100% 97%; /* Whitish Blue #F0F8FF */
-    --foreground: 210 51% 24%; /* Dark Navy #1E3A5F */
+    --foreground: 210 60% 16%; /* Darker Navy for better readability */
     --surface: 0 0% 100%; /* Pure white */
 
     --card: 0 0% 100%; /* White cards */
-    --card-foreground: 210 51% 24%; /* Dark navy text */
+    --card-foreground: 210 60% 16%; /* Darker navy text for better contrast */
 
     /* Sky Blue Theme Colors */
     --primary: 197 71% 73%; /* Sky Blue #87CEEB */
@@ -23,15 +23,15 @@ All colors MUST be HSL for consistent theming
     --secondary: 195 100% 50%; /* Deep Sky Blue #00BFFF */
     --secondary-foreground: 0 0% 100%; /* White text on deep sky blue */
     --accent: 51 100% 50%; /* Golden Yellow #FFD700 */
-    --accent-foreground: 210 51% 24%; /* Dark navy on golden */
+    --accent-foreground: 210 60% 16%; /* Darker navy on golden */
     
     /* Sky Blue Theme Variations */
     --sky-blue: 197 71% 73%; /* Primary Sky Blue #87CEEB */
     --deep-sky-blue: 195 100% 50%; /* Deep Sky Blue #00BFFF */
     --whitish-blue: 208 100% 97%; /* Whitish Blue #F0F8FF */
     --golden-yellow: 51 100% 50%; /* Golden Yellow #FFD700 */
-    --dark-navy: 210 51% 24%; /* Dark Navy #1E3A5F */
-    --inactive-gray: 214 20% 69%; /* Gray #A0AEC0 */
+    --dark-navy: 210 60% 16%; /* Darker Navy for better visibility */
+    --inactive-gray: 214 20% 55%; /* Darker gray for better visibility */
     
     /* Progress System with Sky Blue → Golden Gradient */
     --tier-1-paisa: 195 100% 50%; /* Deep sky blue base */
@@ -101,7 +101,7 @@ All colors MUST be HSL for consistent theming
     --input: 0 0% 100%; /* White inputs with sky blue borders */
     --ring: 195 100% 50%; /* Deep sky blue focus rings */
     --muted: 208 100% 96%; /* Very light whitish blue */
-    --muted-foreground: 210 51% 45%; /* Muted navy text */
+    --muted-foreground: 210 55% 32%; /* Darker muted text for better visibility */
     
     /* Popover colors - solid white background for dropdowns */
     --popover: 0 0% 100%; /* Pure white background */
@@ -194,7 +194,10 @@ All colors MUST be HSL for consistent theming
     --secondary: 195 100% 50%; /* Deep Sky Blue */
     --secondary-foreground: 0 0% 100%;
     --accent: 51 100% 50%; /* Golden Yellow */
-    --accent-foreground: 210 51% 24%;
+    --accent-foreground: 210 60% 16%; /* Darker text on golden */
+    --foreground: 210 60% 16%; /* Darker text */
+    --card-foreground: 210 60% 16%; /* Darker card text */
+    --muted-foreground: 210 55% 32%; /* Darker muted text */
   }
 
   :root.theme-dark_mode, body.theme-dark_mode, :root[data-theme="dark_mode"], body[data-theme="dark_mode"] {
@@ -217,17 +220,17 @@ All colors MUST be HSL for consistent theming
     --secondary: 142 69% 58%; /* Light Green */
     --secondary-foreground: 0 0% 100%;
     --accent: 51 100% 50%; /* Golden Yellow */
-    --accent-foreground: 210 51% 24%;
+    --accent-foreground: 210 60% 16%;
 
     /* Surfaces */
     --background: 160 100% 97%; /* Minty light */
-    --foreground: 160 25% 16%; /* Deep evergreen */
+    --foreground: 160 30% 12%; /* Darker evergreen for better contrast */
     --card: 0 0% 100%;
-    --card-foreground: 160 25% 16%;
+    --card-foreground: 160 30% 12%;
 
     /* UI tokens */
     --muted: 160 60% 96%;
-    --muted-foreground: 160 10% 35%;
+    --muted-foreground: 160 15% 28%; /* Darker muted text */
     --border: 160 30% 85%;
     --ring: 142 76% 36%;
   }
@@ -239,17 +242,17 @@ All colors MUST be HSL for consistent theming
     --secondary: 20 90% 48%; /* Dark Orange */
     --secondary-foreground: 0 0% 100%;
     --accent: 51 100% 50%; /* Golden Yellow */
-    --accent-foreground: 210 51% 24%;
+    --accent-foreground: 210 60% 16%;
 
     /* Surfaces */
     --background: 33 100% 96%; /* Warm light */
-    --foreground: 20 35% 16%; /* Deep brown/orange */
+    --foreground: 20 40% 12%; /* Darker brown for better contrast */
     --card: 0 0% 100%;
-    --card-foreground: 20 35% 16%;
+    --card-foreground: 20 40% 12%;
 
     /* UI tokens */
     --muted: 33 100% 95%;
-    --muted-foreground: 20 15% 38%;
+    --muted-foreground: 20 20% 30%; /* Darker muted text */
     --border: 28 60% 80%;
     --ring: 24 95% 53%;
   }
@@ -261,17 +264,17 @@ All colors MUST be HSL for consistent theming
     --secondary: 262 83% 58%; /* Deep Purple */
     --secondary-foreground: 0 0% 100%;
     --accent: 51 100% 50%; /* Golden Yellow */
-    --accent-foreground: 210 51% 24%;
+    --accent-foreground: 210 60% 16%;
 
     /* Surfaces */
     --background: 262 100% 97%; /* Lavender light */
-    --foreground: 258 30% 20%; /* Deep purple text */
+    --foreground: 258 35% 15%; /* Darker purple text for better contrast */
     --card: 0 0% 100%;
-    --card-foreground: 258 30% 20%;
+    --card-foreground: 258 35% 15%;
 
     /* UI tokens */
     --muted: 262 70% 96%;
-    --muted-foreground: 258 15% 40%;
+    --muted-foreground: 258 20% 32%; /* Darker muted text */
   }
 }
 
@@ -284,6 +287,7 @@ All colors MUST be HSL for consistent theming
     @apply bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: hsl(var(--background));
+    font-weight: 500; /* Medium weight for better readability */
     /* Mobile optimizations */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -294,6 +298,22 @@ All colors MUST be HSL for consistent theming
     overscroll-behavior: none;
     /* Prevent pull-to-refresh */
     overscroll-behavior-y: contain;
+  }
+  
+  /* Enhanced text visibility */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600; /* Semi-bold for headings */
+    color: hsl(var(--foreground));
+  }
+  
+  /* Thicker icons globally */
+  svg {
+    stroke-width: 2.5; /* Increased from default 2 */
+  }
+  
+  /* Ensure lucide icons are thick */
+  [data-lucide], .lucide {
+    stroke-width: 2.5;
   }
   
   /* Mobile-first responsive container */
