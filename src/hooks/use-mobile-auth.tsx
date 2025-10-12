@@ -36,6 +36,25 @@ const OTP_RESEND_INTERVAL = 30; // seconds
 const MAX_OTP_ATTEMPTS = 3;
 const SECURE_STORAGE_KEY = 'mobile-auth-session';
 
+// Safe wrappers for Capacitor plugins to avoid breaking web builds
+const safeHapticImpact = async (style: ImpactStyle) => {
+  try {
+    await Haptics.impact({ style });
+  } catch (e) {
+    // Haptics might not be available on web; ignore errors
+    console.warn('Haptics not available:', (e as any)?.message || e);
+  }
+};
+
+const safeScheduleNotification = async (payload: any) => {
+  try {
+    await LocalNotifications.schedule(payload);
+  } catch (e) {
+    // Notifications may be blocked or plugin not available; ignore errors
+    console.warn('LocalNotifications not available:', (e as any)?.message || e);
+  }
+};
+
 export const useMobileAuth = () => {
   const { toast } = useToast();
   const [state, setState] = useState<MobileAuthState>({
@@ -202,7 +221,7 @@ export const useMobileAuth = () => {
       
       // Check if user already existed
       if (createdUserId && createdUserId !== userId) {
-        await Haptics.impact({ style: ImpactStyle.Medium });
+        await safeHapticImpact(ImpactStyle.Medium);
         toast({
           title: "User Exists",
           description: "Account with this number already exists. Please login.",
@@ -211,7 +230,7 @@ export const useMobileAuth = () => {
         return { success: false, errors: ['User already exists'] };
       }
 
-      await Haptics.impact({ style: ImpactStyle.Light });
+      await safeHapticImpact(ImpactStyle.Light);
       
       toast({
         title: "Registration Successful! 🎉",
@@ -221,7 +240,7 @@ export const useMobileAuth = () => {
       });
 
       // Send welcome notification
-      await LocalNotifications.schedule({
+      await safeScheduleNotification({
         notifications: [{
           id: Date.now(),
           title: "Welcome to Yogic Mile! 🚶‍♂️",
@@ -276,7 +295,7 @@ export const useMobileAuth = () => {
       setState(prev => ({ ...prev, otpSent: true, canResend: false }));
       startResendTimer();
 
-      await Haptics.impact({ style: ImpactStyle.Light });
+      await safeHapticImpact(ImpactStyle.Light);
       
       toast({
         title: "OTP Sent! 📱",
