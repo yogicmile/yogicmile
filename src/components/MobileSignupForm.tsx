@@ -265,61 +265,80 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
             </div>
 
             {/* Address Section */}
-            <div className="space-y-3">
-              <Label className="flex items-center gap-2">
+            <div className="space-y-4 p-4 border rounded-lg bg-card">
+              <Label className="flex items-center gap-2 text-base font-semibold">
                 <MapPin className="h-4 w-4" />
-                Address Information *
+                Address Information
               </Label>
               
-              <div className="grid grid-cols-2 gap-3">
+              {/* City and District in one row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="city">City *</Label>
+                  <Label htmlFor="city" className="text-sm font-medium">
+                    City *
+                  </Label>
                   <Select 
                     value={formData.address.city} 
                     onValueChange={(value) => handleInputChange('address.city', value)}
                   >
-                    <SelectTrigger className={errors['address.city'] ? "border-red-500" : ""}>
-                      <SelectValue placeholder="Select city" />
+                    <SelectTrigger 
+                      className={cn(
+                        "h-10 w-full",
+                        errors['address.city'] ? "border-red-500" : ""
+                      )}
+                    >
+                      <SelectValue placeholder="Select your city" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[200px]">
                       {INDIAN_CITIES.map(city => (
                         <SelectItem key={city} value={city}>{city}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   {errors['address.city'] && (
-                    <p className="text-sm text-red-500">{errors['address.city']}</p>
+                    <p className="text-xs text-red-500 mt-1">{errors['address.city']}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="district">District</Label>
+                  <Label htmlFor="district" className="text-sm font-medium">
+                    District
+                  </Label>
                   <Input
                     id="district"
                     placeholder="Enter district"
                     value={formData.address.district}
                     onChange={(e) => handleInputChange('address.district', e.target.value)}
+                    className="h-10"
                   />
                 </div>
               </div>
 
+              {/* State in separate row for better visibility */}
               <div className="space-y-2">
-                <Label htmlFor="state">State *</Label>
+                <Label htmlFor="state" className="text-sm font-medium">
+                  State *
+                </Label>
                 <Select 
                   value={formData.address.state} 
                   onValueChange={(value) => handleInputChange('address.state', value)}
                 >
-                  <SelectTrigger className={errors['address.state'] ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select state" />
+                  <SelectTrigger 
+                    className={cn(
+                      "h-10 w-full",
+                      errors['address.state'] ? "border-red-500" : ""
+                    )}
+                  >
+                    <SelectValue placeholder="Select your state" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[200px]">
                     {INDIAN_STATES.map(state => (
                       <SelectItem key={state} value={state}>{state}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 {errors['address.state'] && (
-                  <p className="text-sm text-red-500">{errors['address.state']}</p>
+                  <p className="text-xs text-red-500 mt-1">{errors['address.state']}</p>
                 )}
               </div>
             </div>
