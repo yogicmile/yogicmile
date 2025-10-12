@@ -24,3 +24,6 @@ verify_jwt = false
 
 [functions.generate-whatsapp-otp]
 verify_jwt = false
+
+[functions.create-auth-session]
+verify_jwt = false

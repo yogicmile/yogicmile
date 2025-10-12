@@ -374,8 +374,17 @@ export const useMobileAuth = () => {
         .eq('mobile_number', formatted)
         .maybeSingle();
 
-      // Proceed even if user row isn't readable due to RLS; secure local session is enough for app flow
-      const sessionData = {
+      // Create Supabase auth session after OTP verification
+      const { data: sessionData, error: sessionError } = await supabase.functions.invoke('create-auth-session', {
+        body: { mobileNumber: formatted }
+      });
+
+      if (sessionError || !sessionData?.success) {
+        throw new Error('Failed to create session: ' + (sessionData?.error || sessionError?.message));
+      }
+
+      // Store secure local session
+      const localSession = {
         mobileNumber: formatted,
         verifiedAt: new Date().toISOString(),
         deviceId: crypto.randomUUID(),
@@ -383,12 +392,11 @@ export const useMobileAuth = () => {
 
       await Preferences.set({
         key: SECURE_STORAGE_KEY,
-        value: JSON.stringify(sessionData),
+        value: JSON.stringify(localSession),
       });
 
-      // Enable biometric for faster future access
+      // The session will be picked up by AuthContext automatically
       setState(prev => ({ ...prev, biometricEnabled: true }));
-
       await Haptics.impact({ style: ImpactStyle.Light });
       
       toast({
