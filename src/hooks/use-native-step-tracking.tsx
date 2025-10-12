@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { HealthKitService } from '@/services/HealthKitService';
+import { androidStepTracking } from '@/services/AndroidStepTracking';
 import { PHASE_DEFINITIONS, MAX_DAILY_STEPS, STEPS_PER_UNIT } from '@/constants/phases';
 import { useGamification } from '@/hooks/use-gamification';
 
@@ -88,35 +89,69 @@ export const useNativeStepTracking = () => {
 
   const initializeNativeTracking = async () => {
     try {
-      // Request permissions
-      await requestPermissions();
+      const platform = Capacitor.getPlatform();
       
-      // Request HealthKit permissions
-      const healthPerms = await healthKit.current.requestPermissions();
-      
-      // Load stored data
-      await loadStoredData();
-      
-      // Start GPS tracking for speed validation
-      await startGPSTracking();
-      
-      // Start polling native step data
-      startStepPolling();
-      
-      // Set up app state listeners
-      setupAppStateListeners();
-      
-      setIsTracking(true);
-      
-      // Only show welcome message on first setup
-      const { value: hasShownSetup } = await Preferences.get({ key: TRACKING_SETUP_KEY });
-      if (!hasShownSetup) {
-        const source = healthKit.current.getHealthDataSource();
-        toast({
-          title: "Native Tracking Active",
-          description: `Connected to ${source}`,
+      if (platform === 'android') {
+        // Initialize Android step tracking
+        const result = await androidStepTracking.initialize();
+        
+        if (!result.success) {
+          toast({
+            title: "Android Tracking Setup",
+            description: result.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        // Subscribe to Android step updates
+        androidStepTracking.onStepUpdate(async (steps) => {
+          const capped = Math.min(steps, MAX_DAILY_STEPS);
+          await saveToStorage({
+            dailySteps: capped,
+            lifetimeSteps: stepData.lifetimeSteps + (capped - stepData.dailySteps),
+          });
+          
+          // Sync to database
+          await syncStepsToDatabase(steps);
         });
-        await Preferences.set({ key: TRACKING_SETUP_KEY, value: 'true' });
+        
+        // Load initial step count
+        const todaySteps = await androidStepTracking.getTodaySteps();
+        await saveToStorage({ dailySteps: Math.min(todaySteps, MAX_DAILY_STEPS) });
+        
+        setIsTracking(true);
+        
+        toast({
+          title: "Android Step Tracking Active",
+          description: result.message,
+        });
+        
+      } else if (platform === 'ios') {
+        // iOS HealthKit tracking (keep existing logic)
+        await requestPermissions();
+        const healthPerms = await healthKit.current.requestPermissions();
+        await loadStoredData();
+        await startGPSTracking();
+        startStepPolling();
+        setupAppStateListeners();
+        setIsTracking(true);
+        
+        const { value: hasShownSetup } = await Preferences.get({ key: TRACKING_SETUP_KEY });
+        if (!hasShownSetup) {
+          const source = healthKit.current.getHealthDataSource();
+          toast({
+            title: "Native Tracking Active",
+            description: `Connected to ${source}`,
+          });
+          await Preferences.set({ key: TRACKING_SETUP_KEY, value: 'true' });
+        }
+      } else {
+        // Web platform - show info message
+        toast({
+          title: "Step Tracking Unavailable",
+          description: "Native step tracking requires iOS or Android device",
+        });
       }
     } catch (error) {
       console.error('Failed to initialize native tracking:', error);
@@ -440,6 +475,12 @@ export const useNativeStepTracking = () => {
   }, []);
 
   const cleanup = () => {
+    const platform = Capacitor.getPlatform();
+    
+    if (platform === 'android') {
+      androidStepTracking.stopTracking();
+    }
+    
     if (gpsWatchId.current) {
       Geolocation.clearWatch({ id: gpsWatchId.current });
     }

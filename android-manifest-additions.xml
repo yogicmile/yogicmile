@@ -1,31 +1,65 @@
 <!-- Add these permissions to android/app/src/main/AndroidManifest.xml -->
+
 <!-- Network permissions for Supabase -->
 <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
-<!-- Location permissions for step tracking -->
+<!-- Location permissions for step tracking and GPS validation -->
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
-<!-- Step tracking permissions -->
+<!-- Step tracking permissions (Android 10+ / API 29+) -->
 <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
-<!-- Notification permissions -->
+<!-- Notification permissions (Android 13+ / API 33+) -->
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 <uses-permission android:name="android.permission.VIBRATE" />
 
-<!-- Storage permissions -->
+<!-- Storage permissions for local caching -->
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+<!-- Background service permissions -->
+<uses-permission android:name="android.permission.WAKE_LOCK" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+<!-- Google Fit API (optional, for fallback) -->
+<uses-permission android:name="android.permission.GET_ACCOUNTS" />
+<uses-permission android:name="android.permission.USE_CREDENTIALS" />
 
 <!-- Add to application tag -->
 <application
     android:networkSecurityConfig="@xml/network_security_config"
     android:usesCleartextTraffic="true">
     
+    <!-- Background service for continuous step tracking -->
+    <service
+        android:name=".StepCounterService"
+        android:enabled="true"
+        android:exported="false"
+        android:foregroundServiceType="health"
+        android:permission="android.permission.BIND_JOB_SERVICE" />
+    
+    <!-- Boot receiver to restart tracking after device reboot -->
+    <receiver
+        android:name=".BootReceiver"
+        android:enabled="true"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.intent.action.BOOT_COMPLETED" />
+            <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+        </intent-filter>
+    </receiver>
+    
     <!-- Your existing application content -->
     
 </application>
+
+<!-- Minimum SDK: Android 8.0 (API 26) -->
+<!-- Target SDK: Android 14 (API 34) -->
+<!-- Supports: Samsung, OnePlus, Oppo, Vivo, Realme, MI, and all Android devices -->
