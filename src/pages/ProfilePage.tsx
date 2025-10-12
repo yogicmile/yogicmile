@@ -27,14 +27,17 @@ export const ProfilePage = () => {
     currentPhase: 'Paisa Phase 🪙',
     displayName: 'Yogic Walker'
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     document.title = 'Profile | Yogic Mile';
     if (user) {
+      setLoading(true);
       loadUserData();
+    } else if (!authLoading) {
+      setLoading(false);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const loadUserData = async () => {
     try {
