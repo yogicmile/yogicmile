@@ -194,7 +194,8 @@ export const useMobileAuth = () => {
         p_full_name: formData.fullName,
         p_email: formData.email || null,
         p_address: `${formData.address.city}, ${formData.address.district}, ${formData.address.state}, ${formData.address.country}`,
-        p_referred_by: formData.referralCode || null
+        p_referred_by: formData.referralCode || null,
+        p_user_id: userId
       });
 
       if (dbError) throw dbError;
