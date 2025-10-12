@@ -28,29 +28,24 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            {/* Main App Routes */}
-            <Route path="/*" element={
-              <AuthGuard>
-                <AppLayout>
-                  <Routes>
-                    <Route path="welcome" element={<WelcomePage />} />
-                    <Route path="login" element={<LoginPage />} />
-                    <Route path="signup" element={<SignupPage />} />
-                    <Route path="" element={<Index />} />
-                    <Route path="profile" element={<ProfilePage />} />
-                    <Route path="wallet" element={<WalletPage />} />
-                    <Route path="rewards" element={<RewardsPage />} />
-                    <Route path="challenges" element={<ChallengesPage />} />
-                    <Route path="community" element={<CommunityPage />} />
-                    <Route path="settings" element={<SettingsPage />} />
-                    <Route path="help" element={<HelpPage />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </AppLayout>
-              </AuthGuard>
-            } />
-          </Routes>
+          <AuthGuard>
+            <AppLayout>
+              <Routes>
+                <Route path="welcome" element={<WelcomePage />} />
+                <Route path="login" element={<LoginPage />} />
+                <Route path="signup" element={<SignupPage />} />
+                <Route path="" element={<Index />} />
+                <Route path="profile" element={<ProfilePage />} />
+                <Route path="wallet" element={<WalletPage />} />
+                <Route path="rewards" element={<RewardsPage />} />
+                <Route path="challenges" element={<ChallengesPage />} />
+                <Route path="community" element={<CommunityPage />} />
+                <Route path="settings" element={<SettingsPage />} />
+                <Route path="help" element={<HelpPage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AppLayout>
+          </AuthGuard>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
