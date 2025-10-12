@@ -15,7 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export const ProfilePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, session, signOut } = useAuth();
+  const { user, session, signOut, isLoading: authLoading } = useAuth();
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [legalModalTab, setLegalModalTab] = useState<'privacy' | 'terms'>('privacy');
   const [userStats, setUserStats] = useState({
@@ -193,18 +193,25 @@ export const ProfilePage = () => {
     }
   ];
 
-  // Redirect if not authenticated
-  if (!user) {
-    navigate('/login');
-    return null;
-  }
-
-  if (loading) {
+  // Auth/loading states
+  if (authLoading || loading) {
     return (
       <div className="mobile-container bg-background p-4 pb-24 safe-bottom flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="mobile-container bg-background p-6 pb-24 safe-bottom flex items-center justify-center min-h-screen">
+        <div className="max-w-md w-full text-center space-y-4">
+          <h1 className="text-2xl font-bold">Authentication required</h1>
+          <p className="text-muted-foreground">Please log in to view your profile.</p>
+          <Button className="w-full" onClick={() => navigate('/login')}>Go to Login</Button>
         </div>
       </div>
     );
