@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { HealthKitService } from '@/services/HealthKitService';
-import { androidStepTracking } from '@/services/AndroidStepTracking';
+import { androidBackgroundService } from '@/services/AndroidBackgroundService';
 import { PHASE_DEFINITIONS, MAX_DAILY_STEPS, STEPS_PER_UNIT } from '@/constants/phases';
 import { useGamification } from '@/hooks/use-gamification';
 
@@ -37,6 +37,23 @@ const STORAGE_KEY = 'native-step-data';
 const TRACKING_SETUP_KEY = 'native-tracking-setup-shown';
 const SYNC_INTERVAL = 60000; // 1 minute
 const GPS_UPDATE_INTERVAL = 10000; // 10 seconds
+
+// Safe wrappers for Capacitor plugins to avoid breaking web builds
+const safeHapticImpact = async (style: ImpactStyle) => {
+  try {
+    await Haptics.impact({ style });
+  } catch (e) {
+    console.warn('Haptics not available:', (e as any)?.message || e);
+  }
+};
+
+const safeScheduleNotification = async (payload: any) => {
+  try {
+    await LocalNotifications.schedule(payload);
+  } catch (e) {
+    console.warn('LocalNotifications not available:', (e as any)?.message || e);
+  }
+};
 
 export const useNativeStepTracking = () => {
   const { user, isGuest } = useAuth();
@@ -92,43 +109,73 @@ export const useNativeStepTracking = () => {
       const platform = Capacitor.getPlatform();
       
       if (platform === 'android') {
-        // Initialize Android step tracking
-        const result = await androidStepTracking.initialize();
+        // Start Android background service
+        const result = await androidBackgroundService.startTracking();
         
         if (!result.success) {
           toast({
-            title: "Android Tracking Setup",
+            title: "Background Tracking",
             description: result.message,
             variant: "destructive",
           });
+          
+          // Get device-specific recommendations
+          const recommendations = await androidBackgroundService.getDeviceRecommendations();
+          if (recommendations.length > 0) {
+            console.log('Device recommendations:', recommendations);
+            toast({
+              title: "Setup Required",
+              description: recommendations[0],
+              duration: 8000,
+            });
+          }
           return;
         }
         
-        // Subscribe to Android step updates
-        androidStepTracking.onStepUpdate(async (steps) => {
-          const capped = Math.min(steps, MAX_DAILY_STEPS);
-          await saveToStorage({
-            dailySteps: capped,
-            lifetimeSteps: stepData.lifetimeSteps + (capped - stepData.dailySteps),
-          });
-          
-          // Sync to database
-          await syncStepsToDatabase(steps);
-        });
+        // Subscribe to step updates from background service
+        const listenerId = await androidBackgroundService.subscribeToStepUpdates(
+          async (data) => {
+            const capped = Math.min(data.steps, MAX_DAILY_STEPS);
+            await saveToStorage({
+              dailySteps: capped,
+              lifetimeSteps: stepData.lifetimeSteps + (capped - stepData.dailySteps),
+              lastSyncTime: new Date(data.timestamp),
+            });
+            
+            // Sync to database
+            await syncStepsToDatabase(data.steps);
+            
+            // Milestone notifications
+            if (capped % 1000 === 0 && capped > stepData.dailySteps) {
+              await safeHapticImpact(ImpactStyle.Medium);
+              
+              if (permissions.notifications) {
+                await safeScheduleNotification({
+                  notifications: [{
+                    id: Date.now(),
+                    title: "🎉 Milestone Achieved!",
+                    body: `${capped} steps completed`,
+                    schedule: { at: new Date(Date.now() + 100) },
+                  }]
+                });
+              }
+            }
+          }
+        );
         
         // Load initial step count
-        const todaySteps = await androidStepTracking.getTodaySteps();
+        const todaySteps = await androidBackgroundService.getCurrentSteps();
         await saveToStorage({ dailySteps: Math.min(todaySteps, MAX_DAILY_STEPS) });
         
         setIsTracking(true);
         
         toast({
-          title: "Android Step Tracking Active",
-          description: result.message,
+          title: "Background Tracking Active",
+          description: "Steps tracking in background with persistent notification",
         });
         
       } else if (platform === 'ios') {
-        // iOS HealthKit tracking (keep existing logic)
+        // iOS HealthKit tracking (keep existing logic unchanged)
         await requestPermissions();
         const healthPerms = await healthKit.current.requestPermissions();
         await loadStoredData();
@@ -425,6 +472,7 @@ export const useNativeStepTracking = () => {
   const startAutoSync = () => {
     if (syncInterval.current) return;
     
+    const SYNC_INTERVAL = 60000; // 1 minute
     syncInterval.current = setInterval(() => {
       syncPendingSteps();
     }, SYNC_INTERVAL);
@@ -478,7 +526,7 @@ export const useNativeStepTracking = () => {
     const platform = Capacitor.getPlatform();
     
     if (platform === 'android') {
-      androidStepTracking.stopTracking();
+      androidBackgroundService.stopTracking();
     }
     
     if (gpsWatchId.current) {
@@ -491,6 +539,12 @@ export const useNativeStepTracking = () => {
       clearInterval(stepCheckInterval.current);
     }
     setIsTracking(false);
+  };
+
+  const openBatterySettings = async () => {
+    if (Capacitor.getPlatform() === 'android') {
+      await androidBackgroundService.openBatterySettings();
+    }
   };
 
   const simulateSteps = useCallback((count: number = 50) => {
@@ -507,5 +561,6 @@ export const useNativeStepTracking = () => {
     syncPendingSteps,
     simulateSteps, // For testing
     cleanup,
+    openBatterySettings, // New: Open manufacturer-specific battery settings
   };
 };

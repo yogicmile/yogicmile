@@ -3,6 +3,7 @@ import { YogicMileHeader } from '@/components/YogicMileHeader';
 import { TodaysSummaryCard } from '@/components/TodaysSummaryCard';
 import { InteractiveProgressRing } from '@/components/InteractiveProgressRing';
 import { EnhancedNavigationCards } from '@/components/EnhancedNavigationCards';
+import { BackgroundTrackingStatus } from '@/components/BackgroundTrackingStatus';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PageLoading } from '@/components/LoadingStates';
 import { useYogicData } from '@/hooks/use-yogic-data';
@@ -55,6 +56,11 @@ const Index = () => {
               goalSteps={yogicData.dailyProgress.dailyGoal}
               currentTier={yogicData.phases.currentPhase}
             />
+          </div>
+
+          {/* Background Tracking Status (Android only) */}
+          <div className="px-4 pb-4">
+            <BackgroundTrackingStatus />
           </div>
 
           {/* Today's Summary Card */}
