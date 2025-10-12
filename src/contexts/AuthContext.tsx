@@ -50,12 +50,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const guestMode = localStorage.getItem('yogic_mile_guest_mode') === 'true';
     setIsGuest(guestMode);
 
-    // Set up auth state listener FIRST
+    // Set up auth state listener FIRST (sync only)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        setIsLoading(false);
 
         if (event === 'SIGNED_IN') {
           setIsGuest(false);
@@ -68,8 +67,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // THEN get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Process redirect hash tokens from magic link (access_token/refresh_token)
+    const processRedirectHash = async () => {
+      try {
+        const rawHash = window.location.hash || '';
+        const hash = rawHash.startsWith('#') ? rawHash.slice(1) : rawHash;
+        if (!hash) return;
+        const params = new URLSearchParams(hash);
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token');
+        if (access_token && refresh_token) {
+          setIsLoading(true);
+          const { data, error } = await supabase.auth.setSession({ access_token, refresh_token });
+          if (!error && data?.session) {
+            setSession(data.session);
+            setUser(data.session.user);
+            setIsGuest(false);
+            localStorage.removeItem('yogic_mile_guest_mode');
+            // Clean the URL (remove tokens from hash)
+            const { origin, pathname, search } = window.location;
+            window.history.replaceState({}, document.title, origin + pathname + search);
+          }
+        }
+      } catch (e) {
+        console.error('Auth redirect processing failed:', e);
+      }
+    };
+
+    // Initialize: first try to process redirect tokens, then read existing session
+    (async () => {
+      await processRedirectHash();
+      const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
@@ -78,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsGuest(false);
         localStorage.removeItem('yogic_mile_guest_mode');
       }
-    });
+    })();
 
     return () => subscription.unsubscribe();
   }, []);
