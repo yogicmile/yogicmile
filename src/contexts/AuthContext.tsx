@@ -46,33 +46,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check for guest mode in localStorage
-    const guestMode = localStorage.getItem('yogic_mile_guest_mode');
-    if (guestMode === 'true') {
-      setIsGuest(true);
-      setIsLoading(false);
-      return;
-    }
+    // Read guest mode flag but DO NOT early return; always initialize Supabase auth
+    const guestMode = localStorage.getItem('yogic_mile_guest_mode') === 'true';
+    setIsGuest(guestMode);
 
-    // Set up auth state listener
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setIsLoading(false);
-        
+
         if (event === 'SIGNED_IN') {
           setIsGuest(false);
           localStorage.removeItem('yogic_mile_guest_mode');
         }
+        if (event === 'SIGNED_OUT') {
+          // Preserve guest mode if user explicitly enabled it earlier
+          if (guestMode) setIsGuest(true);
+        }
       }
     );
 
-    // Get initial session
+    // THEN get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
+
+      if (session) {
+        setIsGuest(false);
+        localStorage.removeItem('yogic_mile_guest_mode');
+      }
     });
 
     return () => subscription.unsubscribe();
