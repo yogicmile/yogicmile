@@ -379,11 +379,21 @@ export const useMobileAuth = () => {
         body: { mobileNumber: formatted }
       });
 
-      if (sessionError || !sessionData?.success) {
+      if (sessionError || !sessionData?.success || !sessionData?.session) {
         throw new Error('Failed to create session: ' + (sessionData?.error || sessionError?.message));
       }
 
-      // Store secure local session
+      // Set the Supabase auth session with tokens from edge function
+      const { error: setSessionError } = await supabase.auth.setSession({
+        access_token: sessionData.session.access_token,
+        refresh_token: sessionData.session.refresh_token,
+      });
+
+      if (setSessionError) {
+        throw new Error('Failed to establish session: ' + setSessionError.message);
+      }
+
+      // Store secure local session for additional tracking
       const localSession = {
         mobileNumber: formatted,
         verifiedAt: new Date().toISOString(),
@@ -395,13 +405,12 @@ export const useMobileAuth = () => {
         value: JSON.stringify(localSession),
       });
 
-      // The session will be picked up by AuthContext automatically
       setState(prev => ({ ...prev, biometricEnabled: true }));
       await Haptics.impact({ style: ImpactStyle.Light });
       
       toast({
         title: "OTP Verified! ✅",
-        description: "Login successful",
+        description: "Logging you in...",
       });
 
       return { success: true };

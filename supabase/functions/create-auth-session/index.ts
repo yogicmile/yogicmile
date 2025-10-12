@@ -94,30 +94,29 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Generate session token for this user
-    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'magiclink',
-      email: authUser?.user?.email || `${mobileNumber.replace('+', '')}@yogicmile.app`,
-      options: {
-        redirectTo: `${Deno.env.get('SUPABASE_URL')}/auth/v1/verify`,
-      }
+    // Create a session for this user using admin API
+    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.createSession({
+      user_id: authUserId,
     });
 
-    if (sessionError) {
-      console.error('Failed to generate session:', sessionError);
+    if (sessionError || !sessionData.session) {
+      console.error('Failed to create session:', sessionError);
       return new Response(
         JSON.stringify({ success: false, error: 'Failed to create session' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Session created successfully');
+    console.log('Session created successfully for user:', authUserId);
 
     return new Response(
       JSON.stringify({
         success: true,
         user_id: authUserId,
-        access_token: sessionData.properties.action_link.split('&token=')[1]?.split('&')[0],
+        session: {
+          access_token: sessionData.session.access_token,
+          refresh_token: sessionData.session.refresh_token,
+        }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

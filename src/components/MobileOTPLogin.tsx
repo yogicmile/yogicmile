@@ -64,9 +64,10 @@ export const MobileOTPLogin: React.FC<MobileOTPLoginProps> = ({
     const result = await verifyOTP(mobileNumber, otp);
     
     if (result.success) {
-      // Ensure app doesn't redirect back due to unauthenticated state
-      enterGuestMode();
-      onSuccess();
+      // Wait a moment for auth session to be picked up by AuthContext
+      setTimeout(() => {
+        onSuccess();
+      }, 500);
     } else {
       setError(result.error || 'Invalid OTP');
       setOTP('');
