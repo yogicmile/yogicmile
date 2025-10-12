@@ -7,6 +7,7 @@ const corsHeaders = {
 
 interface CreateSessionRequest {
   mobileNumber: string;
+  redirectUrl?: string;
 }
 
 Deno.serve(async (req) => {
@@ -27,7 +28,7 @@ Deno.serve(async (req) => {
       }
     });
 
-    const { mobileNumber }: CreateSessionRequest = await req.json();
+    const { mobileNumber, redirectUrl }: CreateSessionRequest = await req.json();
 
     if (!mobileNumber) {
       return new Response(
@@ -111,7 +112,7 @@ Deno.serve(async (req) => {
       type: 'magiclink',
       email: syntheticEmail,
       options: {
-        redirectTo: (req.headers.get('origin') || req.headers.get('referer') || Deno.env.get('SUPABASE_SITE_URL') || Deno.env.get('SITE_URL') || Deno.env.get('SUPABASE_URL'))
+        redirectTo: redirectUrl || (req.headers.get('origin') || req.headers.get('referer') || Deno.env.get('SUPABASE_SITE_URL') || Deno.env.get('SITE_URL') || Deno.env.get('SUPABASE_URL'))
       }
     });
 

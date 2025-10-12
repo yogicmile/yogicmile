@@ -376,7 +376,7 @@ export const useMobileAuth = () => {
 
       // Request a magic login link from the Edge Function and redirect the browser to it
       const { data: sessionData, error: sessionError } = await supabase.functions.invoke('create-auth-session', {
-        body: { mobileNumber: formatted }
+        body: { mobileNumber: formatted, redirectUrl: `${window.location.origin}/` }
       });
 
       if (sessionError || !sessionData?.success || !sessionData?.action_link) {
