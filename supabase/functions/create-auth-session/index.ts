@@ -94,29 +94,42 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Create a session for this user using admin API
-    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.createSession({
-      user_id: authUserId,
+    // Generate a magic link and return it to the client for redirect-based login
+    const syntheticEmail = (userData.email && userData.email.trim().length > 0)
+      ? userData.email
+      : `${mobileNumber.replace(/[^0-9]/g, '')}@yogicmile.app`;
+
+    // Ensure the auth user has a valid email & phone set
+    await supabaseAdmin.auth.admin.updateUserById(authUserId, {
+      email: syntheticEmail,
+      email_confirm: true,
+      phone: mobileNumber,
+      phone_confirm: true,
     });
 
-    if (sessionError || !sessionData.session) {
-      console.error('Failed to create session:', sessionError);
+    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'magiclink',
+      email: syntheticEmail,
+      options: {
+        redirectTo: (req.headers.get('origin') || req.headers.get('referer') || Deno.env.get('SUPABASE_SITE_URL') || Deno.env.get('SITE_URL') || Deno.env.get('SUPABASE_URL'))
+      }
+    });
+
+    if (linkError || !linkData?.properties?.action_link) {
+      console.error('Failed to generate magic link:', linkError);
       return new Response(
-        JSON.stringify({ success: false, error: 'Failed to create session' }),
+        JSON.stringify({ success: false, error: 'Failed to generate login link' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Session created successfully for user:', authUserId);
+    console.log('Magic link generated for user:', authUserId);
 
     return new Response(
       JSON.stringify({
         success: true,
         user_id: authUserId,
-        session: {
-          access_token: sessionData.session.access_token,
-          refresh_token: sessionData.session.refresh_token,
-        }
+        action_link: linkData.properties.action_link
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

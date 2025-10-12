@@ -374,45 +374,19 @@ export const useMobileAuth = () => {
         .eq('mobile_number', formatted)
         .maybeSingle();
 
-      // Create Supabase auth session after OTP verification
+      // Request a magic login link from the Edge Function and redirect the browser to it
       const { data: sessionData, error: sessionError } = await supabase.functions.invoke('create-auth-session', {
         body: { mobileNumber: formatted }
       });
 
-      if (sessionError || !sessionData?.success || !sessionData?.session) {
-        throw new Error('Failed to create session: ' + (sessionData?.error || sessionError?.message));
+      if (sessionError || !sessionData?.success || !sessionData?.action_link) {
+        throw new Error('Failed to create session: ' + (sessionData?.error || sessionError?.message || 'Edge Function returned a non-2xx status code'));
       }
 
-      // Set the Supabase auth session with tokens from edge function
-      const { error: setSessionError } = await supabase.auth.setSession({
-        access_token: sessionData.session.access_token,
-        refresh_token: sessionData.session.refresh_token,
-      });
+      // Redirect to Supabase magic link to establish the session in this browser
+      window.location.href = sessionData.action_link;
 
-      if (setSessionError) {
-        throw new Error('Failed to establish session: ' + setSessionError.message);
-      }
-
-      // Store secure local session for additional tracking
-      const localSession = {
-        mobileNumber: formatted,
-        verifiedAt: new Date().toISOString(),
-        deviceId: crypto.randomUUID(),
-      };
-
-      await Preferences.set({
-        key: SECURE_STORAGE_KEY,
-        value: JSON.stringify(localSession),
-      });
-
-      setState(prev => ({ ...prev, biometricEnabled: true }));
-      await Haptics.impact({ style: ImpactStyle.Light });
-      
-      toast({
-        title: "OTP Verified! ✅",
-        description: "Logging you in...",
-      });
-
+      // The redirect will handle session creation; return success to stop spinners
       return { success: true };
     } catch (error: any) {
       console.error('OTP verification error:', error);
