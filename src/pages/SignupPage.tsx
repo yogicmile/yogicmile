@@ -54,7 +54,7 @@ export default function SignupPage() {
             <TabsContent value="otp">
               <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                 <p className="text-sm text-green-700">
-                  📱 Get OTP on your WhatsApp (requires existing account)
+                  📱 Get OTP on your WhatsApp (new users supported)
                 </p>
               </div>
               <MobileOTPLogin 
