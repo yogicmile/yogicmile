@@ -67,26 +67,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Process redirect hash tokens from magic link (access_token/refresh_token)
-    const processRedirectHash = async () => {
+    // Process redirect params from magic link (hash tokens or code param)
+    const processRedirectParams = async () => {
       try {
+        // 1) Hash tokens: #access_token=...&refresh_token=...
         const rawHash = window.location.hash || '';
         const hash = rawHash.startsWith('#') ? rawHash.slice(1) : rawHash;
-        if (!hash) return;
-        const params = new URLSearchParams(hash);
-        const access_token = params.get('access_token');
-        const refresh_token = params.get('refresh_token');
-        if (access_token && refresh_token) {
+        if (hash) {
+          const params = new URLSearchParams(hash);
+          const access_token = params.get('access_token');
+          const refresh_token = params.get('refresh_token');
+          if (access_token && refresh_token) {
+            setIsLoading(true);
+            const { data, error } = await supabase.auth.setSession({ access_token, refresh_token });
+            if (!error && data?.session) {
+              setSession(data.session);
+              setUser(data.session.user);
+              setIsGuest(false);
+              localStorage.removeItem('yogic_mile_guest_mode');
+              // Clean the URL
+              const { origin, pathname, search } = window.location;
+              window.history.replaceState({}, document.title, origin + pathname + search);
+              return; // Done
+            }
+          }
+        }
+
+        // 2) Code param: ?code=... (Supabase can use code exchange flow)
+        const url = new URL(window.location.href);
+        const code = url.searchParams.get('code');
+        if (code) {
           setIsLoading(true);
-          const { data, error } = await supabase.auth.setSession({ access_token, refresh_token });
-          if (!error && data?.session) {
-            setSession(data.session);
-            setUser(data.session.user);
-            setIsGuest(false);
-            localStorage.removeItem('yogic_mile_guest_mode');
-            // Clean the URL (remove tokens from hash)
-            const { origin, pathname, search } = window.location;
-            window.history.replaceState({}, document.title, origin + pathname + search);
+          try {
+            const authAny = supabase.auth as any;
+            const { data, error } = await authAny.exchangeCodeForSession({ code });
+            if (!error && data?.session) {
+              setSession(data.session);
+              setUser(data.session.user);
+              setIsGuest(false);
+              localStorage.removeItem('yogic_mile_guest_mode');
+            }
+          } catch (err) {
+            console.error('exchangeCodeForSession failed:', err);
+          } finally {
+            // Clean code param from URL
+            url.searchParams.delete('code');
+            url.searchParams.delete('type');
+            window.history.replaceState({}, document.title, url.toString());
           }
         }
       } catch (e) {
@@ -96,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Initialize: first try to process redirect tokens, then read existing session
     (async () => {
-      await processRedirectHash();
+      await processRedirectParams();
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
       setUser(session?.user ?? null);

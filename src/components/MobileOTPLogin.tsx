@@ -64,12 +64,10 @@ export const MobileOTPLogin: React.FC<MobileOTPLoginProps> = ({
     const result = await verifyOTP(mobileNumber, otp);
     
     if (result.success) {
-      // Wait a moment for auth session to be picked up by AuthContext
-      setTimeout(() => {
-        try { onSuccess(); } catch {}
-        // Fallback hard redirect to ensure navigation even if routing guard races
-        window.location.assign('/');
-      }, 700);
+      // Let edge function redirect to Supabase magic link, which will return to our app
+      // AuthContext will process the redirect and set the session
+      try { onSuccess(); } catch {}
+      return;
     } else {
       setError(result.error || 'Invalid OTP');
       setOTP('');
