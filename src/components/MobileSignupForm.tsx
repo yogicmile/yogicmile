@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useMobileAuth, SignUpFormData } from '@/hooks/use-mobile-auth';
 import { Smartphone, Mail, MapPin, User, Shield, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { LegalPolicyModal } from './LegalPolicyModal';
 
 interface MobileSignupFormProps {
   onSuccess: (mobileNumber: string) => void;
@@ -53,6 +54,8 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showPolicyModal, setShowPolicyModal] = useState(false);
+  const [policyType, setPolicyType] = useState<'privacy' | 'terms'>('privacy');
 
   const handleInputChange = (field: string, value: string | number) => {
     if (field.startsWith('address.')) {
@@ -405,11 +408,27 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
               />
               <Label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
                 I agree to the{' '}
-                <button type="button" className="text-primary underline">
+                <button 
+                  type="button" 
+                  className="text-primary underline hover:text-primary/80"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPolicyType('terms');
+                    setShowPolicyModal(true);
+                  }}
+                >
                   Terms & Conditions
                 </button>{' '}
                 and{' '}
-                <button type="button" className="text-primary underline">
+                <button 
+                  type="button" 
+                  className="text-primary underline hover:text-primary/80"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPolicyType('privacy');
+                    setShowPolicyModal(true);
+                  }}
+                >
                   Privacy Policy
                 </button>
               </Label>
@@ -439,6 +458,12 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
           </form>
         </CardContent>
       </Card>
+      
+      <LegalPolicyModal
+        isOpen={showPolicyModal}
+        onClose={() => setShowPolicyModal(false)}
+        initialTab={policyType}
+      />
     </div>
   );
 };
