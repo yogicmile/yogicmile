@@ -102,6 +102,10 @@ All colors MUST be HSL for consistent theming
     --ring: 195 100% 50%; /* Deep sky blue focus rings */
     --muted: 208 100% 96%; /* Very light whitish blue */
     --muted-foreground: 210 51% 45%; /* Muted navy text */
+    
+    /* Popover colors - solid white background for dropdowns */
+    --popover: 0 0% 100%; /* Pure white background */
+    --popover-foreground: 210 51% 24%; /* Dark navy text */
 
     /* Sky Blue Primary Gradients */
     --gradient-primary: var(--gradient-sky-to-gold);
