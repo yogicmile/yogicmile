@@ -11,12 +11,12 @@ import { LegalPolicyModal } from '@/components/LegalPolicyModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import type { User } from '@supabase/supabase-js';
+
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, session, signOut, isLoading: authLoading } = useAuth();
+  const { user, signOut, isLoading: authLoading } = useAuth();
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [legalModalTab, setLegalModalTab] = useState<'privacy' | 'terms'>('privacy');
   const [userStats, setUserStats] = useState({
@@ -29,50 +29,24 @@ export const ProfilePage = () => {
     displayName: 'Yogic Walker'
   });
   const [loading, setLoading] = useState(false);
-  const [authUser, setAuthUser] = useState<User | null>(null);
-  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
     document.title = 'Profile | Yogic Mile';
-
-    // Resolve active user from context or Supabase directly (fallback)
-    if (user) {
-      setAuthUser(user);
-      setCheckingAuth(false);
-      setLoading(true);
-      loadUserData();
-      return;
-    }
-
-    // Fallback check if context not yet ready
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user) {
-        setAuthUser(data.user);
-        setLoading(true);
-        loadUserData();
-      }
-    }).finally(() => setCheckingAuth(false));
-  }, [user, authLoading]);
-
-  // Keep local authUser in sync with Supabase auth events
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        setAuthUser(session.user);
-      } else if (event === 'SIGNED_OUT') {
-        setAuthUser(null);
-      }
-    });
-    return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) return;
+    setLoading(true);
+    loadUserData();
+  }, [authLoading, user]);
+
 
   const loadUserData = async () => {
     try {
       setLoading(true);
       
-      // Resolve active user (context or fallback)
-      const activeUser = user || authUser;
-      if (!activeUser) {
+      if (!user) {
         setLoading(false);
         return;
       }
@@ -81,7 +55,7 @@ export const ProfilePage = () => {
       const { data: wallet, error: walletError } = await supabase
         .from('wallet_balances')
         .select('total_balance, total_earned')
-        .eq('user_id', (user || authUser)!.id)
+        .eq('user_id', user!.id)
         .maybeSingle();
 
       if (walletError) {
@@ -92,7 +66,7 @@ export const ProfilePage = () => {
       const { data: steps, error: stepsError } = await supabase
         .from('daily_steps')
         .select('steps')
-        .eq('user_id', (user || authUser)!.id);
+        .eq('user_id', user!.id);
 
       if (stepsError) {
         console.error('Error fetching steps:', stepsError);
@@ -104,7 +78,7 @@ export const ProfilePage = () => {
       const { data: userPhase, error: phaseError } = await supabase
         .from('user_phases')
         .select('current_phase, created_at')
-        .eq('user_id', (user || authUser)!.id)
+        .eq('user_id', user!.id)
         .maybeSingle();
 
       if (phaseError) {
@@ -115,7 +89,7 @@ export const ProfilePage = () => {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('full_name')
-        .eq('user_id', (user || authUser)!.id)
+        .eq('user_id', user!.id)
         .maybeSingle();
 
       if (profileError) {
@@ -126,7 +100,7 @@ export const ProfilePage = () => {
       const { data: recentLogs, error: logsError } = await supabase
         .from('daily_steps')
         .select('date')
-        .eq('user_id', (user || authUser)!.id)
+        .eq('user_id', user!.id)
         .order('date', { ascending: false })
         .limit(30);
 
@@ -225,7 +199,7 @@ export const ProfilePage = () => {
   ];
 
   // Auth/loading states
-  if (authLoading || checkingAuth || loading) {
+  if (authLoading || loading) {
     return (
       <div className="mobile-container bg-background p-4 pb-24 safe-bottom flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -236,17 +210,6 @@ export const ProfilePage = () => {
     );
   }
 
-  if (!(user || authUser)) {
-    return (
-      <div className="mobile-container bg-background p-6 pb-24 safe-bottom flex items-center justify-center min-h-screen">
-        <div className="max-w-md w-full text-center space-y-4">
-          <h1 className="text-2xl font-bold">Authentication required</h1>
-          <p className="text-muted-foreground">Please log in to view your profile.</p>
-          <Button className="w-full" onClick={() => navigate('/login')}>Go to Login</Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="mobile-container bg-background p-4 pb-24 safe-bottom">
