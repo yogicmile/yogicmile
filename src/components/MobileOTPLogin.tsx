@@ -7,6 +7,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import { useMobileAuth } from '@/hooks/use-mobile-auth';
 import { Smartphone, Shield, Clock, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MobileOTPLoginProps {
   onSuccess: () => void;
@@ -26,6 +27,7 @@ export const MobileOTPLogin: React.FC<MobileOTPLoginProps> = ({
     generateOTP, 
     verifyOTP 
   } = useMobileAuth();
+  const { enterGuestMode } = useAuth();
   
   const [mobileNumber, setMobileNumber] = useState('');
   const [otp, setOTP] = useState('');
@@ -62,6 +64,8 @@ export const MobileOTPLogin: React.FC<MobileOTPLoginProps> = ({
     const result = await verifyOTP(mobileNumber, otp);
     
     if (result.success) {
+      // Ensure app doesn't redirect back due to unauthenticated state
+      enterGuestMode();
       onSuccess();
     } else {
       setError(result.error || 'Invalid OTP');
