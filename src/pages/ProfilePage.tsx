@@ -11,6 +11,7 @@ import { LegalPolicyModal } from '@/components/LegalPolicyModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import type { User } from '@supabase/supabase-js';
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
@@ -28,23 +29,50 @@ export const ProfilePage = () => {
     displayName: 'Yogic Walker'
   });
   const [loading, setLoading] = useState(false);
+  const [authUser, setAuthUser] = useState<User | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
     document.title = 'Profile | Yogic Mile';
+
+    // Resolve active user from context or Supabase directly (fallback)
     if (user) {
+      setAuthUser(user);
+      setCheckingAuth(false);
       setLoading(true);
       loadUserData();
-    } else if (!authLoading) {
-      setLoading(false);
+      return;
     }
+
+    // Fallback check if context not yet ready
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) {
+        setAuthUser(data.user);
+        setLoading(true);
+        loadUserData();
+      }
+    }).finally(() => setCheckingAuth(false));
   }, [user, authLoading]);
+
+  // Keep local authUser in sync with Supabase auth events
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setAuthUser(session.user);
+      } else if (event === 'SIGNED_OUT') {
+        setAuthUser(null);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const loadUserData = async () => {
     try {
       setLoading(true);
       
-      // Use user from AuthContext instead of separate auth check
-      if (!user) {
+      // Resolve active user (context or fallback)
+      const activeUser = user || authUser;
+      if (!activeUser) {
         setLoading(false);
         return;
       }
@@ -53,7 +81,7 @@ export const ProfilePage = () => {
       const { data: wallet, error: walletError } = await supabase
         .from('wallet_balances')
         .select('total_balance, total_earned')
-        .eq('user_id', user.id)
+        .eq('user_id', (user || authUser)!.id)
         .maybeSingle();
 
       if (walletError) {
@@ -64,7 +92,7 @@ export const ProfilePage = () => {
       const { data: steps, error: stepsError } = await supabase
         .from('daily_steps')
         .select('steps')
-        .eq('user_id', user.id);
+        .eq('user_id', (user || authUser)!.id);
 
       if (stepsError) {
         console.error('Error fetching steps:', stepsError);
@@ -76,7 +104,7 @@ export const ProfilePage = () => {
       const { data: userPhase, error: phaseError } = await supabase
         .from('user_phases')
         .select('current_phase, created_at')
-        .eq('user_id', user.id)
+        .eq('user_id', (user || authUser)!.id)
         .maybeSingle();
 
       if (phaseError) {
@@ -87,7 +115,7 @@ export const ProfilePage = () => {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('full_name')
-        .eq('user_id', user.id)
+        .eq('user_id', (user || authUser)!.id)
         .maybeSingle();
 
       if (profileError) {
@@ -98,7 +126,7 @@ export const ProfilePage = () => {
       const { data: recentLogs, error: logsError } = await supabase
         .from('daily_steps')
         .select('date')
-        .eq('user_id', user.id)
+        .eq('user_id', (user || authUser)!.id)
         .order('date', { ascending: false })
         .limit(30);
 
@@ -197,7 +225,7 @@ export const ProfilePage = () => {
   ];
 
   // Auth/loading states
-  if (authLoading || loading) {
+  if (authLoading || checkingAuth || loading) {
     return (
       <div className="mobile-container bg-background p-4 pb-24 safe-bottom flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -208,7 +236,7 @@ export const ProfilePage = () => {
     );
   }
 
-  if (!user) {
+  if (!(user || authUser)) {
     return (
       <div className="mobile-container bg-background p-6 pb-24 safe-bottom flex items-center justify-center min-h-screen">
         <div className="max-w-md w-full text-center space-y-4">
