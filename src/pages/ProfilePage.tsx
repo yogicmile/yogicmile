@@ -10,10 +10,12 @@ import { useNavigate } from 'react-router-dom';
 import { LegalPolicyModal } from '@/components/LegalPolicyModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, session, signOut } = useAuth();
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [legalModalTab, setLegalModalTab] = useState<'privacy' | 'terms'>('privacy');
   const [userStats, setUserStats] = useState({
@@ -29,22 +31,18 @@ export const ProfilePage = () => {
 
   useEffect(() => {
     document.title = 'Profile | Yogic Mile';
-    loadUserData();
-  }, []);
+    if (user) {
+      loadUserData();
+    }
+  }, [user]);
 
   const loadUserData = async () => {
     try {
       setLoading(true);
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
       
-      if (authError || !user) {
+      // Use user from AuthContext instead of separate auth check
+      if (!user) {
         setLoading(false);
-        toast({ 
-          title: "Authentication required", 
-          description: "Please log in to view your profile",
-          variant: "destructive" 
-        });
-        navigate('/login');
         return;
       }
 
@@ -144,8 +142,7 @@ export const ProfilePage = () => {
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
-      toast({ title: "Signed out successfully" });
+      await signOut();
       navigate('/login');
     } catch (error) {
       toast({ title: "Error signing out", variant: "destructive" });
@@ -195,6 +192,12 @@ export const ProfilePage = () => {
       action: () => navigate('/help')
     }
   ];
+
+  // Redirect if not authenticated
+  if (!user) {
+    navigate('/login');
+    return null;
+  }
 
   if (loading) {
     return (
