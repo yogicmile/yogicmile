@@ -174,7 +174,7 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
                 <p className="text-sm text-red-500">{errors.mobileNumber}</p>
               )}
               <p className="text-xs text-muted-foreground">
-                📱 This will be your login ID and referral code
+                📱 This will be your login ID and referral mobile number
               </p>
             </div>
 
@@ -379,22 +379,26 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
               </div>
             </div>
 
-            {/* Referral Code */}
+            {/* Referral Code - Mobile Number */}
             <div className="space-y-2">
               <Label htmlFor="referral" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                Referral Code <span className="text-muted-foreground">(optional)</span>
+                Referral Mobile Number <span className="text-muted-foreground">(optional)</span>
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Get ₹1 bonus!</span>
               </Label>
               <Input
                 id="referral"
-                type="text"
-                placeholder="YM1234 (Optional)"
+                type="tel"
+                placeholder="Friend's 10-digit mobile number"
+                maxLength={10}
                 value={formData.referralCode}
-                onChange={(e) => handleInputChange('referralCode', e.target.value.toUpperCase())}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  handleInputChange('referralCode', value);
+                }}
               />
               <p className="text-xs text-muted-foreground">
-                🎁 Enter a friend's referral code to get ₹1 welcome bonus!
+                📱 Enter your friend's mobile number to get ₹1 welcome bonus for both!
               </p>
             </div>
 
