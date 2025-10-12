@@ -12,7 +12,6 @@ import {
   Bell, 
   BellRing, 
   Clock, 
-  Footprints, 
   Trophy, 
   MapPin, 
   Coins,
@@ -20,6 +19,7 @@ import {
   RotateCcw,
   Loader2
 } from 'lucide-react';
+import footprintIcon from '@/assets/footprint-icon.png';
 
 export const NotificationSettings: React.FC = () => {
   const {
@@ -94,7 +94,7 @@ export const NotificationSettings: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <Footprints className="h-4 w-4 text-primary" />
+                <img src={footprintIcon} alt="steps" className="h-4 w-4" />
                 <Label className="text-base font-medium">Walking Reminders</Label>
               </div>
               <p className="text-sm text-muted-foreground">

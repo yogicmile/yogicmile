@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
   Calendar, 
-  Footprints, 
   Coins, 
   CheckCircle, 
   Clock, 
@@ -13,6 +12,7 @@ import {
   ChevronUp,
   Share
 } from 'lucide-react';
+import footprintIcon from '@/assets/footprint-icon.png';
 
 interface CoinHistoryEntry {
   id: string;
@@ -147,7 +147,7 @@ const DailyHistoryCard: React.FC<DailyHistoryCardProps> = ({ entry }) => {
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
-              <Footprints className="w-4 h-4 text-primary" />
+              <img src={footprintIcon} alt="steps" className="w-4 h-4" />
               <span className="font-medium">{entry.steps.toLocaleString()} steps</span>
             </div>
             <div className="flex items-center gap-1">

@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Footprints, 
   Coins, 
   Users, 
   Shield, 
@@ -20,6 +19,7 @@ import {
   Trophy,
   MapPin
 } from 'lucide-react';
+import footprintIcon from '@/assets/footprint-icon.png';
 
 interface OnboardingStep {
   id: string;
@@ -50,7 +50,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
     id: 'step-tracking',
     title: 'Smart Step Tracking 👟',
     description: 'Connect your phone\'s health app or wearable device for accurate, automatic step counting.',
-    icon: Footprints,
+    icon: () => <img src={footprintIcon} alt="steps" className="w-6 h-6" />,
     benefits: [
       'Automatic background step detection',
       'Support for Apple Health, Google Fit, Fitbit, and more',

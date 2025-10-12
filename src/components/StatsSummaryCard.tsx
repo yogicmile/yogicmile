@@ -2,12 +2,12 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   TrendingUp, 
-  Footprints, 
   Coins, 
   Target, 
   Flame,
   Award
 } from 'lucide-react';
+import footprintIcon from '@/assets/footprint-icon.png';
 
 interface StatsSummaryCardProps {
   totalCoins: number;
@@ -83,7 +83,7 @@ const StatsSummaryCard: React.FC<StatsSummaryCardProps> = ({
 
           <div className="text-center p-3 bg-white/50 rounded-lg border">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <Footprints className="w-4 h-4 text-primary" />
+              <img src={footprintIcon} alt="steps" className="w-4 h-4" />
               <span className="text-xs text-muted-foreground">Total Steps</span>
             </div>
             <div className="text-2xl font-bold text-primary">
@@ -155,7 +155,7 @@ const StatsSummaryCard: React.FC<StatsSummaryCardProps> = ({
             <span>Best day: {Math.max(100, Math.round(totalCoins / 7))} coins</span>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground">
-            <Footprints className="w-3 h-3" />
+            <img src={footprintIcon} alt="steps" className="w-3 h-3" />
             <span>Distance: ~{Math.round(totalSteps * 0.0008)} km</span>
           </div>
         </div>
