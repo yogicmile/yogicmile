@@ -66,8 +66,10 @@ export const MobileOTPLogin: React.FC<MobileOTPLoginProps> = ({
     if (result.success) {
       // Wait a moment for auth session to be picked up by AuthContext
       setTimeout(() => {
-        onSuccess();
-      }, 500);
+        try { onSuccess(); } catch {}
+        // Fallback hard redirect to ensure navigation even if routing guard races
+        window.location.assign('/');
+      }, 700);
     } else {
       setError(result.error || 'Invalid OTP');
       setOTP('');

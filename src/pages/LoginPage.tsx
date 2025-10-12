@@ -13,7 +13,7 @@ export default function LoginPage() {
   const { enterGuestMode } = useAuth();
 
   const handleLoginSuccess = () => {
-    navigate('/');
+    // Do not navigate immediately; AuthGuard will redirect to '/' once the session is active
   };
 
   const handleSwitchToSignup = () => {
