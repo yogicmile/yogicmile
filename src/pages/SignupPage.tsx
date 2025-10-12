@@ -64,14 +64,27 @@ export default function SignupPage() {
             </TabsContent>
           </Tabs>
 
-          <div className="mt-6 text-center">
-            <Button
-              variant="ghost"
-              onClick={handleGuestMode}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Continue as Guest
-            </Button>
+          <div className="mt-6 space-y-3">
+            <div className="text-center">
+              <Button
+                variant="ghost"
+                onClick={handleGuestMode}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Continue as Guest
+              </Button>
+            </div>
+            
+            <div className="text-center text-sm">
+              <span className="text-muted-foreground">Already have an account? </span>
+              <Button
+                variant="link"
+                onClick={() => navigate('/login')}
+                className="text-primary hover:text-primary/80 p-0 h-auto font-semibold"
+              >
+                Sign in here
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
