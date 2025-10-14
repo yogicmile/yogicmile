@@ -5,6 +5,15 @@ import type { BackgroundStepTrackingPlugin } from './AndroidBackgroundService';
  * Web implementation (mock for development/testing)
  */
 export class BackgroundStepTrackingWeb extends WebPlugin implements BackgroundStepTrackingPlugin {
+  async requestAllPermissions(): Promise<{ activityRecognition: boolean; notifications: boolean; allGranted: boolean }> {
+    console.log('Web: requestAllPermissions called');
+    return {
+      activityRecognition: false,
+      notifications: false,
+      allGranted: false,
+    };
+  }
+
   async startForegroundService(options: {
     notificationTitle: string;
     notificationText: string;
@@ -88,12 +97,12 @@ export class BackgroundStepTrackingWeb extends WebPlugin implements BackgroundSt
   async hasAggressiveBatteryOptimization(): Promise<{
     aggressive: boolean;
     manufacturer: string;
-    recommendations: string[];
+    recommendations: string;
   }> {
     return {
       aggressive: false,
       manufacturer: 'Web',
-      recommendations: [],
+      recommendations: '',
     };
   }
 }

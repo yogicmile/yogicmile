@@ -8,6 +8,11 @@ import { Capacitor } from '@capacitor/core';
 
 export interface BackgroundStepTrackingPlugin {
   /**
+   * Request all required permissions at once
+   */
+  requestAllPermissions(): Promise<{ activityRecognition: boolean; notifications: boolean; allGranted: boolean }>;
+
+  /**
    * Start foreground service with persistent notification
    */
   startForegroundService(options: {
@@ -87,7 +92,7 @@ export interface BackgroundStepTrackingPlugin {
   hasAggressiveBatteryOptimization(): Promise<{
     aggressive: boolean;
     manufacturer: string;
-    recommendations: string[];
+    recommendations: string;
   }>;
 }
 
@@ -122,7 +127,17 @@ export class AndroidBackgroundStepService {
     }
 
     try {
-      // Check device info first
+      // Request permissions first
+      const permResult = await BackgroundStepTracking.requestAllPermissions();
+      
+      if (!permResult.allGranted) {
+        return {
+          success: false,
+          message: 'Required permissions not granted',
+        };
+      }
+
+      // Check device info
       const deviceInfo = await BackgroundStepTracking.getDeviceInfo();
       console.log('Device Info:', deviceInfo);
 
@@ -131,7 +146,10 @@ export class AndroidBackgroundStepService {
       
       if (batteryCheck.aggressive) {
         console.warn(`Aggressive battery optimization detected: ${batteryCheck.manufacturer}`);
-        console.log('Recommendations:', batteryCheck.recommendations);
+        const recs = typeof batteryCheck.recommendations === 'string' 
+          ? batteryCheck.recommendations.split('|') 
+          : batteryCheck.recommendations;
+        console.log('Recommendations:', recs);
       }
 
       // Check if battery optimization is disabled
@@ -142,33 +160,14 @@ export class AndroidBackgroundStepService {
         const exemptionResult = await BackgroundStepTracking.requestBatteryOptimizationExemption();
         
         if (!exemptionResult.granted) {
-          // Try opening manufacturer-specific settings
-          await BackgroundStepTracking.openManufacturerBatterySettings();
-          
-          return {
-            success: false,
-            message: `Battery optimization must be disabled for ${batteryCheck.manufacturer}. Please disable it in Settings.`,
-          };
-        }
-      }
-
-      // Check Google Fit availability
-      const googleFitAvailable = await BackgroundStepTracking.isGoogleFitAvailable();
-      
-      if (googleFitAvailable.available) {
-        // Request Google Fit permissions
-        const fitPermission = await BackgroundStepTracking.requestGoogleFitPermission();
-        
-        if (fitPermission.granted) {
-          console.log('Google Fit integration enabled');
+          console.log('Battery optimization exemption not granted, opening settings');
         }
       }
 
       // Start foreground service
       const serviceResult = await BackgroundStepTracking.startForegroundService({
-        notificationTitle: 'YogicMile - Step Tracking Active',
-        notificationText: 'Tracking your steps in the background',
-        icon: 'ic_notification',
+        notificationTitle: 'Yogic Mile',
+        notificationText: 'Tracking steps in background',
       });
 
       if (!serviceResult.success) {
@@ -309,7 +308,9 @@ export class AndroidBackgroundStepService {
 
     try {
       const result = await BackgroundStepTracking.hasAggressiveBatteryOptimization();
-      return result.recommendations;
+      const recs = result.recommendations || '';
+      const recsArray = typeof recs === 'string' ? recs.split('|') : recs;
+      return recsArray.filter(r => r.trim().length > 0);
     } catch (error) {
       return [];
     }

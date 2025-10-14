@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Settings, Palette, Mail, Shield, Bell, Info, FileText } from 'lucide-react';
+import { ArrowLeft, Settings, Palette, Mail, Shield, Bell, Info, FileText, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { EmailPreferencesSettings } from '@/components/features/EmailPreferencesSettings';
 import { useThemeCustomization } from '@/hooks/use-theme-customization';
@@ -14,6 +14,10 @@ import { BetaFeedbackSystem } from '@/components/beta-testing/BetaFeedbackSystem
 import { VersionManager } from '@/components/app-info/VersionManager';
 import { LegalPolicyModal } from '@/components/LegalPolicyModal';
 import { ConsentManager } from '@/components/ConsentManager';
+import { BackgroundTrackingStatus } from '@/components/BackgroundTrackingStatus';
+import { Capacitor } from '@capacitor/core';
+import { androidBackgroundService } from '@/services/AndroidBackgroundService';
+import { useToast } from '@/hooks/use-toast';
 
 export function SettingsPage() {
   const navigate = useNavigate();
@@ -33,6 +37,10 @@ export function SettingsPage() {
     isLoading 
   } = useThemeCustomization();
 
+  const { toast } = useToast();
+  const [backgroundTracking, setBackgroundTracking] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  
   const [notificationSettings, setNotificationSettings] = useState({
     pushNotifications: true,
     emailNotifications: true,
@@ -44,6 +52,59 @@ export function SettingsPage() {
 
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [legalModalTab, setLegalModalTab] = useState<'privacy' | 'terms'>('privacy');
+
+  // Check background tracking status on mount
+  useEffect(() => {
+    checkBackgroundTracking();
+  }, []);
+
+  const checkBackgroundTracking = async () => {
+    if (Capacitor.getPlatform() === 'android') {
+      try {
+        const isRunning = await androidBackgroundService.isRunning();
+        setBackgroundTracking(isRunning);
+      } catch (error) {
+        console.error('Failed to check background tracking status:', error);
+      }
+    }
+  };
+
+  const handleBackgroundTrackingToggle = async (enabled: boolean) => {
+    setCheckingStatus(true);
+    try {
+      if (enabled) {
+        const result = await androidBackgroundService.startTracking();
+        if (result.success) {
+          setBackgroundTracking(true);
+          toast({
+            title: 'Background Tracking Started',
+            description: 'Your steps are now being tracked continuously',
+          });
+        } else {
+          toast({
+            title: 'Failed to Start Tracking',
+            description: result.message,
+            variant: 'destructive',
+          });
+        }
+      } else {
+        await androidBackgroundService.stopTracking();
+        setBackgroundTracking(false);
+        toast({
+          title: 'Background Tracking Stopped',
+          description: 'Step tracking has been paused',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to toggle background tracking',
+        variant: 'destructive',
+      });
+    } finally {
+      setCheckingStatus(false);
+    }
+  };
 
   const openLegalModal = (tab: 'privacy' | 'terms') => {
     setLegalModalTab(tab);
@@ -91,8 +152,12 @@ export function SettingsPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="appearance" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+        <Tabs defaultValue="tracking" className="w-full">
+          <TabsList className="grid w-full grid-cols-6 gap-1">
+            <TabsTrigger value="tracking" className="flex items-center gap-1">
+              <Activity className="w-4 h-4" />
+              <span className="hidden sm:inline">Track</span>
+            </TabsTrigger>
             <TabsTrigger value="appearance" className="flex items-center gap-1">
               <Palette className="w-4 h-4" />
               <span className="hidden sm:inline">Theme</span>
@@ -114,6 +179,49 @@ export function SettingsPage() {
               <span className="hidden sm:inline">About</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* Background Tracking Tab */}
+          <TabsContent value="tracking" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-primary" />
+                  Background Step Tracking
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Enable continuous step tracking even when the app is closed
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
+                  <div>
+                    <Label className="font-semibold">Enable Background Tracking</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Track steps continuously with a persistent notification
+                    </p>
+                  </div>
+                  <Switch
+                    checked={backgroundTracking}
+                    onCheckedChange={handleBackgroundTrackingToggle}
+                    disabled={checkingStatus || Capacitor.getPlatform() !== 'android'}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Status Card */}
+            {Capacitor.getPlatform() === 'android' && <BackgroundTrackingStatus />}
+
+            {Capacitor.getPlatform() !== 'android' && (
+              <Card className="border-muted">
+                <CardContent className="pt-6">
+                  <p className="text-sm text-muted-foreground text-center">
+                    Background tracking is currently only available on Android devices
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
 
           {/* Appearance Settings */}
           <TabsContent value="appearance" className="space-y-6">
