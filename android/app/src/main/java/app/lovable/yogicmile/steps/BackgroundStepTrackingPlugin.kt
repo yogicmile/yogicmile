@@ -219,6 +219,41 @@ class BackgroundStepTrackingPlugin : Plugin() {
     }
 
     @PluginMethod
+    fun getTodaySteps(call: PluginCall) {
+        // Alias for getStepCount()
+        getStepCount(call)
+    }
+
+    @PluginMethod
+    fun getSessionSteps(call: PluginCall) {
+        val prefs = context.getSharedPreferences("StepTracking", Context.MODE_PRIVATE)
+        val steps = prefs.getInt("today_steps", 0)
+        
+        val result = JSObject()
+        result.put("steps", steps)
+        result.put("sessionSteps", steps) // For this implementation, session = today
+        result.put("timestamp", System.currentTimeMillis())
+        call.resolve(result)
+    }
+
+    @PluginMethod
+    fun start(call: PluginCall) {
+        // Alias for startForegroundService with default options
+        val options = JSObject()
+        options.put("notificationTitle", "Yogic Mile")
+        options.put("notificationText", "Tracking steps in background")
+        
+        val wrappedCall = object : PluginCall(bridge, call.callbackId, call.pluginId, call.methodName, options) {}
+        startForegroundService(wrappedCall)
+    }
+
+    @PluginMethod
+    fun stop(call: PluginCall) {
+        // Alias for stopForegroundService
+        stopForegroundService(call)
+    }
+
+    @PluginMethod
     fun addStepListener(call: PluginCall) {
         // Listeners are handled via BroadcastReceiver
         call.resolve()

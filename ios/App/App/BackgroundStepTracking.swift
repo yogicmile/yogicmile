@@ -126,6 +126,14 @@ public class BackgroundStepTracking: CAPPlugin {
         ])
     }
     
+    @objc func getSessionSteps(_ call: CAPPluginCall) {
+        call.resolve([
+            "steps": todaySteps,
+            "sessionSteps": todaySteps,
+            "timestamp": Date().timeIntervalSince1970 * 1000
+        ])
+    }
+    
     @objc func getStepCount(_ call: CAPPluginCall) {
         getTodaySteps(call)
     }
