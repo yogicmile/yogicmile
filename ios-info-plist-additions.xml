@@ -1,0 +1,23 @@
+<!-- iOS Info.plist Additions for Background Step Tracking -->
+
+<!-- Motion Permission Description -->
+<key>NSMotionUsageDescription</key>
+<string>Yogic Mile uses your motion data to track steps and reward your walking activity with coins. Your step data stays on your device and is never shared.</string>
+
+<!-- Background Modes for Step Tracking -->
+<key>UIBackgroundModes</key>
+<array>
+    <string>fetch</string>
+    <string>processing</string>
+</array>
+
+<!-- Privacy Manifest (iOS 14+) -->
+<key>NSPrivacyTracking</key>
+<false/>
+
+<!-- Health Data Sharing -->
+<key>NSHealthShareUsageDescription</key>
+<string>Yogic Mile reads your step count data to calculate rewards and track your walking progress.</string>
+
+<key>NSHealthUpdateUsageDescription</key>
+<string>Yogic Mile writes step count data to HealthKit for your records.</string>
