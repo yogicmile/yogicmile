@@ -18,6 +18,11 @@ interface ReferralStats {
     joinedAt: string;
     bonusEarned: boolean;
   }>;
+  giftedSteps: {
+    totalStepsGifted: number;
+    phaseBoost: number;
+    todayActive: number;
+  };
 }
 
 export const ReferralCard = () => {
@@ -28,7 +33,12 @@ export const ReferralCard = () => {
     friendsJoined: 0,
     totalEarned: 0,
     pendingBonuses: 0,
-    referredFriends: []
+    referredFriends: [],
+    giftedSteps: {
+      totalStepsGifted: 0,
+      phaseBoost: 0,
+      todayActive: 0
+    }
   });
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -76,12 +86,30 @@ export const ReferralCard = () => {
         .select('*')
         .eq('referrer_mobile', userProfile.mobile_number);
 
-      // Get bonus earnings from referrals
+      // Get bonus earnings from referrals (cash bonuses)
       const { data: bonusEarnings } = await supabase
         .from('bonus_logs')
         .select('amount_paisa')
         .eq('user_id', user.id)
-        .eq('bonus_type', 'referral');
+        .in('bonus_type', ['referral', 'referral_signup_cash']);
+
+      // Get gifted steps statistics
+      const { data: giftedStepsData } = await supabase
+        .from('step_bonuses_log')
+        .select('steps_awarded, awarded_date')
+        .eq('recipient_user_id', user.id)
+        .in('bonus_type', ['referral_signup', 'referral_daily_gift', 'community_motivation']);
+
+      const totalStepsGifted = giftedStepsData?.reduce((sum, log) => sum + log.steps_awarded, 0) || 0;
+      
+      // Count active referees today (gifted steps today)
+      const today = new Date().toISOString().split('T')[0];
+      const todayActive = giftedStepsData?.filter(log => 
+        log.awarded_date === today
+      ).length || 0;
+
+      // Calculate phase boost (simple estimate: every 10k steps = ~5% boost)
+      const phaseBoost = Math.min(Math.round((totalStepsGifted / 10000) * 5), 100);
 
       const totalEarned = bonusEarnings?.reduce((sum, bonus) => sum + bonus.amount_paisa, 0) || 0;
       const completedReferrals = referrals?.filter(r => r.status === 'completed').length || 0;
@@ -97,7 +125,12 @@ export const ReferralCard = () => {
           status: r.status,
           joinedAt: r.created_at,
           bonusEarned: r.status === 'completed'
-        })) || []
+        })) || [],
+        giftedSteps: {
+          totalStepsGifted,
+          phaseBoost: Math.min(phaseBoost, 100),
+          todayActive
+        }
       });
     } catch (error) {
       console.error('Error fetching referral stats:', error);
@@ -252,6 +285,47 @@ Download: https://yogicmile.app #YogicMile #HealthIsWealth`;
           </div>
         </div>
 
+        {/* Gifted Steps Dashboard */}
+        {stats.giftedSteps.totalStepsGifted > 0 && (
+          <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-300">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Gift className="w-5 h-5 text-purple-600" />
+                Bonus Steps from Referrals
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white/70 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {stats.giftedSteps.totalStepsGifted.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Total Gifted</div>
+                </div>
+                <div className="bg-white/70 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-indigo-600">
+                    +{stats.giftedSteps.phaseBoost}%
+                  </div>
+                  <div className="text-xs text-muted-foreground">Phase Boost</div>
+                </div>
+              </div>
+              
+              <div className="bg-white/70 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Active Today</span>
+                  <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">
+                    <Users className="w-3 h-3 mr-1" />
+                    {stats.giftedSteps.todayActive} friends
+                  </Badge>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  💡 Your friends walking accelerates your phase progression!
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {stats.pendingBonuses > 0 && (
           <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
             <p className="text-sm text-orange-800">
@@ -289,12 +363,13 @@ Download: https://yogicmile.app #YogicMile #HealthIsWealth`;
         <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-lg">💚🚶‍♂️</span>
-            <h4 className="font-medium text-sm text-green-800">Health is Wealth Campaign</h4>
+            <h4 className="font-medium text-sm text-green-800">10% Step Gift System</h4>
           </div>
           <ul className="text-xs text-green-700 space-y-1">
-            <li>• Friend uses your code during signup → You both get bonuses</li>
-            <li>• You earn ₹2.00, they get ₹1.00 welcome bonus</li>
-            <li>• 🏃 Health is Wealth: Bonus activates when they complete <strong>10,000 steps</strong>!</li>
+            <li>• <strong>Signup:</strong> You get ₹1.00 cash + 5,000 bonus steps</li>
+            <li>• <strong>Daily Gift (30 days):</strong> 10% of friend's steps added to your phase progress</li>
+            <li>• <strong>Motivations:</strong> 500 bonus steps when community motivates your friends</li>
+            <li>• 💪 Bonus steps accelerate your phase advancement = higher earnings!</li>
           </ul>
         </div>
       </CardContent>

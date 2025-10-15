@@ -1157,12 +1157,16 @@ export type Database = {
       }
       daily_steps: {
         Row: {
+          bonus_steps: number | null
           capped_steps: number
           created_at: string
           date: string
+          gifted_from_motivations: number | null
+          gifted_from_referrals: number | null
           id: string
           is_redeemed: boolean | null
           paisa_earned: number
+          personal_steps: number | null
           phase_id: number
           phase_rate: number
           redeemed_at: string | null
@@ -1171,12 +1175,16 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          bonus_steps?: number | null
           capped_steps?: number
           created_at?: string
           date: string
+          gifted_from_motivations?: number | null
+          gifted_from_referrals?: number | null
           id?: string
           is_redeemed?: boolean | null
           paisa_earned?: number
+          personal_steps?: number | null
           phase_id?: number
           phase_rate?: number
           redeemed_at?: string | null
@@ -1185,12 +1193,16 @@ export type Database = {
           user_id: string
         }
         Update: {
+          bonus_steps?: number | null
           capped_steps?: number
           created_at?: string
           date?: string
+          gifted_from_motivations?: number | null
+          gifted_from_referrals?: number | null
           id?: string
           is_redeemed?: boolean | null
           paisa_earned?: number
+          personal_steps?: number | null
           phase_id?: number
           phase_rate?: number
           redeemed_at?: string | null
@@ -2088,6 +2100,82 @@ export type Database = {
         }
         Relationships: []
       }
+      motivation_logs: {
+        Row: {
+          activity_id: string | null
+          activity_type: string
+          created_at: string | null
+          id: string
+          motivated_user_id: string
+          motivator_user_id: string
+          referrer_user_id: string | null
+          steps_gifted_to_referrer: number | null
+        }
+        Insert: {
+          activity_id?: string | null
+          activity_type: string
+          created_at?: string | null
+          id?: string
+          motivated_user_id: string
+          motivator_user_id: string
+          referrer_user_id?: string | null
+          steps_gifted_to_referrer?: number | null
+        }
+        Update: {
+          activity_id?: string | null
+          activity_type?: string
+          created_at?: string | null
+          id?: string
+          motivated_user_id?: string
+          motivator_user_id?: string
+          referrer_user_id?: string | null
+          steps_gifted_to_referrer?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "motivation_logs_motivated_user_id_fkey"
+            columns: ["motivated_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "motivation_logs_motivated_user_id_fkey"
+            columns: ["motivated_user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_wallet"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "motivation_logs_motivator_user_id_fkey"
+            columns: ["motivator_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "motivation_logs_motivator_user_id_fkey"
+            columns: ["motivator_user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_wallet"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "motivation_logs_referrer_user_id_fkey"
+            columns: ["referrer_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "motivation_logs_referrer_user_id_fkey"
+            columns: ["referrer_user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_wallet"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       notification_logs: {
         Row: {
           created_at: string | null
@@ -2876,46 +2964,67 @@ export type Database = {
       }
       referrals_new: {
         Row: {
+          bonus_expires_at: string | null
           bonus_paid: boolean | null
           completed_at: string | null
           created_at: string | null
+          daily_step_gift_percentage: number | null
           id: string
+          last_gift_date: string | null
           minimum_steps_required: number | null
           referee_mobile: string
           referee_user_id: string | null
           referral_code: string
           referrer_mobile: string
+          referrer_signup_bonus_paisa: number | null
+          referrer_signup_bonus_steps: number | null
           referrer_user_id: string | null
           status: string
           steps_completed: number | null
+          total_paisa_value_of_gifts: number | null
+          total_steps_gifted: number | null
         }
         Insert: {
+          bonus_expires_at?: string | null
           bonus_paid?: boolean | null
           completed_at?: string | null
           created_at?: string | null
+          daily_step_gift_percentage?: number | null
           id?: string
+          last_gift_date?: string | null
           minimum_steps_required?: number | null
           referee_mobile: string
           referee_user_id?: string | null
           referral_code: string
           referrer_mobile: string
+          referrer_signup_bonus_paisa?: number | null
+          referrer_signup_bonus_steps?: number | null
           referrer_user_id?: string | null
           status?: string
           steps_completed?: number | null
+          total_paisa_value_of_gifts?: number | null
+          total_steps_gifted?: number | null
         }
         Update: {
+          bonus_expires_at?: string | null
           bonus_paid?: boolean | null
           completed_at?: string | null
           created_at?: string | null
+          daily_step_gift_percentage?: number | null
           id?: string
+          last_gift_date?: string | null
           minimum_steps_required?: number | null
           referee_mobile?: string
           referee_user_id?: string | null
           referral_code?: string
           referrer_mobile?: string
+          referrer_signup_bonus_paisa?: number | null
+          referrer_signup_bonus_steps?: number | null
           referrer_user_id?: string | null
           status?: string
           steps_completed?: number | null
+          total_paisa_value_of_gifts?: number | null
+          total_steps_gifted?: number | null
         }
         Relationships: []
       }
@@ -3304,6 +3413,74 @@ export type Database = {
           total_steps?: number | null
         }
         Relationships: []
+      }
+      step_bonuses_log: {
+        Row: {
+          awarded_date: string
+          bonus_type: string
+          created_at: string | null
+          id: string
+          paisa_value: number | null
+          recipient_phase_at_award: number
+          recipient_user_id: string
+          source_details: Json | null
+          source_user_id: string | null
+          steps_awarded: number
+        }
+        Insert: {
+          awarded_date?: string
+          bonus_type: string
+          created_at?: string | null
+          id?: string
+          paisa_value?: number | null
+          recipient_phase_at_award: number
+          recipient_user_id: string
+          source_details?: Json | null
+          source_user_id?: string | null
+          steps_awarded: number
+        }
+        Update: {
+          awarded_date?: string
+          bonus_type?: string
+          created_at?: string | null
+          id?: string
+          paisa_value?: number | null
+          recipient_phase_at_award?: number
+          recipient_user_id?: string
+          source_details?: Json | null
+          source_user_id?: string | null
+          steps_awarded?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "step_bonuses_log_recipient_user_id_fkey"
+            columns: ["recipient_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "step_bonuses_log_recipient_user_id_fkey"
+            columns: ["recipient_user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_wallet"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "step_bonuses_log_source_user_id_fkey"
+            columns: ["source_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "step_bonuses_log_source_user_id_fkey"
+            columns: ["source_user_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_wallet"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       step_logs: {
         Row: {
@@ -4299,6 +4476,18 @@ export type Database = {
       }
     }
     Views: {
+      referral_gift_analytics: {
+        Row: {
+          active_referrers: number | null
+          avg_recipient_phase: number | null
+          bonus_type: string | null
+          date: string | null
+          total_gifts: number | null
+          total_potential_paisa: number | null
+          total_steps_gifted: number | null
+        }
+        Relationships: []
+      }
       v_daily_summary: {
         Row: {
           daily_coins: number | null
@@ -4512,6 +4701,27 @@ export type Database = {
           p_requester_id: string
         }
         Returns: string
+      }
+      process_daily_step_gift: {
+        Args: { p_date?: string; p_referee_user_id: string }
+        Returns: Json
+      }
+      process_motivation_bonus: {
+        Args: {
+          p_activity_id?: string
+          p_activity_type: string
+          p_motivated_user_id: string
+          p_motivator_user_id: string
+        }
+        Returns: Json
+      }
+      process_referral_signup: {
+        Args: {
+          p_referee_mobile: string
+          p_referee_user_id: string
+          p_referral_code: string
+        }
+        Returns: Json
       }
       process_spin_result: {
         Args: {
