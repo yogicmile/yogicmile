@@ -5,8 +5,8 @@ const config: CapacitorConfig = {
   appName: 'yogicmile',
   webDir: 'dist',
   // Production: Web assets bundled in app for offline support
-  // For development hot-reload, temporarily add:
-  // server: { url: 'https://yogicmile.netlify.app', cleartext: true }
+  // For development hot-reload, uncomment the server config below:
+  // server: { url: 'https://4741923f-866e-4468-918a-6e7c1c4ebf2e.lovableproject.com?forceHideBadge=true', cleartext: true }
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,

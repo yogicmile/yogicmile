@@ -13,5 +13,17 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
-  }
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'yogicmile-mobile/1.0.0',
+    },
+    fetch: (url, options = {}) => {
+      return fetch(url, {
+        ...options,
+        // 30 second timeout for mobile networks
+        signal: AbortSignal.timeout(30000),
+      });
+    },
+  },
 });

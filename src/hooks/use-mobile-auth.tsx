@@ -281,7 +281,10 @@ export const useMobileAuth = () => {
         body: {
           mobileNumber: formatted,
           userAgent: userAgent
-        }
+        },
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       if (error) throw error;
@@ -306,19 +309,33 @@ export const useMobileAuth = () => {
     } catch (error: any) {
       // Surface better error details from edge function
       let friendly = error?.message || 'Failed to send OTP';
-      try {
-        const details = (error && (error.details || (error.context && error.context.body))) || null as any;
-        if (typeof details === 'string') {
-          const parsed = JSON.parse(details);
-          friendly = parsed?.error || parsed?.message || friendly;
-        } else if (details && typeof details === 'object') {
-          friendly = details?.error || details?.message || friendly;
-        }
-      } catch {}
+      
+      // Detect network errors (common on APK with poor connectivity)
+      if (error?.message?.includes('Failed to fetch') || 
+          error?.message?.includes('NetworkError') ||
+          error?.message?.includes('timeout') ||
+          error?.message?.includes('aborted')) {
+        friendly = 'Network error. Please check your internet connection and try again.';
+      } else {
+        try {
+          const details = (error && (error.details || (error.context && error.context.body))) || null as any;
+          if (typeof details === 'string') {
+            const parsed = JSON.parse(details);
+            friendly = parsed?.error || parsed?.message || friendly;
+          } else if (details && typeof details === 'object') {
+            friendly = details?.error || details?.message || friendly;
+          }
+        } catch {}
 
-      // Common hint when account doesn’t exist (server returns 404 User not found)
-      if (/user not found/i.test(friendly)) {
-        friendly = 'No account found for this number. Please sign up first or use Email & Password.';
+        // Common hint when account doesn't exist (server returns 404 User not found)
+        if (/user not found/i.test(friendly)) {
+          friendly = 'No account found for this number. Please sign up first or use Email & Password.';
+        }
+        
+        // Twilio sandbox not joined
+        if (/not a valid WhatsApp recipient/i.test(friendly) || /sandbox/i.test(friendly)) {
+          friendly = 'WhatsApp not configured for this number. Please contact support or use a different authentication method.';
+        }
       }
 
       console.error('OTP generation error:', error);
