@@ -40,8 +40,9 @@ const handler = async (req: Request): Promise<Response> => {
       });
       return new Response(
         JSON.stringify({ 
-          success: false, 
-          error: 'Twilio configuration missing', 
+          success: false,
+          code: 'CONFIG_MISSING',
+          error: 'System configuration incomplete. Please use Email & Password to sign up.',
           missing: {
             accountSid: !TWILIO_ACCOUNT_SID, 
             authToken: !TWILIO_AUTH_TOKEN, 
@@ -83,8 +84,15 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (rateLimitData?.blocked_until && new Date(rateLimitData.blocked_until) > new Date()) {
       console.log('User temporarily blocked:', mobileNumber);
+      const blockedUntil = new Date(rateLimitData.blocked_until);
       return new Response(
-        JSON.stringify({ success: false, error: 'Too many attempts. Try again later.' }),
+        JSON.stringify({ 
+          success: false, 
+          code: 'OTP_RATE_LIMIT',
+          error: 'You can request up to 3 OTPs per hour. Please try again later.',
+          next_allowed_at: blockedUntil.toISOString(),
+          window_minutes: 60
+        }),
         { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -93,8 +101,16 @@ const handler = async (req: Request): Promise<Response> => {
     const today = new Date().toISOString().split('T')[0];
     if (rateLimitData?.daily_window_start === today && rateLimitData.daily_attempts >= 10) {
       console.log('Daily limit exceeded:', mobileNumber);
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
       return new Response(
-        JSON.stringify({ success: false, error: 'Daily OTP limit exceeded. Try again tomorrow.' }),
+        JSON.stringify({ 
+          success: false, 
+          code: 'OTP_DAILY_LIMIT',
+          error: 'Daily OTP limit (10) exceeded. You can request again tomorrow.',
+          next_allowed_at: tomorrow.toISOString()
+        }),
         { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -190,7 +206,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Update rate limiting
     if (rateLimitData) {
       const windowStart = new Date(rateLimitData.window_start);
-      const isWithinWindow = (Date.now() - windowStart.getTime()) < 15 * 60 * 1000; // 15 minutes
+      const isWithinWindow = (Date.now() - windowStart.getTime()) < 60 * 60 * 1000; // 60 minutes (consistent window)
       const newAttempts = isWithinWindow ? rateLimitData.attempts + 1 : 1;
       const newDailyAttempts = rateLimitData.daily_window_start === today ? 
         rateLimitData.daily_attempts + 1 : 1;
@@ -263,24 +279,44 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!whatsappResponse.ok) {
       console.error('Twilio API error:', whatsappData);
+      let errorCode = 'TWILIO_ERROR';
       let errMsg = 'Failed to send WhatsApp message';
+      
       if (whatsappData?.code === 63007) {
-        errMsg = 'WhatsApp sender number is not configured correctly. Ensure TWILIO_WHATSAPP_NUMBER is your WhatsApp-enabled number in E.164 format (e.g., +14155238886) without the "whatsapp:" prefix.';
+        errorCode = 'TWILIO_INVALID_FROM';
+        errMsg = 'WhatsApp sender number is not configured correctly. Please contact support or use Email & Password.';
       } else if (whatsappData?.code === 21608 || whatsappData?.code === 63016) {
-        errMsg = 'Recipient is not permitted. If using Twilio Sandbox, join it and use the sandbox WhatsApp number.';
+        errorCode = 'TWILIO_SANDBOX_REQUIRED';
+        errMsg = 'This number isn\'t enabled for WhatsApp sandbox. Please use Email & Password to sign up.';
+      } else if (whatsappData?.code === 20003 || whatsappData?.code === 20103 || whatsappData?.code === 20404) {
+        errorCode = 'TWILIO_AUTH_INVALID';
+        errMsg = 'WhatsApp authentication failed. Please contact support or use Email & Password.';
       }
+      
       return new Response(
-        JSON.stringify({ success: false, error: errMsg, details: whatsappData }),
+        JSON.stringify({ 
+          success: false, 
+          code: errorCode,
+          error: errMsg, 
+          details: whatsappData 
+        }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     console.log('WhatsApp OTP sent successfully:', whatsappData.sid);
 
+    // Calculate attempts remaining
+    const currentAttempts = rateLimitData ? 
+      ((Date.now() - new Date(rateLimitData.window_start).getTime()) < 60 * 60 * 1000 ? 
+        rateLimitData.attempts + 1 : 1) : 1;
+    const attemptsRemaining = Math.max(0, 3 - currentAttempts);
+
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'OTP sent via WhatsApp'
+        message: 'OTP sent via WhatsApp',
+        attempts_remaining: attemptsRemaining
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

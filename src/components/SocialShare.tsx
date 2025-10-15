@@ -29,7 +29,11 @@ export const SocialShare = ({
 
     const messages = {
       achievement: `Just unlocked ${context} on Yogic Mile! Walking pays: https://yogicmile.app #YogicMile #WalkEarnEvolve`,
-      referral: `Join me on Yogic Mile and earn real money by walking! Use my code ${context} to get ₹1 bonus. Download: https://yogicmile.app #YogicMile #WalkEarnEvolve`,
+      referral: `Join me on Yogic Mile and earn real money by walking! 
+
+🚶‍♂️ Health is Wealth - Complete 10,000 steps to unlock bonuses!
+
+Use my code ${context} to get ₹1 bonus. Download: https://yogicmile.app #YogicMile #HealthIsWealth`,
       milestone: `Just reached ${context} on Yogic Mile! Walking is now my favorite way to earn: https://yogicmile.app #YogicMile`,
       phase_upgrade: `Upgraded to ${context} on Yogic Mile! Walking pays more now 💰 Join me: https://yogicmile.app #YogicMile`,
       voucher_redemption: `Just redeemed ${context} on Yogic Mile with coins I earned walking! 🚶‍♂️💰 https://yogicmile.app #YogicMile`,

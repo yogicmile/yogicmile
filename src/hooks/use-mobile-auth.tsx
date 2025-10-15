@@ -289,7 +289,7 @@ export const useMobileAuth = () => {
 
       if (error) throw error;
 
-      const response = data as { success: boolean; error?: string; message?: string };
+      const response = data as { success: boolean; error?: string; message?: string; attempts_remaining?: number };
 
       if (!response.success) {
         throw new Error(response.error);
@@ -300,9 +300,13 @@ export const useMobileAuth = () => {
 
       await safeHapticImpact(ImpactStyle.Light);
       
+      const description = response.attempts_remaining !== undefined 
+        ? `OTP sent! ${response.attempts_remaining} of 3 requests left this hour.`
+        : "Check your WhatsApp for 6-digit code";
+      
       toast({
         title: "OTP Sent! 📱",
-        description: "Check your WhatsApp for 6-digit code",
+        description,
       });
 
       return { success: true };
@@ -319,11 +323,30 @@ export const useMobileAuth = () => {
       } else {
         try {
           const details = (error && (error.details || (error.context && error.context.body))) || null as any;
+          let parsedDetails: any = null;
+          
           if (typeof details === 'string') {
-            const parsed = JSON.parse(details);
-            friendly = parsed?.error || parsed?.message || friendly;
+            parsedDetails = JSON.parse(details);
           } else if (details && typeof details === 'object') {
-            friendly = details?.error || details?.message || friendly;
+            parsedDetails = details;
+          }
+          
+          // Check for structured error code
+          if (parsedDetails?.code) {
+            const code = parsedDetails.code;
+            const errorMessages: Record<string, string> = {
+              'OTP_RATE_LIMIT': `⏱️ ${parsedDetails.error}`,
+              'OTP_DAILY_LIMIT': `📅 ${parsedDetails.error}`,
+              'CONFIG_MISSING': `⚠️ ${parsedDetails.error}`,
+              'TWILIO_SANDBOX_REQUIRED': `📱 ${parsedDetails.error}`,
+              'TWILIO_INVALID_FROM': `⚠️ ${parsedDetails.error}`,
+              'TWILIO_AUTH_INVALID': `🔐 ${parsedDetails.error}`
+            };
+            
+            friendly = errorMessages[code] || parsedDetails.error || friendly;
+          } else {
+            // Fallback to original parsing
+            friendly = parsedDetails?.error || parsedDetails?.message || friendly;
           }
         } catch {}
 
@@ -332,9 +355,9 @@ export const useMobileAuth = () => {
           friendly = 'No account found for this number. Please sign up first or use Email & Password.';
         }
         
-        // Twilio sandbox not joined
+        // Twilio sandbox not joined (fallback if no code)
         if (/not a valid WhatsApp recipient/i.test(friendly) || /sandbox/i.test(friendly)) {
-          friendly = 'WhatsApp not configured for this number. Please contact support or use a different authentication method.';
+          friendly = '📱 WhatsApp not configured for this number. Please use Email & Password.';
         }
       }
 

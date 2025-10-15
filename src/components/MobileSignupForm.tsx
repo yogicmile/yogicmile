@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useMobileAuth, SignUpFormData } from '@/hooks/use-mobile-auth';
+import { useToast } from '@/hooks/use-toast';
 import { Smartphone, Mail, MapPin, User, Shield, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LegalPolicyModal } from './LegalPolicyModal';
@@ -33,6 +34,7 @@ const INDIAN_STATES = [
 
 export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, className }) => {
   const { state, signUpMobile, validateMobileNumber, formatMobileNumber } = useMobileAuth();
+  const { toast } = useToast();
   
   const [formData, setFormData] = useState<SignUpFormData>({
     mobileNumber: '',
@@ -56,6 +58,20 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showPolicyModal, setShowPolicyModal] = useState(false);
   const [policyType, setPolicyType] = useState<'privacy' | 'terms'>('privacy');
+
+  // Auto-fill referral code from URL parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    
+    if (refCode && /^\d{10}$/.test(refCode)) {
+      setFormData(prev => ({ ...prev, referralCode: refCode }));
+      toast({
+        title: "Referral code applied! 🎁",
+        description: "Complete 10,000 steps to unlock ₹1 bonus",
+      });
+    }
+  }, [toast]);
 
   const handleInputChange = (field: string, value: string | number) => {
     if (field.startsWith('address.')) {
@@ -398,7 +414,7 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
                 }}
               />
               <p className="text-xs text-muted-foreground">
-                📱 Enter your friend's mobile number to get ₹1 welcome bonus for both!
+                📱 Enter your friend's mobile number to get ₹1 bonus (Complete 10,000 steps to unlock!)
               </p>
             </div>
 

@@ -71,3 +71,23 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+---
+
+## Yogic Mile Features
+
+### "Health is Wealth" Referral System
+Yogic Mile promotes healthy lifestyles through our referral program:
+- **Refer friends** using your 10-digit mobile number
+- **New users get ₹1 bonus**, referrers get **₹2 bonus**
+- **Step requirement**: 10,000 steps to unlock bonuses (not 1,000)
+- **Philosophy**: Aligned with "Health is Wealth" - encouraging meaningful physical activity
+
+### OTP Authentication
+- WhatsApp OTP for passwordless login
+- **Rate limits**: 3 OTPs per hour, 10 per day
+- Friendly error messages with countdown timers
+- Alternative: Email & Password authentication
+
+### For more details
+See `ANDROID-TESTING-GUIDE.md` for complete testing and feature documentation.

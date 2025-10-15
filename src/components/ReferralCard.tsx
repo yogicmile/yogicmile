@@ -127,7 +127,15 @@ export const ReferralCard = () => {
   };
 
   const shareReferralCode = async () => {
-    const shareText = `Join me on Yogic Mile and earn real money by walking! Use my code ${stats.referralCode} to get ₹1 bonus. Download: https://yogicmile.app #YogicMile #WalkEarnEvolve`;
+    const referralLink = `${window.location.origin}/signup?ref=${stats.referralCode}`;
+    const shareText = `Join me on Yogic Mile and earn real money by walking! 
+
+🚶‍♂️ Health is Wealth - Complete 10,000 steps to unlock bonuses!
+
+Use my code ${stats.referralCode} or click this link to sign up:
+${referralLink}
+
+Download: https://yogicmile.app #YogicMile #HealthIsWealth`;
     
     try {
       if (navigator.share) {
@@ -247,7 +255,7 @@ export const ReferralCard = () => {
         {stats.pendingBonuses > 0 && (
           <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
             <p className="text-sm text-orange-800">
-              <strong>{stats.pendingBonuses}</strong> friend(s) need to complete 1,000 steps to unlock bonuses
+              <strong>{stats.pendingBonuses}</strong> friend(s) need to complete <strong>10,000 steps</strong> to unlock bonuses
             </p>
           </div>
         )}
@@ -278,12 +286,15 @@ export const ReferralCard = () => {
         )}
 
         {/* How it Works */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <h4 className="font-medium text-sm text-blue-800 mb-2">How Referrals Work:</h4>
-          <ul className="text-xs text-blue-700 space-y-1">
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-lg">💚🚶‍♂️</span>
+            <h4 className="font-medium text-sm text-green-800">Health is Wealth Campaign</h4>
+          </div>
+          <ul className="text-xs text-green-700 space-y-1">
             <li>• Friend uses your code during signup → You both get bonuses</li>
             <li>• You earn ₹2.00, they get ₹1.00 welcome bonus</li>
-            <li>• Bonus activates when they complete 1,000 steps</li>
+            <li>• 🏃 Health is Wealth: Bonus activates when they complete <strong>10,000 steps</strong>!</li>
           </ul>
         </div>
       </CardContent>

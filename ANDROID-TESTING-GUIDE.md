@@ -320,4 +320,20 @@ Your Android step tracking is **production-ready** when:
 
 ---
 
+## 🔐 OTP Limits & Referral System
+
+### OTP Rate Limits
+- **3 OTP requests per hour** (60-minute window)
+- **10 OTP requests per day** (resets at midnight)
+- **Cooldown**: 60 minutes after hitting hourly limit
+- **Friendly error messages** show remaining attempts and countdown timers
+
+### "Health is Wealth" Referral Campaign
+- **Share your referral link**: `https://yogicmile.com/signup?ref=YOUR_MOBILE`
+- **New users get ₹1 bonus**, you get **₹2 bonus**
+- **Activation requirement**: Referred friend must complete **10,000 steps** to unlock bonuses
+- **Philosophy**: "Health is Wealth" - promoting active, healthy lifestyles through higher step goals
+
+---
+
 **Remember:** Always test on a **physical device** with a **debug APK** before building for production!
