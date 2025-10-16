@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MessageSquare, Plus, TrendingUp, Heart, MessageCircle, Bookmark, Flag, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ import { FORUM_CATEGORIES, type ForumCategory } from '@/types/community';
 import type { ForumPost, ForumComment } from '@/types/community';
 
 export const CommunityForums = () => {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<ForumCategory | 'all'>('all');
@@ -197,7 +199,7 @@ export const CommunityForums = () => {
             <p className="text-muted-foreground mb-4">
               Sign in to participate in community forums, create posts, and engage with other members.
             </p>
-            <Button onClick={() => window.location.href = '/login'}>
+            <Button onClick={() => navigate('/login')}>
               Sign In to Continue
             </Button>
           </CardContent>

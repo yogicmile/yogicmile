@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +21,7 @@ export interface NotificationInboxItem {
 export type NotificationFilter = 'all' | 'unread' | 'achievements' | 'deals';
 
 export const useNotificationInbox = () => {
+  const navigate = useNavigate();
   const { user, isGuest } = useAuth();
   const { toast } = useToast();
   const [notifications, setNotifications] = useState<NotificationInboxItem[]>([]);
@@ -311,7 +313,7 @@ export const useNotificationInbox = () => {
     if (notification.deep_link) {
       try {
         const url = new URL(notification.deep_link, window.location.origin);
-        window.location.href = url.pathname + url.search;
+        navigate(url.pathname + url.search);
       } catch (error) {
         console.error('Invalid deep link:', notification.deep_link);
       }

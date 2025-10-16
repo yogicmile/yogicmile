@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -31,6 +32,7 @@ interface GamifiedOnboardingProps {
 }
 
 export function GamifiedOnboarding({ onComplete }: GamifiedOnboardingProps) {
+  const navigate = useNavigate();
   const { onboardingProgress, completeOnboardingStep, awardAchievement } = useGamification();
   const [currentStep, setCurrentStep] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -111,16 +113,16 @@ export function GamifiedOnboarding({ onComplete }: GamifiedOnboardingProps) {
       // Navigate to respective sections
       switch (step.id) {
         case 'profile_setup':
-          window.location.href = '/profile';
+          navigate('/profile');
           break;
         case 'first_steps':
-          window.location.href = '/';
+          navigate('/');
           break;
         case 'find_friends':
-          window.location.href = '/profile';
+          navigate('/profile');
           break;
         case 'join_challenge':
-          window.location.href = '/rewards';
+          navigate('/rewards');
           break;
       }
     }

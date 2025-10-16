@@ -346,7 +346,10 @@ export const initializeCache = async (userId?: string) => {
   await cacheManager.performMaintenance();
   
   // Set up periodic maintenance (every 10 minutes)
-  setInterval(() => {
+  const intervalId = setInterval(() => {
     cacheManager.performMaintenance().catch(console.error);
   }, 10 * 60 * 1000);
+  
+  // Return cleanup function
+  return () => clearInterval(intervalId);
 };

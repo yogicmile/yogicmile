@@ -2,6 +2,7 @@ import { PushNotifications, PushNotificationSchema, ActionPerformed } from '@cap
 import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { supabase } from '@/integrations/supabase/client';
+import { navigationService } from './NavigationService';
 
 export interface NotificationPayload {
   title: string;
@@ -200,32 +201,27 @@ export class PushNotificationService {
   }
 
   private handleDeepLink(deepLink: string): void {
-    // Parse and handle deep links
-    try {
-      const url = new URL(deepLink, window.location.origin);
-      window.location.href = url.pathname + url.search;
-    } catch (error) {
-      console.error('Invalid deep link:', deepLink, error);
-    }
+    // Parse and handle deep links using NavigationService
+    navigationService.navigateToDeepLink(deepLink);
   }
 
   private handleNotificationType(type: string, data: any): void {
     switch (type) {
       case 'achievement':
         // Navigate to achievements page
-        window.location.href = '/profile?tab=achievements';
+        navigationService.navigate('/profile?tab=achievements');
         break;
       case 'deal':
         // Navigate to deals page
-        window.location.href = '/rewards?category=deals';
+        navigationService.navigate('/rewards?category=deals');
         break;
       case 'coin_expiry':
         // Navigate to wallet page
-        window.location.href = '/wallet';
+        navigationService.navigate('/wallet');
         break;
       case 'reminder':
         // Navigate to dashboard
-        window.location.href = '/';
+        navigationService.navigate('/');
         break;
       default:
         // Default action
