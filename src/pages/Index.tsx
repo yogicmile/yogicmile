@@ -11,14 +11,11 @@ import { useYogicData } from '@/hooks/use-yogic-data';
 import { useNativeStepTracking } from '@/hooks/use-native-step-tracking';
 
 const Index = () => {
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const yogicData = useYogicData();
   const nativeSteps = useNativeStepTracking();
 
   useEffect(() => {
     document.title = 'Yogic Mile - Walk. Earn. Evolve.';
-    const timer = setTimeout(() => setIsInitialLoading(false), 1500);
-    return () => clearTimeout(timer);
   }, []);
 
   const handleClaimReward = async (): Promise<boolean> => {
@@ -30,8 +27,8 @@ const Index = () => {
     }
   };
 
-  // Show loading screen during initial load
-  if (isInitialLoading || yogicData.isLoading) {
+  // Show loading screen while data loads
+  if (yogicData.isLoading) {
     return <PageLoading />;
   }
 

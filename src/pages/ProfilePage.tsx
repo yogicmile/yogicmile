@@ -11,6 +11,7 @@ import { LegalPolicyModal } from '@/components/LegalPolicyModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { ProfilePageSkeleton } from '@/components/ui/wallet-skeleton';
 
 
 export const ProfilePage = () => {
@@ -200,14 +201,7 @@ export const ProfilePage = () => {
 
   // Auth/loading states
   if (authLoading || loading) {
-    return (
-      <div className="mobile-container bg-background p-4 pb-24 safe-bottom flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading profile...</p>
-        </div>
-      </div>
-    );
+    return <ProfilePageSkeleton />;
   }
 
 

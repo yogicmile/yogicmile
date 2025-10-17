@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy } from 'lucide-react';
+import { Trophy, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,16 +8,64 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { LocalDeals } from '@/components/LocalDeals';
 import { SpinWheel } from '@/components/SpinWheel';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const RewardsPage = () => {
   const [selectedReward, setSelectedReward] = useState<any>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [dailySteps, setDailySteps] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     document.title = 'Rewards | Yogic Mile';
-  }, []);
+    loadRewardsData();
+  }, [user]);
+
+  const loadRewardsData = async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // Fetch wallet balance
+      const { data: walletData } = await supabase
+        .from('wallet_balances')
+        .select('total_balance')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (walletData) {
+        setWalletBalance(walletData.total_balance || 0);
+      }
+
+      // Fetch today's steps
+      const today = new Date().toISOString().split('T')[0];
+      const { data: stepsData } = await supabase
+        .from('daily_steps')
+        .select('steps')
+        .eq('user_id', user.id)
+        .eq('date', today)
+        .maybeSingle();
+
+      if (stepsData) {
+        setDailySteps(stepsData.steps || 0);
+      }
+    } catch (error) {
+      console.error('Error loading rewards data:', error);
+      toast({
+        title: 'Error loading data',
+        description: 'Failed to load rewards data',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
-  const walletBalance = 52341; // 52,341 paisa = ₹523.41
   const balanceInRupees = (walletBalance / 100).toFixed(2);
   const MINIMUM_BALANCE = 50000; // ₹500 in paisa
   const canRedeem = walletBalance >= MINIMUM_BALANCE;
@@ -44,8 +92,7 @@ export const RewardsPage = () => {
     ]
   };
 
-  const dailySteps = 8500; // Mock daily steps
-  const canSpin = dailySteps >= 2000; // Updated requirement: 2000+ steps
+  const canSpin = dailySteps >= 10000; // Requirement: 10,000+ steps
 
   const handleRedemption = (reward: any) => {
     if (!canRedeem) {
@@ -83,6 +130,14 @@ export const RewardsPage = () => {
     
     setSelectedReward(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -128,12 +183,13 @@ export const RewardsPage = () => {
           </div>
           <SpinWheel 
             dailySteps={dailySteps}
-            canSpin={canSpin && !canSpin} // Mock: already spun today
+            canSpin={canSpin}
             onSpinComplete={(reward) => {
               toast({
                 title: "Spin complete!",
                 description: `You won: ${reward.description}`,
               });
+              loadRewardsData(); // Reload balance after spin
             }}
           />
         </div>

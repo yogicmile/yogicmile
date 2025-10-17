@@ -8,6 +8,7 @@ import { CountdownTimer } from '@/components/CountdownTimer';
 import { DailyRedeemModal } from '@/components/DailyRedeemModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { WalletPageSkeleton } from '@/components/ui/wallet-skeleton';
 
 interface Transaction {
   id: string;
@@ -213,16 +214,12 @@ export const WalletPage = () => {
 
 
       {/* Content */}
-      <div className="px-4 py-4 space-y-6">
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tier-1-paisa mx-auto"></div>
-            <p className="text-muted-foreground mt-4">Loading wallet...</p>
-          </div>
-        ) : (
-          <>
-            {/* Balance Card */}
-            <div className="bg-gradient-to-br from-tier-1-paisa via-tier-2-rupaya to-tier-1-paisa p-6 rounded-3xl text-white shadow-xl relative overflow-hidden">
+      {loading ? (
+        <WalletPageSkeleton />
+      ) : (
+        <div className="px-4 py-4 space-y-6">
+          {/* Balance Card */}
+          <div className="bg-gradient-to-br from-tier-1-paisa via-tier-2-rupaya to-tier-1-paisa p-6 rounded-3xl text-white shadow-xl relative overflow-hidden">
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-4 right-4 w-32 h-32 rounded-full border-2 border-white/20"></div>
                 <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full border border-white/10"></div>
@@ -248,92 +245,82 @@ export const WalletPage = () => {
                     <div className="text-white/50 text-xs mt-1">
                       {todaysPendingCoins} paisa
                     </div>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
-          </>
-        )}
+          </div>
 
-        {!loading && (
-          <>
-            {/* Countdown Timer */}
-            <CountdownTimer />
+          {/* Countdown Timer */}
+          <CountdownTimer />
 
-            {/* Redeem Today's Coins CTA */}
-            {todaysPendingCoins > 0 && (
+          {/* Redeem Today's Coins CTA */}
+          {todaysPendingCoins > 0 && (
               <Button 
                 onClick={() => setShowDailyRedeem(true)}
                 className="w-full py-3 text-lg font-bold bg-gradient-to-r from-tier-1-paisa to-tier-2-rupaya hover:from-tier-2-rupaya hover:to-tier-1-paisa"
               >
-                Redeem Today's Earnings - ₹{todaysPendingRupees}
-              </Button>
-            )}
-          </>
-        )}
+              Redeem Today's Earnings - ₹{todaysPendingRupees}
+            </Button>
+          )}
 
-        {!loading && (
-          <>
-            {/* Transaction History with Filter Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-              <TabsList className="grid w-full grid-cols-6 text-xs">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="earnings">Earnings</TabsTrigger>
-                <TabsTrigger value="redemptions">Redemptions</TabsTrigger>
-                <TabsTrigger value="referrals">Referrals</TabsTrigger>
-                <TabsTrigger value="week">This Week</TabsTrigger>
-                <TabsTrigger value="month">This Month</TabsTrigger>
-              </TabsList>
+          {/* Transaction History with Filter Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+            <TabsList className="grid w-full grid-cols-6 text-xs">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="earnings">Earnings</TabsTrigger>
+              <TabsTrigger value="redemptions">Redemptions</TabsTrigger>
+              <TabsTrigger value="referrals">Referrals</TabsTrigger>
+              <TabsTrigger value="week">This Week</TabsTrigger>
+              <TabsTrigger value="month">This Month</TabsTrigger>
+            </TabsList>
 
-              <TabsContent value="all" className="space-y-4">
-                <TransactionHistory transactions={transactions} />
-              </TabsContent>
-              
-              <TabsContent value="earnings" className="space-y-4">
-                <TransactionHistory transactions={transactions.filter(t => t.type === 'earning')} />
-              </TabsContent>
-              
-              <TabsContent value="redemptions" className="space-y-4">
-                <TransactionHistory transactions={transactions.filter(t => t.type === 'redemption')} />
-              </TabsContent>
-              
-              <TabsContent value="referrals" className="space-y-4">
-                <TransactionHistory transactions={transactions.filter(t => t.type === 'referral')} />
-              </TabsContent>
-              
-              <TabsContent value="week" className="space-y-4">
-                <TransactionHistory transactions={transactions.filter(t => {
-                  const transactionDate = new Date(t.date);
-                  const weekAgo = new Date();
-                  weekAgo.setDate(weekAgo.getDate() - 7);
-                  return transactionDate >= weekAgo;
-                })} />
-              </TabsContent>
-              
-              <TabsContent value="month" className="space-y-4">
-                <TransactionHistory transactions={transactions.filter(t => {
-                  const transactionDate = new Date(t.date);
-                  const monthAgo = new Date();
-                  monthAgo.setMonth(monthAgo.getMonth() - 1);
-                  return transactionDate >= monthAgo;
-                })} />
-              </TabsContent>
-            </Tabs>
+            <TabsContent value="all" className="space-y-4">
+              <TransactionHistory transactions={transactions} />
+            </TabsContent>
+            
+            <TabsContent value="earnings" className="space-y-4">
+              <TransactionHistory transactions={transactions.filter(t => t.type === 'earning')} />
+            </TabsContent>
+            
+            <TabsContent value="redemptions" className="space-y-4">
+              <TransactionHistory transactions={transactions.filter(t => t.type === 'redemption')} />
+            </TabsContent>
+            
+            <TabsContent value="referrals" className="space-y-4">
+              <TransactionHistory transactions={transactions.filter(t => t.type === 'referral')} />
+            </TabsContent>
+            
+            <TabsContent value="week" className="space-y-4">
+              <TransactionHistory transactions={transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                return transactionDate >= weekAgo;
+              })} />
+            </TabsContent>
+            
+            <TabsContent value="month" className="space-y-4">
+              <TransactionHistory transactions={transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                const monthAgo = new Date();
+                monthAgo.setMonth(monthAgo.getMonth() - 1);
+                return transactionDate >= monthAgo;
+              })} />
+            </TabsContent>
+          </Tabs>
 
-            {/* Export CSV Section */}
-            <div className="bg-secondary/30 rounded-xl p-4 text-center">
-              <Button variant="outline" size="sm" className="w-full">
-                <Download className="w-4 h-4 mr-2" />
-                Export Transaction History
-              </Button>
-              <p className="text-xs text-muted-foreground mt-2">
-                Download your complete transaction history as CSV
-              </p>
-            </div>
-          </>
-        )}
-
-      </div>
+          {/* Export CSV Section */}
+          <div className="bg-secondary/30 rounded-xl p-4 text-center">
+            <Button variant="outline" size="sm" className="w-full">
+              <Download className="w-4 h-4 mr-2" />
+              Export Transaction History
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2">
+              Download your complete transaction history as CSV
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Daily Redeem Modal */}
       <DailyRedeemModal 
