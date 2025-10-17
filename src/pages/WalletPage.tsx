@@ -41,22 +41,30 @@ export const WalletPage = () => {
       if (!user) return;
 
       // Fetch wallet balance
-      const { data: wallet } = await supabase
+      const { data: wallet, error: walletError } = await supabase
         .from('wallet_balances')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
+
+      if (walletError) {
+        console.error('Error loading wallet:', walletError);
+      }
 
       setWalletBalance(wallet?.total_balance || 0);
       
       // Calculate today's pending coins from daily_steps
       const today = new Date().toISOString().split('T')[0];
-      const { data: todaySteps } = await supabase
+      const { data: todaySteps, error: stepsError } = await supabase
         .from('daily_steps')
         .select('paisa_earned, is_redeemed')
         .eq('user_id', user.id)
         .eq('date', today)
-        .single();
+        .maybeSingle();
+
+      if (stepsError) {
+        console.error('Error loading today steps:', stepsError);
+      }
 
       // Only show pending coins if not already redeemed
       setTodaysPendingCoins(
@@ -140,11 +148,13 @@ export const WalletPage = () => {
 
       // Update wallet balance
       const newBalance = walletBalance + todaysPendingCoins;
-      const newTotalEarned = (await supabase
+      const { data: currentWallet } = await supabase
         .from('wallet_balances')
         .select('total_earned')
         .eq('user_id', user.id)
-        .single()).data?.total_earned || 0;
+        .maybeSingle();
+
+      const newTotalEarned = (currentWallet?.total_earned || 0) + todaysPendingCoins;
 
       const { error: walletError } = await supabase
         .from('wallet_balances')

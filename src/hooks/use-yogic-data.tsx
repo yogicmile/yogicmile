@@ -108,34 +108,50 @@ export const useYogicData = () => {
 
     try {
       // Load user profile
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error loading profile:', profileError);
+      }
 
       // Load user phase data
-      const { data: userPhase } = await supabase
+      const { data: userPhase, error: phaseError } = await supabase
         .from('user_phases')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
+
+      if (phaseError) {
+        console.error('Error loading user phase:', phaseError);
+      }
 
       // Load wallet balance
-      const { data: wallet } = await supabase
+      const { data: wallet, error: walletError } = await supabase
         .from('wallet_balances')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
+
+      if (walletError) {
+        console.error('Error loading wallet:', walletError);
+      }
 
       // Load today's steps
       const today = new Date().toISOString().split('T')[0];
-      const { data: todaySteps } = await supabase
+      const { data: todaySteps, error: stepsError } = await supabase
         .from('daily_steps')
         .select('*')
         .eq('user_id', user.id)
         .eq('date', today)
-        .single();
+        .maybeSingle();
+
+      if (stepsError) {
+        console.error('Error loading daily steps:', stepsError);
+      }
 
       const currentPhase = userPhase?.current_phase || 1;
       const phaseInfo = phaseDefinitions.find(p => p.id === currentPhase) || phaseDefinitions[0];

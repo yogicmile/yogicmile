@@ -46,9 +46,12 @@ export const useWallet = () => {
         .from('wallet_balances')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (walletError && walletError.code !== 'PGRST116') throw walletError;
+      if (walletError) {
+        console.error('Error fetching wallet:', walletError);
+        throw walletError;
+      }
 
       // If wallet doesn't exist, create one
       if (!wallet) {
@@ -61,9 +64,12 @@ export const useWallet = () => {
             total_redeemed: 0,
           })
           .select()
-          .single();
+          .maybeSingle();
 
-        if (createError) throw createError;
+        if (createError) {
+          console.error('Error creating wallet:', createError);
+          throw createError;
+        }
         
         setWalletData({
           totalBalance: 0,
@@ -109,12 +115,17 @@ export const useWallet = () => {
 
     try {
       const today = new Date().toISOString().split('T')[0];
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('daily_steps')
         .select('paisa_earned, is_redeemed')
         .eq('user_id', user.id)
         .eq('date', today)
-        .single();
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error getting pending coins:', error);
+        return 0;
+      }
 
       return data && !data.is_redeemed ? data.paisa_earned : 0;
     } catch (error) {
