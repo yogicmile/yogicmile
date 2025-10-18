@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { guestDataManager } from '@/services/GuestDataManager';
 
 interface AuthContextType {
   user: User | null;
@@ -15,6 +16,7 @@ interface AuthContextType {
   exitGuestMode: () => void;
   generateOTP: (mobileNumber: string) => Promise<{ error: any; otp?: string }>;
   verifyOTP: (mobileNumber: string, otp: string) => Promise<{ error: any }>;
+  migrateGuestData: () => Promise<boolean>;
 }
 
 interface SignUpData {
@@ -384,6 +386,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('yogic_mile_guest_mode');
   };
 
+  const migrateGuestData = async (): Promise<boolean> => {
+    if (!user) return false;
+    if (!guestDataManager.hasGuestData()) return false;
+
+    try {
+      const guestData = guestDataManager.getAllGuestData();
+      
+      // Migrate wallet data
+      if (guestData.wallet.totalEarned > 0) {
+        const { error: walletError } = await supabase
+          .from('wallet_balances')
+          .upsert({
+            user_id: user.id,
+            total_balance: guestData.wallet.balance,
+            total_earned: guestData.wallet.totalEarned,
+            updated_at: new Date().toISOString()
+          });
+        if (walletError) console.error('Wallet migration error:', walletError);
+      }
+
+      // Migrate daily steps
+      for (const stepData of guestData.steps) {
+        const { error: stepsError } = await supabase
+          .from('daily_steps')
+          .upsert({
+            user_id: user.id,
+            date: stepData.date,
+            steps: stepData.steps,
+            paisa_earned: stepData.coins,
+            phase_id: stepData.phase,
+            capped_steps: stepData.steps,
+            units_earned: stepData.coins
+          });
+        if (stepsError) console.error('Steps migration error:', stepsError);
+      }
+
+      // Migrate phase data
+      const { error: phaseError } = await supabase
+        .from('user_phases')
+        .upsert({
+          user_id: user.id,
+          current_phase: guestData.phase.currentPhase,
+          total_steps: guestData.phase.totalSteps
+        });
+      if (phaseError) console.error('Phase migration error:', phaseError);
+
+      // Clear guest data after successful migration
+      guestDataManager.clearAllGuestData();
+      
+      toast({
+        title: "Progress saved! 🎉",
+        description: "Your guest data has been migrated to your account",
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Guest data migration failed:', error);
+      return false;
+    }
+  };
+
   const value = {
     user,
     session,
@@ -396,6 +459,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     exitGuestMode,
     generateOTP,
     verifyOTP,
+    migrateGuestData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

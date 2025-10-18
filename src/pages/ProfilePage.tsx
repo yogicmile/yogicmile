@@ -160,6 +160,24 @@ export const ProfilePage = () => {
     setShowLegalModal(true);
   };
 
+  const handleShareApp = async () => {
+    const referralCode = user?.user_metadata?.mobile_number || user?.phone || 'YOGICMILE';
+    const shareUrl = `${window.location.origin}/signup?ref=${referralCode}`;
+    const shareText = `Join me on Yogic Mile! Walk daily and earn rewards. Use my referral code: ${referralCode}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Yogic Mile', text: shareText, url: shareUrl });
+        toast({ title: "Shared successfully!", description: "Thanks for spreading the word!" });
+      } catch (err) {
+        console.log('Share cancelled');
+      }
+    } else {
+      navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+      toast({ title: "Link copied!", description: "Share link copied to clipboard" });
+    }
+  };
+
   const menuItems = [
     {
       icon: <Settings className="w-5 h-5" />,
@@ -169,21 +187,9 @@ export const ProfilePage = () => {
     },
     {
       icon: <Share2 className="w-5 h-5" />,
-      label: 'Refer Friends',
-      description: 'Earn bonus coins for referrals',
-      action: () => navigate('/referral')
-    },
-    {
-      icon: <Trophy className="w-5 h-5" />,
-      label: 'Achievements',
-      description: 'View your milestones',
-      action: () => navigate('/achievements')
-    },
-    {
-      icon: <Target className="w-5 h-5" />,
-      label: 'Goals',
-      description: 'Set daily step targets',
-      action: () => navigate('/goals')
+      label: 'Share App',
+      description: 'Invite friends and earn rewards',
+      action: handleShareApp
     },
     {
       icon: <Shield className="w-5 h-5" />,

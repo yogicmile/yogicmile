@@ -58,6 +58,7 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showPolicyModal, setShowPolicyModal] = useState(false);
   const [policyType, setPolicyType] = useState<'privacy' | 'terms'>('privacy');
+  const [isReferralLocked, setIsReferralLocked] = useState(false);
 
   // Auto-fill referral code from URL parameter
   useEffect(() => {
@@ -66,6 +67,7 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
     
     if (refCode && /^\d{10}$/.test(refCode)) {
       setFormData(prev => ({ ...prev, referralCode: refCode }));
+      setIsReferralLocked(true);
       toast({
         title: "Referral code applied! 🎁",
         description: "Complete 10,000 steps to unlock ₹1 bonus",
@@ -402,17 +404,43 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
                 Referral Mobile Number <span className="text-muted-foreground">(optional)</span>
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Get ₹1 bonus!</span>
               </Label>
-              <Input
-                id="referral"
-                type="tel"
-                placeholder="987XXXXXX"
-                maxLength={10}
-                value={formData.referralCode}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '');
-                  handleInputChange('referralCode', value);
-                }}
-              />
+              <div className="relative">
+                <Input
+                  id="referral"
+                  type="tel"
+                  placeholder="987XXXXXX"
+                  maxLength={10}
+                  value={formData.referralCode}
+                  disabled={isReferralLocked}
+                  onChange={(e) => {
+                    if (!isReferralLocked) {
+                      const value = e.target.value.replace(/\D/g, '');
+                      handleInputChange('referralCode', value);
+                    }
+                  }}
+                  className={isReferralLocked ? "border-green-500 bg-green-50" : ""}
+                />
+                {isReferralLocked && formData.referralCode && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-7 text-xs"
+                    onClick={() => {
+                      setIsReferralLocked(false);
+                      setFormData(prev => ({ ...prev, referralCode: '' }));
+                      toast({ title: "Referral code removed", description: "You can enter a different code" });
+                    }}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+              {isReferralLocked && formData.referralCode && (
+                <p className="text-xs text-green-700 flex items-center gap-1">
+                  <span>✓</span> Referral code locked - ₹1 bonus on 10,000 steps!
+                </p>
+              )}
               <p className="text-xs text-muted-foreground">
                 📱 Enter your friend's mobile number to get ₹1 bonus (Complete 10,000 steps to unlock!)
               </p>

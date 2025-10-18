@@ -10,9 +10,12 @@ import { UserPlus } from "lucide-react";
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  const { enterGuestMode } = useAuth();
+  const { enterGuestMode, migrateGuestData } = useAuth();
 
-  const handleSignupSuccess = () => {
+  const handleSignupSuccess = async () => {
+    // Try to migrate guest data if any exists
+    await migrateGuestData();
+    
     // After successful signup with email/password, user will receive verification email
     navigate('/login');
   };

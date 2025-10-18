@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { guestDataManager } from '@/services/GuestDataManager';
 
 export interface WalletData {
   totalBalance: number; // in paisa
@@ -34,6 +35,14 @@ export const useWallet = () => {
   // Load wallet data
   const loadWalletData = useCallback(async () => {
     if (isGuest || !user) {
+      // For guests, load from localStorage
+      const guestWallet = guestDataManager.getWallet();
+      setWalletData({
+        totalBalance: guestWallet.balance,
+        totalEarned: guestWallet.totalEarned,
+        totalRedeemed: 0,
+        lastUpdated: guestWallet.lastUpdated,
+      });
       setLoading(false);
       return;
     }

@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { PHASE_DEFINITIONS } from '@/constants/phases';
 import { useGamification } from '@/hooks/use-gamification';
+import { guestDataManager } from '@/services/GuestDataManager';
 
 interface YogicData {
   // User data
@@ -82,24 +83,39 @@ export const useYogicData = () => {
   // Load user data from database
   const loadUserData = useCallback(async () => {
     if (isGuest || !user) {
-      // For guests, use mock data but don't persist
+      // For guests, load from localStorage
+      const guestSteps = guestDataManager.getTodaySteps();
+      const guestWallet = guestDataManager.getWallet();
+      const guestPhase = guestDataManager.getPhase();
+      
       setYogicData(prev => ({
         ...prev,
         user: {
           id: 'guest',
           fullName: 'Guest User',
-          currentPhase: 1,
-          totalLifetimeSteps: Math.floor(Math.random() * 50000),
-          currentStreak: Math.floor(Math.random() * 7),
-          longestStreak: Math.floor(Math.random() * 15),
+          currentPhase: guestPhase.currentPhase,
+          totalLifetimeSteps: guestPhase.totalSteps,
+          currentStreak: 0,
+          longestStreak: 0,
         },
         dailyProgress: {
-          currentSteps: Math.floor(Math.random() * 12000),
+          currentSteps: guestSteps?.steps || 0,
           dailyGoal: 10000,
-          coinsEarnedToday: Math.floor(Math.random() * 100),
-          distance: Math.random() * 10,
-          activeMinutes: Math.floor(Math.random() * 120),
+          coinsEarnedToday: guestSteps?.coins || 0,
+          distance: (guestSteps?.steps || 0) * 0.0008,
+          activeMinutes: Math.floor((guestSteps?.steps || 0) / 100),
           isRedeemed: false,
+        },
+        wallet: {
+          totalBalance: guestWallet.balance,
+          totalEarned: guestWallet.totalEarned,
+          totalRedeemed: 0,
+        },
+        phases: {
+          currentPhase: guestPhase.currentPhase,
+          currentPhaseSteps: guestPhase.totalSteps,
+          phaseTarget: phaseDefinitions[guestPhase.currentPhase]?.stepRequirement || 200000,
+          daysRemaining: phaseDefinitions[guestPhase.currentPhase]?.timeLimit || 60,
         },
       }));
       setIsLoading(false);
