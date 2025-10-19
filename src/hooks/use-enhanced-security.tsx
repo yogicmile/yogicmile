@@ -5,7 +5,6 @@ import { useAuth } from '@/contexts/AuthContext';
 interface DeviceSession {
   id: string;
   device_fingerprint: string;
-  session_token: string;
   ip_address: string | null;
   user_agent: string | null;
   is_active: boolean;
@@ -59,7 +58,7 @@ export const useEnhancedSecurity = () => {
     return Math.abs(hash).toString(16);
   }, []);
 
-  // Initialize device session
+  // Initialize device session via Edge Function (secure)
   const initializeDeviceSession = useCallback(async () => {
     if (!user) return;
 
@@ -67,38 +66,32 @@ export const useEnhancedSecurity = () => {
     setDeviceFingerprint(fingerprint);
 
     try {
-      const sessionToken = crypto.randomUUID();
-      
-      const { error } = await supabase
-        .from('device_sessions')
-        .insert({
-          user_id: user.id,
+      const { data, error } = await supabase.functions.invoke('create-device-session', {
+        body: {
           device_fingerprint: fingerprint,
-          session_token: sessionToken,
-          ip_address: null, // Browser can't access real IP
-          user_agent: navigator.userAgent,
-          is_active: true
-        });
+          user_agent: navigator.userAgent
+        }
+      });
 
       if (error) {
         console.error('Failed to initialize device session:', error);
+      } else if (data?.success) {
+        console.log('Device session created successfully');
       }
-
-      // Store session token in sessionStorage (not localStorage for security)
-      sessionStorage.setItem('device_session_token', sessionToken);
     } catch (error) {
       console.error('Failed to initialize device session:', error);
     }
   }, [user, generateDeviceFingerprint]);
 
-  // Fetch device sessions
+  // Fetch device sessions from safe view (excludes session_token)
   const fetchDeviceSessions = useCallback(async () => {
     if (!user) return;
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('device_sessions')
+      // Using type assertion for the view which isn't in generated types
+      const { data, error } = await (supabase as any)
+        .from('device_sessions_safe')
         .select('*')
         .eq('user_id', user.id)
         .order('last_activity', { ascending: false });
@@ -177,43 +170,33 @@ export const useEnhancedSecurity = () => {
     }
   }, [user, fetchSecurityEvents]);
 
-  // Revoke device session
+  // Revoke device session via Edge Function (secure)
   const revokeDeviceSession = useCallback(async (sessionId: string) => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from('device_sessions')
-        .update({ is_active: false })
-        .eq('id', sessionId)
-        .eq('user_id', user.id);
+      const { data, error } = await supabase.functions.invoke('revoke-device-session', {
+        body: { session_id: sessionId }
+      });
 
       if (error) throw error;
       
-      await logSecurityEvent('device_session_revoked', 'medium', { 
-        revoked_session_id: sessionId 
-      });
-      
-      fetchDeviceSessions();
+      if (data?.success) {
+        fetchDeviceSessions();
+      }
     } catch (error) {
       console.error('Failed to revoke device session:', error);
     }
-  }, [user, logSecurityEvent, fetchDeviceSessions]);
+  }, [user, fetchDeviceSessions]);
 
-  // Update session activity
+  // Update session activity via Edge Function (secure)
   const updateSessionActivity = useCallback(async () => {
-    const sessionToken = sessionStorage.getItem('device_session_token');
-    if (!sessionToken || !user) return;
+    if (!user || !deviceFingerprint) return;
 
     try {
-      const { error } = await supabase
-        .from('device_sessions')
-        .update({ 
-          last_activity: new Date().toISOString(),
-          is_active: true 
-        })
-        .eq('session_token', sessionToken)
-        .eq('user_id', user.id);
+      const { error } = await supabase.functions.invoke('update-session-activity', {
+        body: { device_fingerprint: deviceFingerprint }
+      });
 
       if (error) {
         console.error('Failed to update session activity:', error);
@@ -221,7 +204,7 @@ export const useEnhancedSecurity = () => {
     } catch (error) {
       console.error('Failed to update session activity:', error);
     }
-  }, [user]);
+  }, [user, deviceFingerprint]);
 
   // Validate password strength
   const validatePasswordStrength = useCallback((password: string) => {
