@@ -39,6 +39,28 @@ Deno.serve(async (req) => {
 
     console.log(`Creating auth session for: ${mobileNumber}`);
 
+    // SECURITY: Verify that an OTP was recently validated for this mobile number
+    const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000).toISOString();
+    const { data: recentOTP, error: otpError } = await supabaseAdmin
+      .from('otp_logs')
+      .select('id, created_at, is_used')
+      .eq('mobile_number', mobileNumber)
+      .eq('is_used', true)
+      .gte('created_at', threeMinutesAgo)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (otpError || !recentOTP) {
+      console.error('No recent OTP verification found:', otpError);
+      return new Response(
+        JSON.stringify({ success: false, error: 'OTP verification required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`OTP verified at: ${recentOTP.created_at}`);
+
     // Check if user exists in public.users
     const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
@@ -108,11 +130,42 @@ Deno.serve(async (req) => {
       phone_confirm: true,
     });
 
+    // SECURITY: Validate redirect URL to prevent open redirect attacks
+    const allowedDomains = [
+      'lovableproject.com',
+      'yogicmile.app',
+      'localhost',
+      'supabase.co'
+    ];
+    
+    const defaultRedirect = req.headers.get('origin') || req.headers.get('referer') || 
+                           Deno.env.get('SUPABASE_SITE_URL') || Deno.env.get('SITE_URL') || 
+                           Deno.env.get('SUPABASE_URL');
+    
+    let validatedRedirectUrl = defaultRedirect;
+    
+    if (redirectUrl) {
+      try {
+        const parsedUrl = new URL(redirectUrl);
+        const isAllowed = allowedDomains.some(domain => 
+          parsedUrl.hostname === domain || parsedUrl.hostname.endsWith(`.${domain}`)
+        );
+        
+        if (isAllowed) {
+          validatedRedirectUrl = redirectUrl;
+        } else {
+          console.warn(`Redirect URL rejected: ${redirectUrl}`);
+        }
+      } catch (e) {
+        console.error('Invalid redirect URL format:', e);
+      }
+    }
+
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: syntheticEmail,
       options: {
-        redirectTo: redirectUrl || (req.headers.get('origin') || req.headers.get('referer') || Deno.env.get('SUPABASE_SITE_URL') || Deno.env.get('SITE_URL') || Deno.env.get('SUPABASE_URL'))
+        redirectTo: validatedRedirectUrl
       }
     });
 
