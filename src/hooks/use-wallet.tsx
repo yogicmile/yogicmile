@@ -143,69 +143,103 @@ export const useWallet = () => {
     }
   }, [user, isGuest]);
 
-  // Redeem daily coins
+  // Redeem daily coins (ATOMIC - prevents race conditions and double-spending)
   const redeemDailyCoins = useCallback(async (pendingCoins: number) => {
     if (isGuest || !user || pendingCoins <= 0) return false;
 
     try {
+      // Generate idempotency key to prevent duplicate redemptions on retry
+      const idempotencyKey = `redeem-${user.id}-${new Date().toISOString().split('T')[0]}-${Date.now()}`;
       const today = new Date().toISOString().split('T')[0];
 
-      // Mark as redeemed
-      const { error: stepError } = await supabase
-        .from('daily_steps')
-        .update({ 
-          is_redeemed: true, 
-          redeemed_at: new Date().toISOString() 
-        })
-        .eq('user_id', user.id)
-        .eq('date', today)
-        .eq('is_redeemed', false);
-
-      if (stepError) throw stepError;
-
-      // Add transaction
-      const { error: txnError } = await supabase.from('transactions').insert({
-        user_id: user.id,
-        type: 'earning',
-        amount: pendingCoins,
-        description: `Daily earnings - ${new Date().toLocaleDateString()}`,
-        status: 'completed'
+      // Call atomic redemption function with rate limiting
+      const { data, error } = await supabase.rpc('redeem_daily_coins_with_rate_limit', {
+        p_user_id: user.id,
+        p_date: today,
+        p_idempotency_key: idempotencyKey
       });
 
-      if (txnError) throw txnError;
+      if (error) {
+        console.error('Redemption RPC error:', error);
+        throw error;
+      }
 
-      // Update wallet
-      const newBalance = walletData.totalBalance + pendingCoins;
-      const { error: walletError } = await supabase
-        .from('wallet_balances')
-        .update({
-          total_balance: newBalance,
-          total_earned: walletData.totalEarned + pendingCoins,
-          last_updated: new Date().toISOString()
-        })
-        .eq('user_id', user.id);
+      // Type-safe response handling
+      const response = data as { 
+        success: boolean; 
+        error?: string; 
+        message?: string;
+        amount?: number;
+        new_balance?: number;
+        already_processed?: boolean;
+      };
 
-      if (walletError) throw walletError;
+      // Handle response from atomic function
+      if (!response.success) {
+        let errorMessage = response.message || 'Redemption failed';
+        let variant: 'default' | 'destructive' = 'destructive';
 
-      // Update local state
+        // Handle specific error cases
+        switch (response.error) {
+          case 'already_redeemed':
+            errorMessage = 'Already redeemed for today';
+            variant = 'default';
+            break;
+          case 'no_coins_to_redeem':
+            errorMessage = 'No coins available to redeem';
+            break;
+          case 'concurrent_redemption':
+            errorMessage = 'Redemption in progress, please wait';
+            break;
+          case 'rate_limited':
+            errorMessage = response.message || 'Too many attempts, please try again later';
+            break;
+          case 'no_steps_found':
+            errorMessage = 'No step record found for today';
+            break;
+        }
+
+        toast({
+          title: response.error === 'already_redeemed' ? "Already Redeemed" : "Redemption Failed",
+          description: errorMessage,
+          variant,
+        });
+        return false;
+      }
+
+      // Success! Update local state
+      const redeemedAmount = response.amount || 0;
+      const newBalance = response.new_balance || (walletData.totalBalance + redeemedAmount);
+
       setWalletData(prev => ({
         ...prev,
         totalBalance: newBalance,
-        totalEarned: prev.totalEarned + pendingCoins,
+        totalEarned: prev.totalEarned + redeemedAmount,
       }));
 
       toast({
         title: "Coins Redeemed!",
-        description: `₹${(pendingCoins / 100).toFixed(2)} added to wallet`,
+        description: `₹${(redeemedAmount / 100).toFixed(2)} added to wallet`,
       });
 
+      // Reload wallet data to sync with database
       await loadWalletData();
       return true;
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('Error redeeming coins:', error);
+      
+      // Handle specific error cases
+      let errorMessage = 'Please try again';
+      if (error?.message?.includes('lock_not_available')) {
+        errorMessage = 'Redemption in progress, please wait';
+      } else if (error?.code === 'PGRST116') {
+        errorMessage = 'Function not found. Please contact support.';
+      }
+
       toast({
         title: "Redemption Failed",
-        description: "Please try again",
+        description: errorMessage,
         variant: "destructive",
       });
       return false;

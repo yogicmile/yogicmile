@@ -2860,6 +2860,39 @@ export type Database = {
         }
         Relationships: []
       }
+      redemption_rate_limits: {
+        Row: {
+          attempt_count: number
+          blocked_until: string | null
+          created_at: string
+          date: string
+          id: string
+          last_attempt: string
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          attempt_count?: number
+          blocked_until?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          last_attempt?: string
+          user_id: string
+          window_start?: string
+        }
+        Update: {
+          attempt_count?: number
+          blocked_until?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          last_attempt?: string
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       redemptions: {
         Row: {
           coins_spent: number
@@ -3877,6 +3910,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          idempotency_key: string | null
           item_name: string | null
           metadata: Json | null
           status: string
@@ -3888,6 +3922,7 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          idempotency_key?: string | null
           item_name?: string | null
           metadata?: Json | null
           status?: string
@@ -3899,6 +3934,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          idempotency_key?: string | null
           item_name?: string | null
           metadata?: Json | null
           status?: string
@@ -4820,6 +4856,14 @@ export type Database = {
           p_reward_type: string
           p_user_id: string
         }
+        Returns: Json
+      }
+      redeem_daily_coins_atomic: {
+        Args: { p_date: string; p_idempotency_key?: string; p_user_id: string }
+        Returns: Json
+      }
+      redeem_daily_coins_with_rate_limit: {
+        Args: { p_date: string; p_idempotency_key?: string; p_user_id: string }
         Returns: Json
       }
       verify_hashed_otp: {
