@@ -4476,6 +4476,42 @@ export type Database = {
       }
     }
     Views: {
+      device_sessions_safe: {
+        Row: {
+          created_at: string | null
+          device_fingerprint: string | null
+          expires_at: string | null
+          id: string | null
+          ip_address: unknown | null
+          is_active: boolean | null
+          last_activity: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          device_fingerprint?: string | null
+          expires_at?: string | null
+          id?: string | null
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          last_activity?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          device_fingerprint?: string | null
+          expires_at?: string | null
+          id?: string | null
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          last_activity?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       referral_gift_analytics: {
         Row: {
           active_referrers: number | null
@@ -4485,6 +4521,48 @@ export type Database = {
           total_gifts: number | null
           total_potential_paisa: number | null
           total_steps_gifted: number | null
+        }
+        Relationships: []
+      }
+      user_purchases_safe: {
+        Row: {
+          amount_cents: number | null
+          boost_type: string | null
+          created_at: string | null
+          currency: string | null
+          expires_at: string | null
+          gateway_payment_id: string | null
+          id: string | null
+          metadata: Json | null
+          status: Database["public"]["Enums"]["payment_status"] | null
+          used_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_cents?: number | null
+          boost_type?: string | null
+          created_at?: string | null
+          currency?: string | null
+          expires_at?: string | null
+          gateway_payment_id?: never
+          id?: string | null
+          metadata?: Json | null
+          status?: Database["public"]["Enums"]["payment_status"] | null
+          used_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_cents?: number | null
+          boost_type?: string | null
+          created_at?: string | null
+          currency?: string | null
+          expires_at?: string | null
+          gateway_payment_id?: never
+          id?: string | null
+          metadata?: Json | null
+          status?: Database["public"]["Enums"]["payment_status"] | null
+          used_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -4617,6 +4695,17 @@ export type Database = {
       get_user_role: {
         Args: { p_user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      get_user_safe_profile: {
+        Args: { user_id_param: string }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          masked_mobile: string
+          role: string
+        }[]
       }
       get_user_subscription_status: {
         Args: { p_user_id: string }
