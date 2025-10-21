@@ -336,9 +336,16 @@ export const useCommunity = () => {
     }
   }, [userProfile, loadFriends]);
 
-  // Set up real-time subscriptions for community updates
+  // Set up real-time subscriptions (OPTIMIZED: Debounced reloads)
   useEffect(() => {
     if (!userProfile) return;
+
+    // Debounce reload to prevent excessive calls
+    let reloadTimeout: NodeJS.Timeout | null = null;
+    const debouncedReload = () => {
+      if (reloadTimeout) clearTimeout(reloadTimeout);
+      reloadTimeout = setTimeout(() => loadFriends(), 1000);
+    };
 
     // Subscribe to friendship changes
     const friendshipsChannel = supabase
@@ -352,12 +359,13 @@ export const useCommunity = () => {
           filter: `requester_id=eq.${userProfile.user_id},addressee_id=eq.${userProfile.user_id}`,
         },
         () => {
-          loadFriends(); // Refresh friends list on any change
+          debouncedReload(); // Debounce to reduce reload frequency
         }
       )
       .subscribe();
 
     return () => {
+      if (reloadTimeout) clearTimeout(reloadTimeout);
       supabase.removeChannel(friendshipsChannel);
     };
   }, [userProfile, loadFriends]);

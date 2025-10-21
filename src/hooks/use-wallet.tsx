@@ -321,13 +321,13 @@ export const useWallet = () => {
     loadWalletData();
   }, [loadWalletData]);
 
-  // Set up real-time subscriptions
+  // Set up real-time subscriptions (OPTIMIZED: Single channel)
   useEffect(() => {
     if (isGuest || !user) return;
 
-    // Subscribe to wallet changes
-    const walletChannel = supabase
-      .channel('wallet-changes')
+    // Consolidate into single channel for better performance
+    const walletUpdatesChannel = supabase
+      .channel('wallet-updates')
       .on(
         'postgres_changes',
         {
@@ -336,15 +336,19 @@ export const useWallet = () => {
           table: 'wallet_balances',
           filter: `user_id=eq.${user.id}`,
         },
-        () => {
-          loadWalletData();
+        (payload) => {
+          // Only update state, don't reload all data
+          if (payload.eventType === 'UPDATE' && payload.new) {
+            setWalletData(prev => ({
+              ...prev,
+              totalBalance: payload.new.total_balance || prev.totalBalance,
+              totalEarned: payload.new.total_earned || prev.totalEarned,
+              totalRedeemed: payload.new.total_redeemed || prev.totalRedeemed,
+              lastUpdated: payload.new.last_updated || prev.lastUpdated,
+            }));
+          }
         }
       )
-      .subscribe();
-
-    // Subscribe to transaction changes
-    const txnChannel = supabase
-      .channel('transaction-changes')
       .on(
         'postgres_changes',
         {
@@ -353,17 +357,19 @@ export const useWallet = () => {
           table: 'transactions',
           filter: `user_id=eq.${user.id}`,
         },
-        () => {
-          loadWalletData();
+        (payload) => {
+          // Optimistically add transaction to list
+          if (payload.new) {
+            setTransactions(prev => [payload.new as WalletTransaction, ...prev]);
+          }
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(walletChannel);
-      supabase.removeChannel(txnChannel);
+      supabase.removeChannel(walletUpdatesChannel);
     };
-  }, [user, isGuest, loadWalletData]);
+  }, [user, isGuest]);
 
   return {
     walletData,

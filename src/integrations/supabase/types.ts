@@ -4753,6 +4753,10 @@ export type Database = {
           status: Database["public"]["Enums"]["subscription_status"]
         }[]
       }
+      get_wallet_data_batch: {
+        Args: { p_limit?: number; p_user_id: string }
+        Returns: Json
+      }
       has_active_boost: {
         Args: { p_boost_type: string; p_user_id: string }
         Returns: boolean

@@ -582,37 +582,29 @@ export function useGamification() {
     }
   };
 
-  // Set up real-time subscriptions for challenges
+  // Set up real-time subscriptions (OPTIMIZED: Only user's participation)
   useEffect(() => {
     const getCurrentUserId = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       return user?.id;
     };
 
-    let challengesChannel: any;
     let participationChannel: any;
+    let reloadTimeout: NodeJS.Timeout | null = null;
+
+    const debouncedReload = () => {
+      if (reloadTimeout) clearTimeout(reloadTimeout);
+      reloadTimeout = setTimeout(() => {
+        loadSeasonalChallenges();
+        loadUserChallengeParticipation();
+      }, 2000);
+    };
 
     const setupSubscriptions = async () => {
       const userId = await getCurrentUserId();
       if (!userId) return;
 
-      // Subscribe to seasonal challenges changes
-      challengesChannel = supabase
-        .channel('seasonal-challenges-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'seasonal_challenges',
-          },
-          () => {
-            loadSeasonalChallenges();
-          }
-        )
-        .subscribe();
-
-      // Subscribe to user's challenge participation changes
+      // Only subscribe to user's participation changes (removed global challenges subscription)
       participationChannel = supabase
         .channel('challenge-participation-changes')
         .on(
@@ -624,7 +616,7 @@ export function useGamification() {
             filter: `user_id=eq.${userId}`,
           },
           () => {
-            loadUserChallengeParticipation();
+            debouncedReload(); // Debounce to batch updates
           }
         )
         .subscribe();
@@ -633,7 +625,7 @@ export function useGamification() {
     setupSubscriptions();
 
     return () => {
-      if (challengesChannel) supabase.removeChannel(challengesChannel);
+      if (reloadTimeout) clearTimeout(reloadTimeout);
       if (participationChannel) supabase.removeChannel(participationChannel);
     };
   }, [loadSeasonalChallenges, loadUserChallengeParticipation]);

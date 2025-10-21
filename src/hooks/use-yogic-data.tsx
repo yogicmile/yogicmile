@@ -392,29 +392,32 @@ export const useYogicData = () => {
     loadUserData();
   }, [loadUserData]);
 
-  // Real-time database subscriptions for authenticated users
+  // Real-time database subscriptions (OPTIMIZED: Reduced reloads)
   useEffect(() => {
     if (isGuest || !user) return;
 
-    // Subscribe to daily_steps changes
-    const stepsChannel = supabase
-      .channel('daily-steps-changes')
+    // Only subscribe to critical real-time updates
+    const criticalUpdatesChannel = supabase
+      .channel('yogic-critical-updates')
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'UPDATE',
           schema: 'public',
           table: 'daily_steps',
           filter: `user_id=eq.${user.id}`,
         },
-        () => {
-          loadUserData(); // Refresh data when steps update
+        (payload) => {
+          // Optimistic update without full reload
+          if (payload.new && payload.new.date === new Date().toISOString().split('T')[0]) {
+            loadUserData(); // Refresh data when steps update
+          }
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(stepsChannel);
+      supabase.removeChannel(criticalUpdatesChannel);
     };
   }, [isGuest, user, loadUserData]);
 
