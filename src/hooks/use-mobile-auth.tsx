@@ -263,7 +263,7 @@ export const useMobileAuth = () => {
     }
   };
 
-  const generateOTP = async (mobileNumber: string) => {
+  const generateOTP = async (mobileNumber: string, isRetry = false): Promise<{ success: boolean; error?: string; allowProceedToOTP?: boolean }> => {
     setState(prev => ({ ...prev, isLoading: true }));
     
     try {
@@ -272,8 +272,7 @@ export const useMobileAuth = () => {
       }
 
       const formatted = formatMobileNumber(mobileNumber);
-      
-      // Get user agent for security logging
+      const requestId = crypto.randomUUID();
       const userAgent = navigator.userAgent;
 
       // Generate and send OTP via WhatsApp using edge function
@@ -284,12 +283,13 @@ export const useMobileAuth = () => {
         },
         headers: {
           'Content-Type': 'application/json',
+          'X-Request-Id': requestId,
         },
       });
 
       if (error) throw error;
 
-      const response = data as { success: boolean; error?: string; message?: string; attempts_remaining?: number };
+      const response = data as { success: boolean; error?: string; message?: string; attempts_remaining?: number; code?: string; reqId?: string };
 
       if (!response.success) {
         throw new Error(response.error);
@@ -311,15 +311,19 @@ export const useMobileAuth = () => {
 
       return { success: true };
     } catch (error: any) {
-      // Surface better error details from edge function
-      let friendly = error?.message || 'Failed to send OTP';
+      let friendly = 'Failed to send OTP';
+      let errorCode = '';
+      let reqId = '';
+      let shouldRetry = false;
+      let allowProceedToOTP = false;
       
       // Detect network errors (common on APK with poor connectivity)
       if (error?.message?.includes('Failed to fetch') || 
           error?.message?.includes('NetworkError') ||
           error?.message?.includes('timeout') ||
           error?.message?.includes('aborted')) {
-        friendly = 'Network error. Please check your internet connection and try again.';
+        friendly = 'Network error. Check your internet and try again.';
+        shouldRetry = !isRetry;
       } else {
         try {
           const details = (error && (error.details || (error.context && error.context.body))) || null as any;
@@ -331,43 +335,67 @@ export const useMobileAuth = () => {
             parsedDetails = details;
           }
           
-          // Check for structured error code
-          if (parsedDetails?.code) {
-            const code = parsedDetails.code;
-            const errorMessages: Record<string, string> = {
-              'OTP_RATE_LIMIT': `⏱️ ${parsedDetails.error}`,
-              'OTP_DAILY_LIMIT': `📅 ${parsedDetails.error}`,
-              'CONFIG_MISSING': `⚠️ ${parsedDetails.error}`,
-              'TWILIO_SANDBOX_REQUIRED': `📱 ${parsedDetails.error}`,
-              'TWILIO_INVALID_FROM': `⚠️ ${parsedDetails.error}`,
-              'TWILIO_AUTH_INVALID': `🔐 ${parsedDetails.error}`
+          // Extract structured error info
+          if (parsedDetails) {
+            errorCode = parsedDetails.code || '';
+            reqId = parsedDetails.reqId || '';
+            
+            const errorMessages: Record<string, { message: string; canProceed?: boolean }> = {
+              'INVALID_METHOD': { message: 'Service issue. Please refresh and try again.' },
+              'INVALID_JSON': { message: 'Technical glitch. Retrying...', canProceed: true },
+              'VALIDATION_ERROR': { message: parsedDetails.error || 'Please check your mobile number.' },
+              'OTP_RATE_LIMIT': { message: parsedDetails.error || 'Too many requests. Please wait.' },
+              'OTP_DAILY_LIMIT': { message: parsedDetails.error || 'Daily limit reached. Try tomorrow.' },
+              'OTP_BLOCKED': { message: parsedDetails.error || 'Account blocked. Contact support.' },
+              'USER_NOT_FOUND': { message: 'No account found. Sign up first or use Email & Password.' },
+              'CONFIG_MISSING': { message: 'Service not configured. Contact support.' },
+              'TWILIO_SANDBOX_REQUIRED': { message: 'WhatsApp not set up for this number. Use Email & Password.' },
+              'TWILIO_INVALID_FROM': { message: 'WhatsApp service issue. Contact support.' },
+              'TWILIO_AUTH_INVALID': { message: 'Authentication error. Contact support.' },
+              'UNEXPECTED_ERROR': { message: 'Something went wrong. Try again.', canProceed: true }
             };
             
-            friendly = errorMessages[code] || parsedDetails.error || friendly;
-          } else {
-            // Fallback to original parsing
-            friendly = parsedDetails?.error || parsedDetails?.message || friendly;
+            const errorInfo = errorMessages[errorCode];
+            if (errorInfo) {
+              friendly = errorInfo.message;
+              allowProceedToOTP = errorInfo.canProceed || false;
+              shouldRetry = !isRetry && errorCode === 'INVALID_JSON';
+            } else {
+              friendly = parsedDetails.error || parsedDetails.message || friendly;
+            }
           }
-        } catch {}
-
-        // Common hint when account doesn't exist (server returns 404 User not found)
-        if (/user not found/i.test(friendly)) {
-          friendly = 'No account found for this number. Please sign up first or use Email & Password.';
+        } catch (parseErr) {
+          console.warn('Failed to parse error details:', parseErr);
         }
-        
-        // Twilio sandbox not joined (fallback if no code)
-        if (/not a valid WhatsApp recipient/i.test(friendly) || /sandbox/i.test(friendly)) {
-          friendly = '📱 WhatsApp not configured for this number. Please use Email & Password.';
+
+        // Fallback pattern matching for unstructured errors
+        if (/user not found/i.test(error?.message || '')) {
+          friendly = 'No account found. Sign up first or use Email & Password.';
+        } else if (/not a valid WhatsApp recipient/i.test(error?.message || '') || /sandbox/i.test(error?.message || '')) {
+          friendly = 'WhatsApp not configured. Use Email & Password.';
         }
       }
 
+      // One silent retry for transient errors
+      if (shouldRetry && !isRetry) {
+        console.log(`Retrying OTP generation (code: ${errorCode})...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return generateOTP(mobileNumber, true);
+      }
+
       console.error('OTP generation error:', error);
+      
+      const description = reqId 
+        ? `${friendly} (Ref: ${reqId.slice(-4).toUpperCase()})`
+        : friendly;
+      
       toast({
         title: "OTP Generation Failed",
-        description: friendly,
+        description,
         variant: "destructive",
       });
-      return { success: false, error: friendly };
+      
+      return { success: false, error: friendly, allowProceedToOTP };
     } finally {
       setState(prev => ({ ...prev, isLoading: false }));
     }

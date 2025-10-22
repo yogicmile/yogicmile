@@ -20,46 +20,96 @@ interface GenerateOTPRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  const reqId = crypto.randomUUID();
+  
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Only accept POST requests
+  if (req.method !== 'POST') {
+    console.error(`[${reqId}] Invalid method: ${req.method}`);
+    return new Response(JSON.stringify({
+      success: false,
+      code: 'INVALID_METHOD',
+      error: 'Please use POST method with JSON body.',
+      reqId
+    }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   try {
+    // Safely parse request body
+    const rawBody = await req.text();
+    
+    if (!rawBody || rawBody.trim() === '') {
+      console.error(`[${reqId}] Empty request body`);
+      return new Response(JSON.stringify({
+        success: false,
+        code: 'INVALID_JSON',
+        error: 'Request body is required.',
+        reqId
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    let requestBody: GenerateOTPRequest;
+    try {
+      requestBody = JSON.parse(rawBody);
+    } catch (parseError) {
+      console.error(`[${reqId}] JSON parse error:`, parseError);
+      return new Response(JSON.stringify({
+        success: false,
+        code: 'INVALID_JSON',
+        error: 'Invalid JSON format in request body.',
+        reqId
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Read Twilio credentials at request time
     const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
     const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
     const TWILIO_WHATSAPP_NUMBER = Deno.env.get('TWILIO_WHATSAPP_NUMBER');
 
     if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_WHATSAPP_NUMBER) {
-      console.error('Missing Twilio credentials', {
-        has_sid: !!TWILIO_ACCOUNT_SID,
-        has_token: !!TWILIO_AUTH_TOKEN,
-        has_whatsapp: !!TWILIO_WHATSAPP_NUMBER,
+      console.error(`[${reqId}] Missing Twilio credentials`);
+      return new Response(JSON.stringify({
+        success: false,
+        code: 'CONFIG_MISSING',
+        error: 'WhatsApp service not configured. Please contact support.',
+        reqId
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
-      return new Response(
-        JSON.stringify({ 
-          success: false,
-          code: 'CONFIG_MISSING',
-          error: 'System configuration incomplete. Please use Email & Password to sign up.',
-          missing: {
-            accountSid: !TWILIO_ACCOUNT_SID, 
-            authToken: !TWILIO_AUTH_TOKEN, 
-            whatsappFrom: !TWILIO_WHATSAPP_NUMBER 
-          } 
-        }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
     }
 
-    const { mobileNumber, ipAddress, userAgent }: GenerateOTPRequest = await req.json();
+    const { mobileNumber, ipAddress, userAgent } = requestBody;
+
+    const maskedMobile = mobileNumber ? `${mobileNumber.slice(0, -4)}****` : 'unknown';
+    console.log(`[${reqId}] Request: method=${req.method}, mobile=${maskedMobile}, userAgent=${userAgent?.substring(0, 50)}`);
 
     if (!mobileNumber) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Mobile number is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      console.error(`[${reqId}] Missing mobile number`);
+      return new Response(JSON.stringify({
+        success: false,
+        code: 'VALIDATION_ERROR',
+        error: 'Mobile number is required.',
+        reqId
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Check rate limiting
@@ -75,49 +125,59 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Check if blocked
     if (rateLimitData?.permanent_block) {
-      console.log('User permanently blocked:', mobileNumber);
-      return new Response(
-        JSON.stringify({ success: false, error: 'Account permanently blocked. Contact support.' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      console.warn(`[${reqId}] Mobile ${maskedMobile} is permanently blocked`);
+      return new Response(JSON.stringify({
+        success: false,
+        code: 'OTP_BLOCKED',
+        error: 'Account is blocked. Contact support.',
+        blocked_until: rateLimitData.blocked_until,
+        reqId
+      }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     if (rateLimitData?.blocked_until && new Date(rateLimitData.blocked_until) > new Date()) {
-      console.log('User temporarily blocked:', mobileNumber);
       const blockedUntil = new Date(rateLimitData.blocked_until);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          code: 'OTP_RATE_LIMIT',
-          error: 'You can request up to 3 OTPs per hour. Please try again later.',
-          next_allowed_at: blockedUntil.toISOString(),
-          window_minutes: 60
-        }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      const waitSeconds = Math.ceil((blockedUntil.getTime() - Date.now()) / 1000);
+      console.warn(`[${reqId}] Mobile ${maskedMobile} is temporarily blocked for ${waitSeconds}s`);
+      return new Response(JSON.stringify({
+        success: false,
+        code: 'OTP_RATE_LIMIT',
+        error: `Too many requests. Try again after ${Math.ceil(waitSeconds / 60)} minutes.`,
+        retry_after_seconds: waitSeconds,
+        blocked_until: rateLimitData.blocked_until,
+        reqId
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     // Check daily limit
     const today = new Date().toISOString().split('T')[0];
     if (rateLimitData?.daily_window_start === today && rateLimitData.daily_attempts >= 10) {
-      console.log('Daily limit exceeded:', mobileNumber);
+      console.warn(`[${reqId}] Mobile ${maskedMobile} exceeded daily limit`);
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          code: 'OTP_DAILY_LIMIT',
-          error: 'Daily OTP limit (10) exceeded. You can request again tomorrow.',
-          next_allowed_at: tomorrow.toISOString()
-        }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({
+        success: false,
+        code: 'OTP_DAILY_LIMIT',
+        error: 'Daily OTP limit (10) exceeded. Try again tomorrow.',
+        next_allowed_at: tomorrow.toISOString(),
+        attempts_remaining: 0,
+        reqId
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     // Generate 6-digit OTP
     const plainOTP = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log('Generated OTP for', mobileNumber);
+    console.log(`[${reqId}] Generated OTP for ${maskedMobile}`);
 
     // Hash the OTP using database function
     const { data: hashedOTP, error: hashError } = await supabase.rpc('hash_otp', {
@@ -304,7 +364,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log('WhatsApp OTP sent successfully:', whatsappData.sid);
+    console.log(`[${reqId}] WhatsApp OTP sent successfully: ${whatsappData.sid}`);
 
     // Calculate attempts remaining
     const currentAttempts = rateLimitData ? 
@@ -316,17 +376,24 @@ const handler = async (req: Request): Promise<Response> => {
       JSON.stringify({ 
         success: true, 
         message: 'OTP sent via WhatsApp',
-        attempts_remaining: attemptsRemaining
+        attempts_remaining: attemptsRemaining,
+        reqId
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error: any) {
-    console.error('Error in generate-whatsapp-otp function:', error);
-    return new Response(
-      JSON.stringify({ success: false, error: error.message || 'Failed to generate OTP' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    console.error(`[${reqId}] Unexpected error:`, error);
+    
+    return new Response(JSON.stringify({
+      success: false,
+      code: 'UNEXPECTED_ERROR',
+      error: 'Something went wrong. Please try again.',
+      reqId
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 };
 

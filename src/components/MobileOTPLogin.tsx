@@ -33,10 +33,12 @@ export const MobileOTPLogin: React.FC<MobileOTPLoginProps> = ({
   const [otp, setOTP] = useState('');
   const [step, setStep] = useState<'mobile' | 'otp'>('mobile');
   const [error, setError] = useState('');
+  const [canProceedToOTP, setCanProceedToOTP] = useState(false);
 
   const handleMobileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setCanProceedToOTP(false);
 
     if (!validateMobileNumber(mobileNumber)) {
       setError('Please enter a valid 10-digit mobile number');
@@ -47,8 +49,10 @@ export const MobileOTPLogin: React.FC<MobileOTPLoginProps> = ({
     
     if (result.success) {
       setStep('otp');
+      setCanProceedToOTP(false);
     } else {
       setError(result.error || 'Failed to send OTP');
+      setCanProceedToOTP(result.allowProceedToOTP || false);
     }
   };
 
@@ -76,11 +80,19 @@ export const MobileOTPLogin: React.FC<MobileOTPLoginProps> = ({
 
   const handleResendOTP = async () => {
     setError('');
+    setCanProceedToOTP(false);
     const result = await generateOTP(mobileNumber);
     
     if (!result.success) {
       setError(result.error || 'Failed to resend OTP');
+      setCanProceedToOTP(result.allowProceedToOTP || false);
     }
+  };
+
+  const handleProceedToOTP = () => {
+    setStep('otp');
+    setError('');
+    setCanProceedToOTP(false);
   };
 
   const handleBack = () => {
@@ -119,11 +131,27 @@ export const MobileOTPLogin: React.FC<MobileOTPLoginProps> = ({
                   disabled={state.isLoading}
                 />
                 {error && (
-                  <p className="text-sm text-red-500">{error}</p>
+                  <div className="space-y-2">
+                    <p className="text-sm text-red-500">{error}</p>
+                    {canProceedToOTP && (
+                      <p className="text-xs text-muted-foreground">
+                        Already received the code?{' '}
+                        <button
+                          type="button"
+                          onClick={handleProceedToOTP}
+                          className="text-primary hover:underline font-medium"
+                        >
+                          Enter it here
+                        </button>
+                      </p>
+                    )}
+                  </div>
                 )}
-                <p className="text-xs text-muted-foreground">
-                  📱 We'll send a 6-digit OTP via WhatsApp to verify your number
-                </p>
+                {!error && (
+                  <p className="text-xs text-muted-foreground">
+                    📱 We'll send a 6-digit OTP via WhatsApp to verify your number
+                  </p>
+                )}
               </div>
 
               <Button
