@@ -6,9 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TransactionHistory } from '@/components/TransactionHistory';
 import { CountdownTimer } from '@/components/CountdownTimer';
 import { DailyRedeemModal } from '@/components/DailyRedeemModal';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { WalletPageSkeleton } from '@/components/ui/wallet-skeleton';
+import { useWallet } from '@/hooks/use-wallet';
 
 interface Transaction {
   id: string;
@@ -25,78 +25,36 @@ export const WalletPage = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('all');
   const [showDailyRedeem, setShowDailyRedeem] = useState(false);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [walletBalance, setWalletBalance] = useState(0);
   const [todaysPendingCoins, setTodaysPendingCoins] = useState(0);
-  const [loading, setLoading] = useState(true);
+  
+  // Use the wallet hook for all data operations
+  const { walletData, transactions: hookTransactions, loading, loadWalletData, getTodaysPendingCoins, redeemDailyCoins } = useWallet();
 
   useEffect(() => {
     document.title = 'Wallet | Yogic Mile';
-    loadWalletData();
   }, []);
 
-  const loadWalletData = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Fetch wallet balance
-      const { data: wallet, error: walletError } = await supabase
-        .from('wallet_balances')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (walletError) {
-        console.error('Error loading wallet:', walletError);
-      }
-
-      setWalletBalance(wallet?.total_balance || 0);
-      
-      // Calculate today's pending coins from daily_steps
-      const today = new Date().toISOString().split('T')[0];
-      const { data: todaySteps, error: stepsError } = await supabase
-        .from('daily_steps')
-        .select('paisa_earned, is_redeemed')
-        .eq('user_id', user.id)
-        .eq('date', today)
-        .maybeSingle();
-
-      if (stepsError) {
-        console.error('Error loading today steps:', stepsError);
-      }
-
-      // Only show pending coins if not already redeemed
-      setTodaysPendingCoins(
-        todaySteps && !todaySteps.is_redeemed ? todaySteps.paisa_earned : 0
-      );
-
-      // Fetch transactions
-      const { data: txns } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      const formattedTransactions: Transaction[] = (txns || []).map(txn => ({
-        id: txn.id,
-        type: txn.type as 'earning' | 'redemption' | 'referral' | 'spin',
-        amount: txn.amount,
-        date: txn.created_at,
-        description: txn.description || '',
-        icon: getTransactionIcon(txn.type),
-        status: (txn.status || 'completed') as 'completed' | 'pending' | 'failed' | 'expired'
-      }));
-
-      setTransactions(formattedTransactions);
-    } catch (error) {
-      console.error('Error loading wallet data:', error);
-      toast({ title: "Error loading wallet data", variant: "destructive" });
-    } finally {
-      setLoading(false);
+  // Load today's pending coins
+  useEffect(() => {
+    const loadPending = async () => {
+      const pending = await getTodaysPendingCoins();
+      setTodaysPendingCoins(pending);
+    };
+    if (!loading) {
+      loadPending();
     }
-  };
+  }, [loading, getTodaysPendingCoins]);
+
+  // Format transactions for UI
+  const transactions: Transaction[] = hookTransactions.map(txn => ({
+    id: txn.id,
+    type: txn.type as 'earning' | 'redemption' | 'referral' | 'spin',
+    amount: txn.amount,
+    date: txn.created_at,
+    description: txn.description || '',
+    icon: getTransactionIcon(txn.type),
+    status: (txn.status || 'completed') as 'completed' | 'pending' | 'failed' | 'expired'
+  }));
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
@@ -109,79 +67,26 @@ export const WalletPage = () => {
   };
 
   const todaysPendingRupees = (todaysPendingCoins / 100).toFixed(2);
-  const balanceInRupees = (walletBalance / 100).toFixed(2);
+  const balanceInRupees = (walletData.totalBalance / 100).toFixed(2);
 
-  const handleRefresh = () => {
-    loadWalletData();
+  const handleRefresh = async () => {
+    await loadWalletData();
+    const pending = await getTodaysPendingCoins();
+    setTodaysPendingCoins(pending);
   };
 
   const handleDailyRedeem = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const today = new Date().toISOString().split('T')[0];
-
-      // Mark today's earnings as redeemed in daily_steps
-      const { error: stepError } = await supabase
-        .from('daily_steps')
-        .update({ 
-          is_redeemed: true, 
-          redeemed_at: new Date().toISOString() 
-        })
-        .eq('user_id', user.id)
-        .eq('date', today)
-        .eq('is_redeemed', false);
-
-      if (stepError) throw stepError;
-
-      // Add transaction record
-      const { error: txnError } = await supabase.from('transactions').insert({
-        user_id: user.id,
-        type: 'earning',
-        amount: todaysPendingCoins,
-        description: `Daily earnings redeemed - ${new Date().toLocaleDateString()}`,
-        status: 'completed'
-      });
-
-      if (txnError) throw txnError;
-
-      // Update wallet balance
-      const newBalance = walletBalance + todaysPendingCoins;
-      const { data: currentWallet } = await supabase
-        .from('wallet_balances')
-        .select('total_earned')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      const newTotalEarned = (currentWallet?.total_earned || 0) + todaysPendingCoins;
-
-      const { error: walletError } = await supabase
-        .from('wallet_balances')
-        .update({
-          total_balance: newBalance,
-          total_earned: newTotalEarned + todaysPendingCoins,
-          last_updated: new Date().toISOString()
-        })
-        .eq('user_id', user.id);
-
-      if (walletError) throw walletError;
-
+    const success = await redeemDailyCoins(todaysPendingCoins);
+    
+    if (success) {
       toast({ 
         title: "Coins redeemed successfully!",
-        description: `₹${(todaysPendingCoins / 100).toFixed(2)} added to wallet`
+        description: `₹${todaysPendingRupees} added to wallet`
       });
-      
       setShowDailyRedeem(false);
-      loadWalletData();
-    } catch (error) {
-      console.error('Error redeeming coins:', error);
-      toast({ 
-        title: "Error redeeming coins", 
-        description: "Please try again later",
-        variant: "destructive" 
-      });
+      setTodaysPendingCoins(0);
     }
+    // Error toast is already handled by the hook
   };
 
   return (
@@ -242,7 +147,7 @@ export const WalletPage = () => {
                   </div>
                   <div className="text-white/80 text-sm">Available Balance</div>
                   <div className="text-white/60 text-xs mt-1">
-                    {walletBalance.toLocaleString()} paisa
+                    {walletData.totalBalance.toLocaleString()} paisa
                   </div>
                 </div>
                 
