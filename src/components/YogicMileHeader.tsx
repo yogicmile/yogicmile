@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -15,16 +14,6 @@ export const YogicMileHeader = ({
   size = 'medium',
   onClick
 }: YogicMileHeaderProps) => {
-  const [glowAnimation, setGlowAnimation] = useState(false);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setGlowAnimation(true);
-      setTimeout(() => setGlowAnimation(false), 1000);
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, []);
 
   const sizeClasses = {
     small: {
@@ -59,25 +48,19 @@ export const YogicMileHeader = ({
       )}
       onClick={onClick}
     >
-      {/* Background Gradient Effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-tier-1-paisa/5 to-transparent animate-pulse opacity-50"></div>
+      {/* Background Gradient Effect - CSS only, reduced frequency */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-tier-1-paisa/5 to-transparent header-glow opacity-50"></div>
       
       {/* Main Logo */}
       <div className="relative z-10">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <div className="relative">
+          <div className="relative sparkle-container">
             <Sparkles 
               className={cn(
-                "text-tier-1-paisa transition-all duration-500",
-                currentSize.icon,
-                glowAnimation && "animate-pulse text-tier-2-rupaya"
+                "text-tier-1-paisa",
+                currentSize.icon
               )} 
             />
-            {glowAnimation && (
-              <div className="absolute inset-0 animate-ping">
-                <Sparkles className={cn("text-tier-1-paisa/50", currentSize.icon)} />
-              </div>
-            )}
           </div>
           
           <h1 className={cn(
@@ -87,10 +70,8 @@ export const YogicMileHeader = ({
             Step Rewards
           </h1>
           
-          <div className="relative">
-            <div className="text-2xl animate-bounce" style={{ animationDelay: '0.5s' }}>
-              👟
-            </div>
+          <div className="text-2xl shoe-bounce">
+            👟
           </div>
         </div>
         
@@ -104,12 +85,10 @@ export const YogicMileHeader = ({
         )}
       </div>
 
-      {/* Decorative Elements */}
+      {/* Decorative Elements - Reduced to 2, optimized */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        <div className="absolute top-2 left-4 w-1 h-1 bg-tier-1-paisa rounded-full animate-pulse opacity-60"></div>
-        <div className="absolute top-4 right-6 w-2 h-2 bg-tier-2-rupaya rounded-full animate-pulse opacity-40" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-2 left-6 w-1.5 h-1.5 bg-tier-3-token rounded-full animate-pulse opacity-50" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute bottom-4 right-4 w-1 h-1 bg-sage-green rounded-full animate-pulse opacity-70" style={{ animationDelay: '1.5s' }}></div>
+        <div className="absolute top-2 left-4 w-1 h-1 bg-tier-1-paisa rounded-full header-dot-1"></div>
+        <div className="absolute bottom-4 right-4 w-1 h-1 bg-sage-green rounded-full header-dot-2"></div>
       </div>
     </div>
   );

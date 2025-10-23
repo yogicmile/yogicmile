@@ -6,7 +6,7 @@ import { EnhancedNavigationCards } from '@/components/EnhancedNavigationCards';
 import { BackgroundTrackingStatus } from '@/components/BackgroundTrackingStatus';
 import { StepTrackingValidator } from '@/components/StepTrackingValidator';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { PageLoading } from '@/components/LoadingStates';
+import { HomePageSkeleton } from '@/components/performance/SkeletonLoaders';
 import { useYogicData } from '@/hooks/use-yogic-data';
 import { useNativeStepTracking } from '@/hooks/use-native-step-tracking';
 
@@ -27,9 +27,9 @@ const Index = () => {
     }
   };
 
-  // Show loading screen while data loads
+  // Show skeleton while data loads (better UX than blank screen)
   if (yogicData.isLoading) {
-    return <PageLoading />;
+    return <HomePageSkeleton />;
   }
 
   // Use native steps if available, otherwise use database steps

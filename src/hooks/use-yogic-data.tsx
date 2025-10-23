@@ -392,32 +392,40 @@ export const useYogicData = () => {
     loadUserData();
   }, [loadUserData]);
 
-  // Real-time database subscriptions (OPTIMIZED: Reduced reloads)
+  // Real-time database subscriptions with debouncing
   useEffect(() => {
     if (isGuest || !user) return;
 
-    // Only subscribe to critical real-time updates
-    const criticalUpdatesChannel = supabase
-      .channel('yogic-critical-updates')
+    let debounceTimer: NodeJS.Timeout | null = null;
+
+    // Debounced reload to prevent excessive updates
+    const debouncedReload = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        loadUserData();
+      }, 3000); // Wait 3 seconds before reloading
+    };
+
+    // Only subscribe to wallet updates (not steps - those are updated manually)
+    const walletUpdatesChannel = supabase
+      .channel('yogic-wallet-updates')
       .on(
         'postgres_changes',
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'daily_steps',
+          table: 'wallet_balances',
           filter: `user_id=eq.${user.id}`,
         },
-        (payload) => {
-          // Optimistic update without full reload
-          if (payload.new && payload.new.date === new Date().toISOString().split('T')[0]) {
-            loadUserData(); // Refresh data when steps update
-          }
+        () => {
+          debouncedReload();
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(criticalUpdatesChannel);
+      if (debounceTimer) clearTimeout(debounceTimer);
+      supabase.removeChannel(walletUpdatesChannel);
     };
   }, [isGuest, user, loadUserData]);
 
