@@ -64,7 +64,7 @@ export const YogicMileHeader = ({
           </div>
           
           <h1 className={cn(
-            "font-bold bg-gradient-to-r from-tier-1-paisa via-tier-2-rupaya to-tier-1-paisa bg-clip-text text-transparent font-display",
+            "font-bold bg-gradient-to-r from-tier-1-paisa via-tier-2-coin to-tier-1-paisa bg-clip-text text-transparent font-display",
             currentSize.logo
           )}>
             Step Rewards
@@ -88,7 +88,7 @@ export const YogicMileHeader = ({
       {/* Decorative Elements - Reduced to 2, optimized */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         <div className="absolute top-2 left-4 w-1 h-1 bg-tier-1-paisa rounded-full header-dot-1"></div>
-        <div className="absolute bottom-4 right-4 w-1 h-1 bg-sage-green rounded-full header-dot-2"></div>
+        <div className="absolute bottom-4 right-4 w-1 h-1 bg-tier-2-coin rounded-full header-dot-2"></div>
       </div>
     </div>
   );
