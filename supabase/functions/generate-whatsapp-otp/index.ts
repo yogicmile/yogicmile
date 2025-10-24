@@ -113,6 +113,21 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Validate E.164 format (international phone number)
+    const e164Pattern = /^\+?[1-9]\d{1,14}$/;
+    if (!e164Pattern.test(mobileNumber)) {
+      console.error(`[${reqId}] Invalid mobile number format: ${maskedMobile}`);
+      return new Response(JSON.stringify({
+        success: false,
+        code: 'VALIDATION_ERROR',
+        error: 'Please enter a valid mobile number with country code (e.g., +919885277707).',
+        reqId
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Check rate limiting
     const { data: rateLimitData, error: rateLimitError } = await supabase
       .from('otp_rate_limits')
@@ -205,16 +220,21 @@ const handler = async (req: Request): Promise<Response> => {
         p_mobile_number: mobileNumber,
         p_full_name: 'Yogic Walker', // Default name, can be updated later
         p_email: null,
-        p_address: null,
+        p_address: 'Address not set', // Default address to satisfy NOT NULL constraint
         p_referred_by: null,
         p_user_id: null
       });
 
       if (createError) {
-        console.error('Error creating new user:', createError);
+        console.error(`[${reqId}] create_user_with_mobile failed:`, createError);
         return new Response(
-          JSON.stringify({ success: false, error: 'Failed to create user account' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ 
+            success: false, 
+            code: 'USER_CREATION_FAILED',
+            error: 'Could not prepare account for OTP. Please try again or sign up via Email & Password.',
+            reqId
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
