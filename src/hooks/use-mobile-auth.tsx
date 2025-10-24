@@ -283,7 +283,6 @@ export const useMobileAuth = () => {
         },
         headers: {
           'Content-Type': 'application/json',
-          'X-Request-Id': requestId,
         },
       });
 
