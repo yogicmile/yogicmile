@@ -133,13 +133,17 @@ Deno.serve(async (req) => {
     // SECURITY: Validate redirect URL to prevent open redirect attacks
     const allowedDomains = [
       'lovableproject.com',
+      'lovable.app',
       'yogicmile.app',
       'localhost',
       'supabase.co'
     ];
     
-    const defaultRedirect = req.headers.get('origin') || req.headers.get('referer') || 
-                           Deno.env.get('SUPABASE_SITE_URL') || Deno.env.get('SITE_URL') || 
+    // Prefer request origin/referer over environment variables
+    const defaultRedirect = req.headers.get('origin') || 
+                           req.headers.get('referer')?.split('?')[0] || 
+                           Deno.env.get('SUPABASE_SITE_URL') || 
+                           Deno.env.get('SITE_URL') || 
                            Deno.env.get('SUPABASE_URL');
     
     let validatedRedirectUrl = defaultRedirect;
@@ -153,12 +157,15 @@ Deno.serve(async (req) => {
         
         if (isAllowed) {
           validatedRedirectUrl = redirectUrl;
+          console.log(`✅ Redirect URL validated: ${redirectUrl}`);
         } else {
-          console.warn(`Redirect URL rejected: ${redirectUrl}`);
+          console.warn(`⚠️ Redirect URL rejected: ${redirectUrl}, using fallback: ${defaultRedirect}`);
         }
       } catch (e) {
         console.error('Invalid redirect URL format:', e);
       }
+    } else {
+      console.log(`No redirect URL provided, using default: ${validatedRedirectUrl}`);
     }
 
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
