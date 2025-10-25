@@ -80,13 +80,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const access_token = params.get('access_token');
           const refresh_token = params.get('refresh_token');
           if (access_token && refresh_token) {
-            setIsLoading(true);
             const { data, error } = await supabase.auth.setSession({ access_token, refresh_token });
             if (!error && data?.session) {
               setSession(data.session);
               setUser(data.session.user);
               setIsGuest(false);
               localStorage.removeItem('yogic_mile_guest_mode');
+              setIsLoading(false); // Must set loading false before early return
               // Clean the URL
               const { origin, pathname, search } = window.location;
               window.history.replaceState({}, document.title, origin + pathname + search);
@@ -99,7 +99,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const url = new URL(window.location.href);
         const code = url.searchParams.get('code');
         if (code) {
-          setIsLoading(true);
           try {
             const authAny = supabase.auth as any;
             const { data, error } = await authAny.exchangeCodeForSession({ code });
@@ -108,6 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               setUser(data.session.user);
               setIsGuest(false);
               localStorage.removeItem('yogic_mile_guest_mode');
+              setIsLoading(false); // Set loading false after successful code exchange
             }
           } catch (err) {
             console.error('exchangeCodeForSession failed:', err);
