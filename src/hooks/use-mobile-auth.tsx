@@ -266,33 +266,161 @@ export const useMobileAuth = () => {
   const generateOTP = async (mobileNumber: string, isRetry = false): Promise<{ success: boolean; error?: string; allowProceedToOTP?: boolean }> => {
     setState(prev => ({ ...prev, isLoading: true }));
     
+    const clientRequestId = crypto.randomUUID().slice(0, 8);
+    
     try {
       if (!validateMobileNumber(mobileNumber)) {
-        throw new Error('Invalid mobile number format');
+        toast({
+          title: "Invalid Number",
+          description: "Please enter a valid 10-digit mobile number",
+          variant: "destructive",
+        });
+        return { success: false, error: 'Invalid mobile number format' };
       }
 
       const formatted = formatMobileNumber(mobileNumber);
-      const requestId = crypto.randomUUID();
       const userAgent = navigator.userAgent;
 
-      // Generate and send OTP via WhatsApp using edge function
-      const { data, error } = await supabase.functions.invoke('generate-whatsapp-otp', {
-        body: {
-          mobileNumber: formatted,
-          userAgent: userAgent
-        },
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      console.info(`[${clientRequestId}] Requesting OTP for ${formatted.replace(/\d(?=\d{4})/g, '*')}`);
 
-      if (error) throw error;
+      let response: any = null;
+      let responseError: any = null;
 
-      const response = data as { success: boolean; error?: string; message?: string; attempts_remaining?: number; code?: string; reqId?: string };
+      // First attempt: Use Supabase client invoke
+      try {
+        const { data, error } = await supabase.functions.invoke('generate-whatsapp-otp', {
+          body: {
+            mobileNumber: formatted,
+            userAgent: userAgent
+          }
+        });
 
-      if (!response.success) {
-        throw new Error(response.error);
+        if (error) {
+          responseError = error;
+          console.warn(`[${clientRequestId}] Invoke failed:`, error);
+        } else {
+          response = data;
+        }
+      } catch (invokeErr) {
+        responseError = invokeErr;
+        console.warn(`[${clientRequestId}] Invoke exception:`, invokeErr);
       }
+
+      // If first attempt failed with INVALID_JSON or empty response, retry once
+      if (!response || responseError) {
+        const shouldRetry = !isRetry && (
+          responseError?.message?.includes('INVALID_JSON') ||
+          responseError?.message?.includes('Empty request body') ||
+          !response
+        );
+
+        if (shouldRetry) {
+          console.info(`[${clientRequestId}] Retrying after 800ms...`);
+          await new Promise(resolve => setTimeout(resolve, 800));
+          
+          try {
+            const { data, error } = await supabase.functions.invoke('generate-whatsapp-otp', {
+              body: {
+                mobileNumber: formatted,
+                userAgent: userAgent
+              }
+            });
+
+            if (error) {
+              responseError = error;
+              console.warn(`[${clientRequestId}] Retry failed:`, error);
+            } else {
+              response = data;
+              responseError = null;
+            }
+          } catch (retryErr) {
+            responseError = retryErr;
+            console.warn(`[${clientRequestId}] Retry exception:`, retryErr);
+          }
+        }
+      }
+
+      // Fallback: Direct fetch to edge function URL
+      if (!response || responseError) {
+        console.info(`[${clientRequestId}] Falling back to direct fetch...`);
+        
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3eW1mdmZhaXF2dGlxamZtZWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2NzY4ODAsImV4cCI6MjA3MzI1Mjg4MH0.BuuVywo2S7yhIsO4LvqCvJVULKdUlXKNKiKzVjgr6yw';
+          
+          const fetchResponse = await fetch(
+            'https://rwymfvfaiqvtiqjfmejv.supabase.co/functions/v1/generate-whatsapp-otp',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': anonKey,
+                'Authorization': `Bearer ${session?.access_token || anonKey}`
+              },
+              body: JSON.stringify({
+                mobileNumber: formatted,
+                userAgent: userAgent
+              })
+            }
+          );
+
+          if (!fetchResponse.ok) {
+            const errorText = await fetchResponse.text();
+            throw new Error(`HTTP ${fetchResponse.status}: ${errorText}`);
+          }
+
+          response = await fetchResponse.json();
+          responseError = null;
+          console.info(`[${clientRequestId}] Direct fetch succeeded`);
+        } catch (fetchErr: any) {
+          console.error(`[${clientRequestId}] Direct fetch failed:`, fetchErr);
+          throw new Error(fetchErr.message || 'Failed to connect to OTP service');
+        }
+      }
+
+      // Parse response
+      if (!response || !response.success) {
+        const errorCode = response?.code || '';
+        const serverReqId = response?.reqId || '';
+        const serverError = response?.error || 'Failed to send OTP';
+        
+        console.error(`[${clientRequestId}] Server error: ${errorCode} - ${serverError} (${serverReqId})`);
+        
+        const errorMessages: Record<string, string> = {
+          'INVALID_JSON': 'Temporary issue sending request. Please try again.',
+          'CONFIG_MISSING': 'WhatsApp service not configured. Please use Email & Password.',
+          'VALIDATION_ERROR': response?.error || 'Please enter a valid mobile number with country code.',
+          'OTP_RATE_LIMIT': response?.error || 'Too many requests. Please wait before trying again.',
+          'OTP_DAILY_LIMIT': response?.error || 'Daily limit reached. Please try again tomorrow.',
+          'OTP_BLOCKED': response?.error || 'Your account is blocked. Please contact support.',
+          'USER_CREATION_FAILED': 'Could not prepare account. Please try Email & Password.',
+          'TWILIO_SANDBOX_REQUIRED': 'WhatsApp not set up. Please use Email & Password.',
+          'TWILIO_INVALID_FROM': 'WhatsApp service issue. Please contact support.',
+          'TWILIO_AUTH_INVALID': 'Authentication error. Please contact support.',
+          'UNEXPECTED_ERROR': response?.error || 'Something went wrong. Please try again.'
+        };
+        
+        const friendlyMessage = errorMessages[errorCode] || serverError;
+        const displayMessage = serverReqId 
+          ? `${friendlyMessage} (Ref: ${serverReqId.slice(-4).toUpperCase()})`
+          : friendlyMessage;
+        
+        toast({
+          title: "OTP Failed",
+          description: displayMessage,
+          variant: "destructive",
+        });
+        
+        return { 
+          success: false, 
+          error: friendlyMessage,
+          allowProceedToOTP: errorCode === 'INVALID_JSON' || errorCode === 'UNEXPECTED_ERROR'
+        };
+      }
+
+      // Success
+      const serverReqId = response.reqId || '';
+      console.info(`[${clientRequestId}] OTP sent successfully (server: ${serverReqId})`);
 
       setState(prev => ({ ...prev, otpSent: true, canResend: false }));
       startResendTimer();
@@ -310,91 +438,23 @@ export const useMobileAuth = () => {
 
       return { success: true };
     } catch (error: any) {
-      let friendly = 'Failed to send OTP';
-      let errorCode = '';
-      let reqId = '';
-      let shouldRetry = false;
-      let allowProceedToOTP = false;
+      console.error(`[${clientRequestId}] OTP generation failed:`, error);
       
-      // Detect network errors (common on APK with poor connectivity)
+      let friendlyMessage = 'Failed to send OTP. Please try again.';
+      
       if (error?.message?.includes('Failed to fetch') || 
           error?.message?.includes('NetworkError') ||
-          error?.message?.includes('timeout') ||
-          error?.message?.includes('aborted')) {
-        friendly = 'Network error. Check your internet and try again.';
-        shouldRetry = !isRetry;
-      } else {
-        try {
-          const details = (error && (error.details || (error.context && error.context.body))) || null as any;
-          let parsedDetails: any = null;
-          
-          if (typeof details === 'string') {
-            parsedDetails = JSON.parse(details);
-          } else if (details && typeof details === 'object') {
-            parsedDetails = details;
-          }
-          
-          // Extract structured error info
-          if (parsedDetails) {
-            errorCode = parsedDetails.code || '';
-            reqId = parsedDetails.reqId || '';
-            
-            const errorMessages: Record<string, { message: string; canProceed?: boolean }> = {
-              'INVALID_METHOD': { message: 'Service issue. Please refresh and try again.' },
-              'INVALID_JSON': { message: 'Technical glitch. Retrying...', canProceed: true },
-              'VALIDATION_ERROR': { message: parsedDetails.error || 'Please check your mobile number.' },
-              'OTP_RATE_LIMIT': { message: parsedDetails.error || 'Too many requests. Please wait.' },
-              'OTP_DAILY_LIMIT': { message: parsedDetails.error || 'Daily limit reached. Try tomorrow.' },
-              'OTP_BLOCKED': { message: parsedDetails.error || 'Account blocked. Contact support.' },
-              'USER_NOT_FOUND': { message: 'No account found. Sign up first or use Email & Password.' },
-              'CONFIG_MISSING': { message: 'Service not configured. Contact support.' },
-              'TWILIO_SANDBOX_REQUIRED': { message: 'WhatsApp not set up for this number. Use Email & Password.' },
-              'TWILIO_INVALID_FROM': { message: 'WhatsApp service issue. Contact support.' },
-              'TWILIO_AUTH_INVALID': { message: 'Authentication error. Contact support.' },
-              'UNEXPECTED_ERROR': { message: 'Something went wrong. Try again.', canProceed: true }
-            };
-            
-            const errorInfo = errorMessages[errorCode];
-            if (errorInfo) {
-              friendly = errorInfo.message;
-              allowProceedToOTP = errorInfo.canProceed || false;
-              shouldRetry = !isRetry && errorCode === 'INVALID_JSON';
-            } else {
-              friendly = parsedDetails.error || parsedDetails.message || friendly;
-            }
-          }
-        } catch (parseErr) {
-          console.warn('Failed to parse error details:', parseErr);
-        }
-
-        // Fallback pattern matching for unstructured errors
-        if (/user not found/i.test(error?.message || '')) {
-          friendly = 'No account found. Sign up first or use Email & Password.';
-        } else if (/not a valid WhatsApp recipient/i.test(error?.message || '') || /sandbox/i.test(error?.message || '')) {
-          friendly = 'WhatsApp not configured. Use Email & Password.';
-        }
+          error?.message?.includes('timeout')) {
+        friendlyMessage = 'Network error. Check your internet connection.';
       }
-
-      // One silent retry for transient errors
-      if (shouldRetry && !isRetry) {
-        console.log(`Retrying OTP generation (code: ${errorCode})...`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return generateOTP(mobileNumber, true);
-      }
-
-      console.error('OTP generation error:', error);
-      
-      const description = reqId 
-        ? `${friendly} (Ref: ${reqId.slice(-4).toUpperCase()})`
-        : friendly;
       
       toast({
         title: "OTP Generation Failed",
-        description,
+        description: friendlyMessage,
         variant: "destructive",
       });
       
-      return { success: false, error: friendly, allowProceedToOTP };
+      return { success: false, error: friendlyMessage };
     } finally {
       setState(prev => ({ ...prev, isLoading: false }));
     }
