@@ -70,7 +70,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     // Process redirect params from magic link (hash tokens or code param)
-    const processRedirectParams = async () => {
+    // Returns true if redirect was handled, false otherwise
+    const processRedirectParams = async (): Promise<boolean> => {
       try {
         // 1) Hash tokens: #access_token=...&refresh_token=...
         const rawHash = window.location.hash || '';
@@ -86,11 +87,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               setUser(data.session.user);
               setIsGuest(false);
               localStorage.removeItem('yogic_mile_guest_mode');
-              setIsLoading(false); // Must set loading false before early return
               // Clean the URL
               const { origin, pathname, search } = window.location;
               window.history.replaceState({}, document.title, origin + pathname + search);
-              return; // Done
+              return true; // Redirect handled
             }
           }
         }
@@ -107,12 +107,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               setUser(data.session.user);
               setIsGuest(false);
               localStorage.removeItem('yogic_mile_guest_mode');
-              setIsLoading(false); // Set loading false after successful code exchange
+              // Clean code param from URL
+              url.searchParams.delete('code');
+              url.searchParams.delete('type');
+              window.history.replaceState({}, document.title, url.toString());
+              return true; // Redirect handled
             }
           } catch (err) {
             console.error('exchangeCodeForSession failed:', err);
           } finally {
-            // Clean code param from URL
+            // Clean code param from URL even if exchange failed
             url.searchParams.delete('code');
             url.searchParams.delete('type');
             window.history.replaceState({}, document.title, url.toString());
@@ -121,20 +125,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (e) {
         console.error('Auth redirect processing failed:', e);
       }
+      return false; // No redirect handled
     };
 
     // Initialize: first try to process redirect tokens, then read existing session
     (async () => {
-      await processRedirectParams();
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
+      const redirectHandled = await processRedirectParams();
+      
+      // Only get session if we didn't just process a redirect
+      if (!redirectHandled) {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
 
-      if (session) {
-        setIsGuest(false);
-        localStorage.removeItem('yogic_mile_guest_mode');
+        if (session) {
+          setIsGuest(false);
+          localStorage.removeItem('yogic_mile_guest_mode');
+        }
       }
+      
+      // Always set loading to false at the end, only once
+      setIsLoading(false);
     })();
 
     return () => subscription.unsubscribe();
