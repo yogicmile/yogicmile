@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,8 +8,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthGuard } from "@/components/AuthGuard";
 import { AppLayout } from "@/components/AppLayout";
-import { FirstTimePermissionFlow } from "@/components/onboarding/FirstTimePermissionFlow";
-import { permissionManager } from "@/services/PermissionManager";
 import Index from "./pages/Index";
 import { WalletPage } from "./pages/WalletPage";
 import { RewardsPage } from "./pages/RewardsPage";
@@ -26,42 +24,8 @@ import { CommunityPage } from "./pages/CommunityPage";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
+  // Onboarding flow is handled within WelcomePage to avoid race conditions
 
-  useEffect(() => {
-    checkFirstLaunch();
-  }, []);
-
-  const checkFirstLaunch = async () => {
-    const completed = await permissionManager.hasCompletedOnboarding();
-    setIsFirstLaunch(!completed);
-  };
-
-  const handleOnboardingComplete = () => {
-    setIsFirstLaunch(false);
-  };
-
-  // Show permission flow on first launch
-  if (isFirstLaunch === true) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <FirstTimePermissionFlow onComplete={handleOnboardingComplete} />
-        </TooltipProvider>
-      </QueryClientProvider>
-    );
-  }
-
-  // Show loading state while checking
-  if (isFirstLaunch === null) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-foreground font-semibold">Loading...</div>
-      </div>
-    );
-  }
 
   // Normal app flow
   return (

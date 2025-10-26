@@ -1,8 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
+
+import { FirstTimePermissionFlow } from '@/components/onboarding/FirstTimePermissionFlow';
+import { permissionManager } from '@/services/PermissionManager';
 
 const WelcomePage = () => {
   const navigate = useNavigate();
@@ -10,12 +13,51 @@ const WelcomePage = () => {
   try {
     const { enterGuestMode, user, isLoading } = useAuth();
 
+    const [showPermissionFlow, setShowPermissionFlow] = useState(false);
+    const [, setCheckingOnboarding] = useState(true);
+
     // If authenticated, never show welcome — go home
     useEffect(() => {
       if (!isLoading && user) {
         navigate('/');
       }
     }, [isLoading, user, navigate]);
+
+    // Check onboarding for unauthenticated users
+    useEffect(() => {
+      if (!isLoading && !user) {
+        let cancelled = false;
+        const check = async () => {
+          console.log('[WelcomePage] Checking onboarding status...');
+          try {
+            const result = await Promise.race<boolean>([
+              permissionManager.hasCompletedOnboarding(),
+              new Promise<boolean>((resolve) => setTimeout(() => resolve(true), 5000)), // timeout -> treat as completed to avoid blocking
+            ]);
+            if (!cancelled && result === false) {
+              setShowPermissionFlow(true);
+            }
+          } catch (e) {
+            console.warn('[WelcomePage] Onboarding check failed, proceeding to welcome.', e);
+          } finally {
+            if (!cancelled) setCheckingOnboarding(false);
+          }
+        };
+        check();
+        return () => { cancelled = true; };
+      } else {
+        setCheckingOnboarding(false);
+      }
+    }, [isLoading, user]);
+
+    const handlePermissionsComplete = async () => {
+      try {
+        await permissionManager.markOnboardingComplete();
+      } catch (e) {
+        console.warn('[WelcomePage] markOnboardingComplete failed', e);
+      }
+      setShowPermissionFlow(false);
+    };
 
     const handleGuestMode = () => {
       try {
@@ -29,6 +71,13 @@ const WelcomePage = () => {
 
     console.log('WelcomePage rendering successfully');
 
+    if (showPermissionFlow) {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <FirstTimePermissionFlow onComplete={handlePermissionsComplete} />
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 flex flex-col items-center justify-center p-4">
         {/* Step Rewards Logo and Branding */}
