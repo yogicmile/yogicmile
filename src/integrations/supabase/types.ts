@@ -350,7 +350,7 @@ export type Database = {
           admin_user_id: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           new_values: Json | null
           old_values: Json | null
           record_id: string | null
@@ -362,7 +362,7 @@ export type Database = {
           admin_user_id: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string | null
@@ -374,7 +374,7 @@ export type Database = {
           admin_user_id?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           record_id?: string | null
@@ -433,7 +433,7 @@ export type Database = {
           conversion_data: Json | null
           created_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           partner_id: string
           partner_name: string
           referrer_url: string | null
@@ -448,7 +448,7 @@ export type Database = {
           conversion_data?: Json | null
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           partner_id: string
           partner_name: string
           referrer_url?: string | null
@@ -463,7 +463,7 @@ export type Database = {
           conversion_data?: Json | null
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           partner_id?: string
           partner_name?: string
           referrer_url?: string | null
@@ -530,7 +530,7 @@ export type Database = {
           created_at: string
           details: Json | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           user_agent: string | null
           user_id: string | null
         }
@@ -539,7 +539,7 @@ export type Database = {
           created_at?: string
           details?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string | null
         }
@@ -548,7 +548,7 @@ export type Database = {
           created_at?: string
           details?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string | null
         }
@@ -1221,7 +1221,7 @@ export type Database = {
           export_type: string
           file_path: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           request_timestamp: string
           status: string
           user_id: string
@@ -1234,7 +1234,7 @@ export type Database = {
           export_type?: string
           file_path?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           request_timestamp?: string
           status?: string
           user_id: string
@@ -1247,7 +1247,7 @@ export type Database = {
           export_type?: string
           file_path?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           request_timestamp?: string
           status?: string
           user_id?: string
@@ -1260,7 +1260,7 @@ export type Database = {
           device_fingerprint: string
           expires_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           is_active: boolean | null
           last_activity: string | null
           session_token: string
@@ -1272,7 +1272,7 @@ export type Database = {
           device_fingerprint: string
           expires_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_active?: boolean | null
           last_activity?: string | null
           session_token: string
@@ -1284,7 +1284,7 @@ export type Database = {
           device_fingerprint?: string
           expires_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_active?: boolean | null
           last_activity?: string | null
           session_token?: string
@@ -3227,7 +3227,7 @@ export type Database = {
           event_timestamp: string
           event_type: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           result_status: string | null
           user_agent: string | null
           user_id: string | null
@@ -3242,7 +3242,7 @@ export type Database = {
           event_timestamp?: string
           event_type: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           result_status?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -3257,7 +3257,7 @@ export type Database = {
           event_timestamp?: string
           event_type?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           result_status?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -3269,7 +3269,7 @@ export type Database = {
           analytics_data: Json | null
           content_shared: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           platform: string | null
           share_context: string | null
           share_type: string
@@ -3281,7 +3281,7 @@ export type Database = {
           analytics_data?: Json | null
           content_shared?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           platform?: string | null
           share_context?: string | null
           share_type: string
@@ -3293,7 +3293,7 @@ export type Database = {
           analytics_data?: Json | null
           content_shared?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           platform?: string | null
           share_context?: string | null
           share_type?: string
@@ -4018,7 +4018,7 @@ export type Database = {
           activity_data: Json | null
           activity_type: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           session_id: string | null
           timestamp: string
           user_agent: string | null
@@ -4028,7 +4028,7 @@ export type Database = {
           activity_data?: Json | null
           activity_type: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           session_id?: string | null
           timestamp?: string
           user_agent?: string | null
@@ -4038,7 +4038,7 @@ export type Database = {
           activity_data?: Json | null
           activity_type?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           session_id?: string | null
           timestamp?: string
           user_agent?: string | null
@@ -4089,7 +4089,7 @@ export type Database = {
           granted: boolean
           granted_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           user_agent: string | null
           user_id: string
           withdrawn_at: string | null
@@ -4101,7 +4101,7 @@ export type Database = {
           granted?: boolean
           granted_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id: string
           withdrawn_at?: string | null
@@ -4113,7 +4113,7 @@ export type Database = {
           granted?: boolean
           granted_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string
           withdrawn_at?: string | null
@@ -4351,6 +4351,7 @@ export type Database = {
       users: {
         Row: {
           address: string
+          auth_user_id: string | null
           created_at: string | null
           email: string | null
           full_name: string
@@ -4366,6 +4367,7 @@ export type Database = {
         }
         Insert: {
           address: string
+          auth_user_id?: string | null
           created_at?: string | null
           email?: string | null
           full_name: string
@@ -4381,6 +4383,7 @@ export type Database = {
         }
         Update: {
           address?: string
+          auth_user_id?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string
@@ -4518,7 +4521,7 @@ export type Database = {
           device_fingerprint: string | null
           expires_at: string | null
           id: string | null
-          ip_address: unknown | null
+          ip_address: unknown
           is_active: boolean | null
           last_activity: string | null
           user_agent: string | null
@@ -4529,7 +4532,7 @@ export type Database = {
           device_fingerprint?: string | null
           expires_at?: string | null
           id?: string | null
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_active?: boolean | null
           last_activity?: string | null
           user_agent?: string | null
@@ -4540,7 +4543,7 @@ export type Database = {
           device_fingerprint?: string | null
           expires_at?: string | null
           id?: string | null
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_active?: boolean | null
           last_activity?: string | null
           user_agent?: string | null
@@ -4665,24 +4668,21 @@ export type Database = {
       }
     }
     Functions: {
-      can_view_challenge: {
-        Args: { p_challenge_id: string }
-        Returns: boolean
-      }
-      check_spin_availability: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
-      create_user_with_mobile: {
-        Args:
-          | {
+      can_view_challenge: { Args: { p_challenge_id: string }; Returns: boolean }
+      check_spin_availability: { Args: { p_user_id: string }; Returns: Json }
+      create_user_with_mobile:
+        | {
+            Args: {
               p_address?: string
               p_email?: string
               p_full_name: string
               p_mobile_number: string
               p_referred_by?: string
             }
-          | {
+            Returns: string
+          }
+        | {
+            Args: {
               p_address?: string
               p_email?: string
               p_full_name: string
@@ -4690,8 +4690,8 @@ export type Database = {
               p_referred_by?: string
               p_user_id?: string
             }
-        Returns: string
-      }
+            Returns: string
+          }
       detect_fraud_patterns: {
         Args: {
           p_activity_data: Json
@@ -4704,10 +4704,7 @@ export type Database = {
         Args: { p_steps: number; p_user_id: string }
         Returns: string
       }
-      generate_otp: {
-        Args: { p_mobile_number: string }
-        Returns: string
-      }
+      generate_otp: { Args: { p_mobile_number: string }; Returns: string }
       generate_otp_with_rate_limit: {
         Args: {
           p_ip_address?: unknown
@@ -4720,10 +4717,7 @@ export type Database = {
         Args: { mobile_number_param: string }
         Returns: string
       }
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_current_user_role: { Args: never; Returns: string }
       get_user_challenge_role: {
         Args: { challenge_id_param: string }
         Returns: string
@@ -4768,18 +4762,12 @@ export type Database = {
         }
         Returns: boolean
       }
-      hash_otp: {
-        Args: { plain_otp: string }
-        Returns: string
-      }
+      hash_otp: { Args: { plain_otp: string }; Returns: string }
       is_challenge_creator: {
         Args: { challenge_id_param: string }
         Returns: boolean
       }
-      is_family_member: {
-        Args: { plan_id_param: string }
-        Returns: boolean
-      }
+      is_family_member: { Args: { plan_id_param: string }; Returns: boolean }
       is_family_plan_owner: {
         Args: { plan_id_param: string }
         Returns: boolean
