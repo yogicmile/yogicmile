@@ -45,31 +45,45 @@ const handler = async (req: Request): Promise<Response> => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   try {
-    // Safely parse request body
-    const rawBody = await req.text();
-    
-    if (!rawBody || rawBody.trim() === '') {
-      console.error(`[${reqId}] Empty request body`);
-      return new Response(JSON.stringify({
-        success: false,
-        code: 'INVALID_JSON',
-        error: 'Request body is required.',
-        reqId
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    // Safely parse request body with robust multi-parser
+    let requestBody: GenerateOTPRequest | null = null;
+    const contentType = (req.headers.get('content-type') || '').toLowerCase();
 
-    let requestBody: GenerateOTPRequest;
     try {
-      requestBody = JSON.parse(rawBody);
+      if (contentType.includes('application/json')) {
+        // Primary: JSON
+        requestBody = await req.json();
+      } else if (contentType.includes('application/x-www-form-urlencoded')) {
+        // Fallback: form-encoded
+        const form = await req.formData();
+        requestBody = {
+          mobileNumber: String(form.get('mobileNumber') || ''),
+          userAgent: String(form.get('userAgent') || ''),
+          ipAddress: String(form.get('ipAddress') || ''),
+        } as GenerateOTPRequest;
+      } else {
+        // Last resort: raw text then JSON.parse
+        const rawBody = await req.text();
+        if (!rawBody || rawBody.trim() === '') {
+          console.error(`[${reqId}] Empty request body`);
+          return new Response(JSON.stringify({
+            success: false,
+            code: 'INVALID_JSON',
+            error: 'Request body is required.',
+            reqId
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        requestBody = JSON.parse(rawBody);
+      }
     } catch (parseError) {
-      console.error(`[${reqId}] JSON parse error:`, parseError);
+      console.error(`[${reqId}] Body parse error:`, parseError);
       return new Response(JSON.stringify({
         success: false,
         code: 'INVALID_JSON',
-        error: 'Invalid JSON format in request body.',
+        error: 'Invalid request body format.',
         reqId
       }), {
         status: 400,
@@ -113,14 +127,14 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Validate E.164 format (international phone number)
-    const e164Pattern = /^\+?[1-9]\d{1,14}$/;
-    if (!e164Pattern.test(mobileNumber)) {
+    // Validate Indian E.164 format (+91 followed by 10 digits starting 6-9)
+    const e164India = /^\+91[6-9]\d{9}$/;
+    if (!e164India.test(mobileNumber)) {
       console.error(`[${reqId}] Invalid mobile number format: ${maskedMobile}`);
       return new Response(JSON.stringify({
         success: false,
         code: 'VALIDATION_ERROR',
-        error: 'Please enter a valid mobile number with country code (e.g., +919885277707).',
+        error: 'Please enter a valid Indian mobile number with country code (e.g., +91XXXXXXXXXX).',
         reqId
       }), {
         status: 400,
