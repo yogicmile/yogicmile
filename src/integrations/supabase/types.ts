@@ -524,6 +524,30 @@ export type Database = {
         }
         Relationships: []
       }
+      ar_mode_settings: {
+        Row: {
+          achievement_animations: boolean | null
+          ar_enabled: boolean | null
+          ar_theme: string | null
+          show_virtual_companions: boolean | null
+          user_id: string
+        }
+        Insert: {
+          achievement_animations?: boolean | null
+          ar_enabled?: boolean | null
+          ar_theme?: string | null
+          show_virtual_companions?: boolean | null
+          user_id: string
+        }
+        Update: {
+          achievement_animations?: boolean | null
+          ar_enabled?: boolean | null
+          ar_theme?: string | null
+          show_virtual_companions?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -695,6 +719,57 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_completion_photos: {
+        Row: {
+          caption: string | null
+          challenge_id: string
+          id: string
+          likes_count: number | null
+          location: unknown
+          photo_url: string
+          route_id: string | null
+          uploaded_at: string | null
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          challenge_id: string
+          id?: string
+          likes_count?: number | null
+          location?: unknown
+          photo_url: string
+          route_id?: string | null
+          uploaded_at?: string | null
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          challenge_id?: string
+          id?: string
+          likes_count?: number | null
+          location?: unknown
+          photo_url?: string
+          route_id?: string | null
+          uploaded_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_completion_photos_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_completion_photos_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "walking_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenge_participants: {
         Row: {
           challenge_id: string
@@ -738,15 +813,25 @@ export type Database = {
       }
       challenges: {
         Row: {
+          can_be_duplicated: boolean | null
+          community_id: string | null
+          completion_count: number | null
           created_at: string | null
           creator_id: string
           description: string | null
+          difficulty_level: string | null
           end_date: string
           goal_type: string
           group_chat_id: string | null
           id: string
+          parent_challenge_id: string | null
           participant_limit: number | null
           privacy_setting: string | null
+          requires_gps_tracking: boolean | null
+          requires_photo_proof: boolean | null
+          reward_items: Json | null
+          reward_type: string | null
+          route_type: string | null
           start_date: string
           status: string | null
           target_value: number
@@ -754,15 +839,25 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          can_be_duplicated?: boolean | null
+          community_id?: string | null
+          completion_count?: number | null
           created_at?: string | null
           creator_id: string
           description?: string | null
+          difficulty_level?: string | null
           end_date: string
           goal_type: string
           group_chat_id?: string | null
           id?: string
+          parent_challenge_id?: string | null
           participant_limit?: number | null
           privacy_setting?: string | null
+          requires_gps_tracking?: boolean | null
+          requires_photo_proof?: boolean | null
+          reward_items?: Json | null
+          reward_type?: string | null
+          route_type?: string | null
           start_date: string
           status?: string | null
           target_value: number
@@ -770,22 +865,47 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          can_be_duplicated?: boolean | null
+          community_id?: string | null
+          completion_count?: number | null
           created_at?: string | null
           creator_id?: string
           description?: string | null
+          difficulty_level?: string | null
           end_date?: string
           goal_type?: string
           group_chat_id?: string | null
           id?: string
+          parent_challenge_id?: string | null
           participant_limit?: number | null
           privacy_setting?: string | null
+          requires_gps_tracking?: boolean | null
+          requires_photo_proof?: boolean | null
+          reward_items?: Json | null
+          reward_type?: string | null
+          route_type?: string | null
           start_date?: string
           status?: string | null
           target_value?: number
           title?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "challenges_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenges_parent_challenge_id_fkey"
+            columns: ["parent_challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       collectibles: {
         Row: {
@@ -826,6 +946,66 @@ export type Database = {
         }
         Relationships: []
       }
+      communities: {
+        Row: {
+          avatar_url: string | null
+          banner_url: string | null
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          id: string
+          invite_code: string | null
+          member_count: number | null
+          name: string
+          privacy_setting: string | null
+          qr_code_url: string | null
+          status: string | null
+          streak_record_days: number | null
+          theme_settings: Json | null
+          total_challenges_completed: number | null
+          total_distance_km: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          id?: string
+          invite_code?: string | null
+          member_count?: number | null
+          name: string
+          privacy_setting?: string | null
+          qr_code_url?: string | null
+          status?: string | null
+          streak_record_days?: number | null
+          theme_settings?: Json | null
+          total_challenges_completed?: number | null
+          total_distance_km?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          id?: string
+          invite_code?: string | null
+          member_count?: number | null
+          name?: string
+          privacy_setting?: string | null
+          qr_code_url?: string | null
+          status?: string | null
+          streak_record_days?: number | null
+          theme_settings?: Json | null
+          total_challenges_completed?: number | null
+          total_distance_km?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       community_achievements: {
         Row: {
           achievement_name: string
@@ -858,6 +1038,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      community_members: {
+        Row: {
+          community_id: string
+          contribution_score: number | null
+          id: string
+          joined_date: string | null
+          role: string | null
+          total_steps_contributed: number | null
+          user_id: string
+        }
+        Insert: {
+          community_id: string
+          contribution_score?: number | null
+          id?: string
+          joined_date?: string | null
+          role?: string | null
+          total_steps_contributed?: number | null
+          user_id: string
+        }
+        Update: {
+          community_id?: string
+          contribution_score?: number | null
+          id?: string
+          joined_date?: string | null
+          role?: string | null
+          total_steps_contributed?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_members_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       connected_devices: {
         Row: {
@@ -1836,12 +2054,15 @@ export type Database = {
         Row: {
           category: string
           coins_earned: number | null
+          community_id: string | null
           created_at: string | null
           id: string
+          leaderboard_type: string | null
           location_filter: string | null
           period: string
           rank_position: number
           steps: number | null
+          team_id: string | null
           updated_at: string | null
           user_id: string
           weeks_active: number | null
@@ -1849,12 +2070,15 @@ export type Database = {
         Insert: {
           category: string
           coins_earned?: number | null
+          community_id?: string | null
           created_at?: string | null
           id?: string
+          leaderboard_type?: string | null
           location_filter?: string | null
           period: string
           rank_position: number
           steps?: number | null
+          team_id?: string | null
           updated_at?: string | null
           user_id: string
           weeks_active?: number | null
@@ -1862,17 +2086,35 @@ export type Database = {
         Update: {
           category?: string
           coins_earned?: number | null
+          community_id?: string | null
           created_at?: string | null
           id?: string
+          leaderboard_type?: string | null
           location_filter?: string | null
           period?: string
           rank_position?: number
           steps?: number | null
+          team_id?: string | null
           updated_at?: string | null
           user_id?: string
           weeks_active?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "leaderboards_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leaderboards_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "virtual_teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       load_time_analytics: {
         Row: {
@@ -2057,6 +2299,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mini_challenges: {
+        Row: {
+          active_until: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_mystery: boolean | null
+          mystery_reveal: string | null
+          name: string
+          reward_coins: number | null
+          target_steps: number
+          time_limit_minutes: number | null
+          type: string
+        }
+        Insert: {
+          active_until?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_mystery?: boolean | null
+          mystery_reveal?: string | null
+          name: string
+          reward_coins?: number | null
+          target_steps: number
+          time_limit_minutes?: number | null
+          type: string
+        }
+        Update: {
+          active_until?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_mystery?: boolean | null
+          mystery_reveal?: string | null
+          name?: string
+          reward_coins?: number | null
+          target_steps?: number
+          time_limit_minutes?: number | null
+          type?: string
+        }
+        Relationships: []
       }
       moderation_reports: {
         Row: {
@@ -3130,6 +3414,41 @@ export type Database = {
         }
         Relationships: []
       }
+      route_heatmap_data: {
+        Row: {
+          community_id: string | null
+          id: string
+          intensity_score: number | null
+          last_visited: string | null
+          location_point: unknown
+          user_id: string | null
+        }
+        Insert: {
+          community_id?: string | null
+          id?: string
+          intensity_score?: number | null
+          last_visited?: string | null
+          location_point: unknown
+          user_id?: string | null
+        }
+        Update: {
+          community_id?: string | null
+          id?: string
+          intensity_score?: number | null
+          last_visited?: string | null
+          location_point?: unknown
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_heatmap_data_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seasonal_challenge_participants: {
         Row: {
           challenge_id: string
@@ -3866,6 +4185,41 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          contribution_steps: number | null
+          id: string
+          joined_date: string | null
+          role: string | null
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          contribution_steps?: number | null
+          id?: string
+          joined_date?: string | null
+          role?: string | null
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          contribution_steps?: number | null
+          id?: string
+          joined_date?: string | null
+          role?: string | null
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "virtual_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ticket_responses: {
         Row: {
           attachments: Json | null
@@ -4243,6 +4597,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_playlists: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_default_walking: boolean | null
+          music_service: string | null
+          name: string
+          playlist_url: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_default_walking?: boolean | null
+          music_service?: string | null
+          name: string
+          playlist_url?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_default_walking?: boolean | null
+          music_service?: string | null
+          name?: string
+          playlist_url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           achievements_count: number | null
@@ -4446,6 +4830,127 @@ export type Database = {
           views_count?: number | null
         }
         Relationships: []
+      }
+      virtual_teams: {
+        Row: {
+          community_id: string | null
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          id: string
+          is_public: boolean | null
+          max_members: number | null
+          name: string
+          team_goal_steps: number | null
+          team_progress_steps: number | null
+          updated_at: string | null
+          walk_schedule: Json | null
+        }
+        Insert: {
+          community_id?: string | null
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          max_members?: number | null
+          name: string
+          team_goal_steps?: number | null
+          team_progress_steps?: number | null
+          updated_at?: string | null
+          walk_schedule?: Json | null
+        }
+        Update: {
+          community_id?: string | null
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          max_members?: number | null
+          name?: string
+          team_goal_steps?: number | null
+          team_progress_steps?: number | null
+          updated_at?: string | null
+          walk_schedule?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "virtual_teams_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      walking_routes: {
+        Row: {
+          average_pace_min_per_km: number | null
+          calories_burned: number | null
+          challenge_id: string | null
+          completed_at: string | null
+          distance_km: number | null
+          duration_seconds: number | null
+          elevation_gain_m: number | null
+          end_location: unknown
+          id: string
+          max_speed_kmh: number | null
+          route_data: Json
+          route_thumbnail_url: string | null
+          start_location: unknown
+          started_at: string | null
+          status: string | null
+          steps_count: number | null
+          user_id: string
+        }
+        Insert: {
+          average_pace_min_per_km?: number | null
+          calories_burned?: number | null
+          challenge_id?: string | null
+          completed_at?: string | null
+          distance_km?: number | null
+          duration_seconds?: number | null
+          elevation_gain_m?: number | null
+          end_location?: unknown
+          id?: string
+          max_speed_kmh?: number | null
+          route_data?: Json
+          route_thumbnail_url?: string | null
+          start_location?: unknown
+          started_at?: string | null
+          status?: string | null
+          steps_count?: number | null
+          user_id: string
+        }
+        Update: {
+          average_pace_min_per_km?: number | null
+          calories_burned?: number | null
+          challenge_id?: string | null
+          completed_at?: string | null
+          distance_km?: number | null
+          duration_seconds?: number | null
+          elevation_gain_m?: number | null
+          end_location?: unknown
+          id?: string
+          max_speed_kmh?: number | null
+          route_data?: Json
+          route_thumbnail_url?: string | null
+          start_location?: unknown
+          started_at?: string | null
+          status?: string | null
+          steps_count?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "walking_routes_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wallet_balances: {
         Row: {
