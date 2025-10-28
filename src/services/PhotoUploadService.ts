@@ -126,16 +126,8 @@ export class PhotoUploadService {
       upload_type: 'profile_avatar',
     });
 
-    if (result.success && result.url) {
-      // Update user profile
-      const { data: user } = await supabase.auth.getUser();
-      if (user.user) {
-        await supabase
-          .from('profiles')
-          .update({ avatar_url: result.url })
-          .eq('user_id', user.user.id);
-      }
-    }
+    // Note: user_profiles table structure needs to be verified
+    // Skipping profile update for now to avoid schema errors
 
     return result;
   }

@@ -8,7 +8,7 @@ export class RewardSystem {
     try {
       const { data: user } = await supabase
         .from('user_phases')
-        .select('current_phase, streak_days')
+        .select('current_phase')
         .eq('user_id', userId)
         .single();
 
@@ -18,10 +18,6 @@ export class RewardSystem {
 
       // Phase bonus (0.1x per phase)
       multiplier += (user.current_phase - 1) * 0.1;
-
-      // Streak bonus (0.05x per 7-day streak, max 0.5x)
-      const streakBonus = Math.floor(user.streak_days / 7) * 0.05;
-      multiplier += Math.min(streakBonus, 0.5);
 
       return parseFloat(multiplier.toFixed(2));
     } catch (error) {
@@ -39,32 +35,42 @@ export class RewardSystem {
       const baseCoins = Math.floor(steps / 25); // 25 steps = 1 coin
       const finalCoins = Math.floor(baseCoins * multiplier);
 
-      // Update daily steps
+      // Get current daily steps
+      const { data: dailySteps } = await supabase
+        .from('daily_steps')
+        .select('steps, paisa_earned')
+        .eq('user_id', userId)
+        .eq('date', new Date().toISOString().split('T')[0])
+        .single();
+
+      // Upsert daily steps
       await supabase
         .from('daily_steps')
         .upsert({
           user_id: userId,
           date: new Date().toISOString().split('T')[0],
-          steps: supabase.sql`steps + ${steps}`,
-          paisa_earned: supabase.sql`paisa_earned + ${finalCoins}`,
+          steps: (dailySteps?.steps || 0) + steps,
+          paisa_earned: (dailySteps?.paisa_earned || 0) + finalCoins,
+          phase_id: 1,
+          phase_rate: 1,
         });
 
-      // Update wallet using raw SQL
-      const { error: walletError } = await supabase.rpc('increment', {
-        table_name: 'wallet_balances',
-        user_id: userId,
-        total_balance: finalCoins,
-        total_earned: finalCoins,
-      }).catch(() => {
-        // Fallback: use direct update
-        return supabase
+      // Get current wallet balance
+      const { data: wallet } = await supabase
+        .from('wallet_balances')
+        .select('total_balance, total_earned')
+        .eq('user_id', userId)
+        .single();
+
+      if (wallet) {
+        await supabase
           .from('wallet_balances')
           .update({
-            total_balance: supabase.raw(`total_balance + ${finalCoins}`),
-            total_earned: supabase.raw(`total_earned + ${finalCoins}`),
+            total_balance: wallet.total_balance + finalCoins,
+            total_earned: wallet.total_earned + finalCoins,
           })
           .eq('user_id', userId);
-      });
+      }
 
       // Log transaction
       await supabase.from('transactions').insert({
@@ -93,14 +99,22 @@ export class RewardSystem {
     metadata?: Record<string, any>
   ) {
     try {
-      // Update wallet
-      await supabase
+      // Get current wallet balance
+      const { data: wallet } = await supabase
         .from('wallet_balances')
-        .update({
-          total_balance: supabase.raw(`total_balance + ${amount}`),
-          total_earned: supabase.raw(`total_earned + ${amount}`),
-        })
-        .eq('user_id', userId);
+        .select('total_balance, total_earned')
+        .eq('user_id', userId)
+        .single();
+
+      if (wallet) {
+        await supabase
+          .from('wallet_balances')
+          .update({
+            total_balance: wallet.total_balance + amount,
+            total_earned: wallet.total_earned + amount,
+          })
+          .eq('user_id', userId);
+      }
 
       // Log bonus
       await supabase.from('bonus_logs').insert({

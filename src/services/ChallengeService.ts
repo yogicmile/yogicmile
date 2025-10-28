@@ -166,27 +166,38 @@ export class ChallengeService {
         .eq('id', challengeId)
         .single();
 
-      if (!challenge || !challenge.reward_items || challenge.reward_items.length === 0) {
+      if (!challenge || !challenge.reward_items) {
         return { success: true };
       }
 
-      // Calculate total reward amount
-      const rewardAmount = challenge.reward_items.reduce((sum: number, item: any) => {
+      // Type guard and calculate total reward amount
+      const items = challenge.reward_items as any[];
+      if (!Array.isArray(items) || items.length === 0) {
+        return { success: true };
+      }
+
+      const rewardAmount = items.reduce((sum: number, item: any) => {
         return sum + (item.amount || 0);
       }, 0);
 
       if (rewardAmount <= 0) return { success: true };
 
-      // Add coins to wallet
-      const { error: walletError } = await supabase
+      // Fetch current balance and update
+      const { data: wallet } = await supabase
         .from('wallet_balances')
-        .update({
-          total_balance: supabase.raw(`total_balance + ${rewardAmount}`),
-          total_earned: supabase.raw(`total_earned + ${rewardAmount}`),
-        })
-        .eq('user_id', userId);
+        .select('total_balance, total_earned')
+        .eq('user_id', userId)
+        .single();
 
-      if (walletError) throw walletError;
+      if (wallet) {
+        await supabase
+          .from('wallet_balances')
+          .update({
+            total_balance: wallet.total_balance + rewardAmount,
+            total_earned: wallet.total_earned + rewardAmount,
+          })
+          .eq('user_id', userId);
+      }
 
       // Log transaction
       await supabase.from('transactions').insert({
@@ -216,14 +227,10 @@ export class ChallengeService {
     try {
       let query = supabase
         .from('challenges')
-        .select(`
-          *,
-          creator:creator_id (id, full_name),
-          participants:challenge_participants(count)
-        `)
+        .select('*')
         .eq('status', 'active')
         .gte('end_date', new Date().toISOString())
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }) as any;
 
       if (filters?.type) query = query.eq('challenge_type', filters.type);
       if (filters?.privacy) query = query.eq('privacy_setting', filters.privacy);

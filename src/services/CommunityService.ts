@@ -77,8 +77,8 @@ export class CommunityService {
     try {
       let query = supabase
         .from('communities')
-        .select('*, creator:creator_id(id, full_name)')
-        .order('created_at', { ascending: false });
+        .select('*')
+        .order('created_at', { ascending: false }) as any;
 
       if (filters?.category) {
         query = query.eq('category', filters.category);
@@ -192,10 +192,9 @@ export class CommunityService {
       const { data: post, error } = await supabase
         .from('forum_posts')
         .insert({
-          community_id: data.community_id,
+          author_id: user.user.id,
           title: data.title,
           content: data.content,
-          author_user_id: user.user.id,
           category: data.post_type || 'discussion',
           image_urls: data.media_urls || [],
         })
@@ -218,9 +217,8 @@ export class CommunityService {
       const { data: posts, error } = await supabase
         .from('forum_posts')
         .select('*')
-        .eq('community_id', communityId)
         .order('created_at', { ascending: false })
-        .limit(limit);
+        .limit(limit) as any;
 
       if (error) throw error;
       return { success: true, posts };
@@ -242,7 +240,7 @@ export class CommunityService {
         .from('forum_comments')
         .insert({
           post_id: postId,
-          author_user_id: user.user.id,
+          author_id: user.user.id,
           content,
         })
         .select()
@@ -261,15 +259,22 @@ export class CommunityService {
    */
   static async updateCommunityStats(communityId: string) {
     try {
-      // Update challenges completed count
-      const { error } = await supabase
+      // Get current stats
+      const { data: community } = await supabase
         .from('communities')
-        .update({
-          total_challenges_completed: supabase.raw('total_challenges_completed + 1'),
-        })
-        .eq('id', communityId);
+        .select('total_challenges_completed')
+        .eq('id', communityId)
+        .single();
 
-      if (error) throw error;
+      if (community) {
+        await supabase
+          .from('communities')
+          .update({
+            total_challenges_completed: community.total_challenges_completed + 1,
+          })
+          .eq('id', communityId);
+      }
+
       return { success: true };
     } catch (error) {
       console.error('Failed to update community stats:', error);

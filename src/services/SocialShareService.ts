@@ -215,14 +215,22 @@ export class SocialShareService {
         content_shared: JSON.stringify(data),
       });
 
-      // Award social engagement points
-      await supabase
+      // Award social engagement points (5 coins)
+      const { data: wallet } = await supabase
         .from('wallet_balances')
-        .update({
-          total_balance: supabase.sql`total_balance + 5`,
-          total_earned: supabase.sql`total_earned + 5`,
-        })
-        .eq('user_id', user.user.id);
+        .select('total_balance, total_earned')
+        .eq('user_id', user.user.id)
+        .single();
+
+      if (wallet) {
+        await supabase
+          .from('wallet_balances')
+          .update({
+            total_balance: wallet.total_balance + 5,
+            total_earned: wallet.total_earned + 5,
+          })
+          .eq('user_id', user.user.id);
+      }
     } catch (error) {
       console.error('Failed to log share:', error);
     }
