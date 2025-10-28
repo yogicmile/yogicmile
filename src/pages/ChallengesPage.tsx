@@ -1,9 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SeasonalChallenges } from "@/components/challenges/SeasonalChallenges";
-import { Trophy, Target, Star } from "lucide-react";
+import { ChallengeCreator } from "@/components/challenges/ChallengeCreator";
+import { MiniChallengeCarousel } from "@/components/gamification/MiniChallengeCarousel";
+import { Trophy, Target, Star, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export const ChallengesPage = () => {
+  const [showCreator, setShowCreator] = useState(false);
+
   useEffect(() => {
     document.title = "Challenges | Yogic Mile";
     const desc = "Join seasonal walking challenges, compete with friends, and earn exclusive rewards on Yogic Mile.";
@@ -19,14 +24,25 @@ export const ChallengesPage = () => {
   return (
     <main className="container mx-auto px-4 py-6 space-y-6">
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-          <Trophy className="w-8 h-8 text-warning" />
-          Seasonal Challenges
-        </h1>
-        <p className="text-muted-foreground">
-          Join time-limited challenges, compete with the community, and win exclusive rewards.
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+              <Trophy className="w-8 h-8 text-warning" />
+              Challenges
+            </h1>
+            <p className="text-muted-foreground">
+              Join challenges, compete with the community, and win exclusive rewards.
+            </p>
+          </div>
+          <Button onClick={() => setShowCreator(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Create
+          </Button>
+        </div>
       </header>
+
+      {/* Mini Challenges */}
+      <MiniChallengeCarousel />
 
       {/* Challenge Benefits */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -77,6 +93,8 @@ export const ChallengesPage = () => {
       <section>
         <SeasonalChallenges />
       </section>
+
+      <ChallengeCreator open={showCreator} onOpenChange={setShowCreator} />
     </main>
   );
 };
