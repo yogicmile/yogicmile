@@ -33,6 +33,9 @@ import java.util.Locale
 )
 class BackgroundStepTrackingPlugin : Plugin() {
     
+    // Store pending permission call for direct permission request
+    private var pendingPermissionCall: PluginCall? = null
+    
     private val stepUpdateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == StepCounterService.ACTION_STEPS_UPDATED) {
@@ -88,6 +91,22 @@ class BackgroundStepTrackingPlugin : Plugin() {
 
     @PluginMethod
     fun requestAllPermissions(call: PluginCall) {
+        android.util.Log.d("StepTracking", "requestAllPermissions called")
+        
+        val activity = getActivity()
+        if (activity == null) {
+            android.util.Log.e("StepTracking", "Activity context not available")
+            val result = JSObject()
+            result.put("activityRecognition", false)
+            result.put("notifications", false)
+            result.put("allGranted", false)
+            result.put("error", "Activity context not available")
+            call.resolve(result)
+            return
+        }
+        
+        android.util.Log.d("StepTracking", "Activity context available: $activity")
+        
         val permissions = mutableListOf<String>()
         
         // Activity Recognition (Android 10+)
@@ -95,6 +114,7 @@ class BackgroundStepTrackingPlugin : Plugin() {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACTIVITY_RECOGNITION)
                 != PackageManager.PERMISSION_GRANTED) {
                 permissions.add(Manifest.permission.ACTIVITY_RECOGNITION)
+                android.util.Log.d("StepTracking", "Need ACTIVITY_RECOGNITION permission")
             }
         }
         
@@ -103,10 +123,12 @@ class BackgroundStepTrackingPlugin : Plugin() {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
                 permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+                android.util.Log.d("StepTracking", "Need POST_NOTIFICATIONS permission")
             }
         }
         
         if (permissions.isEmpty()) {
+            android.util.Log.d("StepTracking", "All permissions already granted")
             val result = JSObject()
             result.put("activityRecognition", true)
             result.put("notifications", true)
@@ -115,7 +137,17 @@ class BackgroundStepTrackingPlugin : Plugin() {
             return
         }
         
-        requestPermissionForAliases(permissions.toTypedArray(), call, "allPermissionsCallback")
+        android.util.Log.d("StepTracking", "Requesting permissions: $permissions")
+        
+        // Save call for later callback
+        pendingPermissionCall = call
+        
+        // Request using ActivityCompat directly for better control
+        ActivityCompat.requestPermissions(
+            activity,
+            permissions.toTypedArray(),
+            REQUEST_CODE_PERMISSIONS
+        )
     }
 
     @PermissionCallback
@@ -154,6 +186,58 @@ class BackgroundStepTrackingPlugin : Plugin() {
         result.put("allGranted", activityGranted && notificationsGranted)
         
         call.resolve(result)
+    }
+
+    // Handle permission result from Android system
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        
+        android.util.Log.d("StepTracking", "onRequestPermissionsResult called with requestCode: $requestCode")
+        
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            val call = pendingPermissionCall
+            if (call == null) {
+                android.util.Log.e("StepTracking", "No pending permission call found")
+                return
+            }
+            
+            var activityGranted = true
+            var notificationsGranted = true
+            
+            for (i in permissions.indices) {
+                val permission = permissions[i]
+                val granted = grantResults[i] == PackageManager.PERMISSION_GRANTED
+                
+                android.util.Log.d("StepTracking", "Permission $permission: ${if (granted) "GRANTED" else "DENIED"}")
+                
+                when (permission) {
+                    Manifest.permission.ACTIVITY_RECOGNITION -> {
+                        activityGranted = granted
+                    }
+                    Manifest.permission.POST_NOTIFICATIONS -> {
+                        notificationsGranted = granted
+                    }
+                }
+            }
+            
+            val result = JSObject()
+            result.put("activityRecognition", activityGranted)
+            result.put("notifications", notificationsGranted)
+            result.put("allGranted", activityGranted && notificationsGranted)
+            
+            android.util.Log.d("StepTracking", "Permission result: activityRecognition=$activityGranted, notifications=$notificationsGranted")
+            
+            call.resolve(result)
+            pendingPermissionCall = null
+        }
+    }
+
+    companion object {
+        private const val REQUEST_CODE_PERMISSIONS = 1001
     }
 
     @PluginMethod
