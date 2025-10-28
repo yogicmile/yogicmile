@@ -1,5 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { Community, CommunityMember } from '@/types/community';
 
 export class CommunityService {
   /**
@@ -124,9 +123,6 @@ export class CommunityService {
 
       if (error) throw error;
 
-      // Update member count
-      await supabase.rpc('increment_community_members', { community_id: communityId });
-
       return { success: true, member };
     } catch (error) {
       console.error('Failed to join community:', error);
@@ -146,9 +142,6 @@ export class CommunityService {
         .eq('user_id', userId);
 
       if (error) throw error;
-
-      // Update member count
-      await supabase.rpc('decrement_community_members', { community_id: communityId });
 
       return { success: true };
     } catch (error) {
@@ -199,8 +192,12 @@ export class CommunityService {
       const { data: post, error } = await supabase
         .from('forum_posts')
         .insert({
-          ...data,
-          author_id: user.user.id,
+          community_id: data.community_id,
+          title: data.title,
+          content: data.content,
+          author_user_id: user.user.id,
+          category: data.post_type || 'discussion',
+          image_urls: data.media_urls || [],
         })
         .select()
         .single();
@@ -220,11 +217,7 @@ export class CommunityService {
     try {
       const { data: posts, error } = await supabase
         .from('forum_posts')
-        .select(`
-          *,
-          author:author_id (id, full_name),
-          comments:forum_comments(count)
-        `)
+        .select('*')
         .eq('community_id', communityId)
         .order('created_at', { ascending: false })
         .limit(limit);
@@ -249,7 +242,7 @@ export class CommunityService {
         .from('forum_comments')
         .insert({
           post_id: postId,
-          author_id: user.user.id,
+          author_user_id: user.user.id,
           content,
         })
         .select()
@@ -264,29 +257,19 @@ export class CommunityService {
   }
 
   /**
-   * Update community activity stats
+   * Update community activity (increment completion count)
    */
   static async updateCommunityStats(communityId: string) {
     try {
-      const { data: stats, error } = await supabase
-        .from('community_stats')
-        .select('*')
-        .eq('community_id', communityId)
-        .single();
+      // Update challenges completed count
+      const { error } = await supabase
+        .from('communities')
+        .update({
+          total_challenges_completed: supabase.raw('total_challenges_completed + 1'),
+        })
+        .eq('id', communityId);
 
-      if (error && error.code !== 'PGRST116') throw error;
-
-      const updates = {
-        community_id: communityId,
-        total_posts: stats ? stats.total_posts + 1 : 1,
-        last_activity_at: new Date().toISOString(),
-      };
-
-      const { error: upsertError } = await supabase
-        .from('community_stats')
-        .upsert(updates);
-
-      if (upsertError) throw upsertError;
+      if (error) throw error;
       return { success: true };
     } catch (error) {
       console.error('Failed to update community stats:', error);

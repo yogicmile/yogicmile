@@ -12,7 +12,7 @@ interface HeatmapPoint {
 
 export class HeatmapService {
   /**
-   * Save GPS route
+   * Save GPS route (placeholder - requires gps_routes table migration)
    */
   static async saveRoute(data: {
     coordinates: Coordinate[];
@@ -22,24 +22,22 @@ export class HeatmapService {
     route_name?: string;
   }) {
     try {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error('User not authenticated');
+      // Store in local storage for now until gps_routes table is created
+      const routeData = {
+        id: crypto.randomUUID(),
+        coordinates: data.coordinates,
+        distance: data.distance,
+        duration: data.duration,
+        steps: data.steps,
+        name: data.route_name || `Route ${new Date().toLocaleDateString()}`,
+        created_at: new Date().toISOString(),
+      };
 
-      const { data: route, error } = await supabase
-        .from('gps_routes')
-        .insert({
-          user_id: user.user.id,
-          route_data: data.coordinates,
-          distance_km: data.distance,
-          duration_minutes: data.duration,
-          steps_count: data.steps,
-          route_name: data.route_name || `Route ${new Date().toLocaleDateString()}`,
-        })
-        .select()
-        .single();
+      const existingRoutes = JSON.parse(localStorage.getItem('gps_routes') || '[]');
+      existingRoutes.push(routeData);
+      localStorage.setItem('gps_routes', JSON.stringify(existingRoutes));
 
-      if (error) throw error;
-      return { success: true, route };
+      return { success: true, route: routeData };
     } catch (error) {
       console.error('Failed to save route:', error);
       return { success: false, error };
@@ -47,19 +45,12 @@ export class HeatmapService {
   }
 
   /**
-   * Get user's routes
+   * Get user's routes (from local storage)
    */
   static async getUserRoutes(userId: string, limit = 20) {
     try {
-      const { data: routes, error } = await supabase
-        .from('gps_routes')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(limit);
-
-      if (error) throw error;
-      return { success: true, routes };
+      const routes = JSON.parse(localStorage.getItem('gps_routes') || '[]');
+      return { success: true, routes: routes.slice(0, limit) };
     } catch (error) {
       console.error('Failed to get user routes:', error);
       return { success: false, error };
@@ -67,29 +58,18 @@ export class HeatmapService {
   }
 
   /**
-   * Generate heatmap data from routes
+   * Generate heatmap data from routes (local storage)
    */
   static async generateHeatmapData(userId: string, period?: { start: string; end: string }) {
     try {
-      let query = supabase
-        .from('gps_routes')
-        .select('route_data')
-        .eq('user_id', userId);
-
-      if (period) {
-        query = query.gte('created_at', period.start).lte('created_at', period.end);
-      }
-
-      const { data: routes, error } = await query;
-
-      if (error) throw error;
+      const routes = JSON.parse(localStorage.getItem('gps_routes') || '[]');
 
       // Aggregate all coordinates with intensity
       const heatmapPoints: HeatmapPoint[] = [];
       const coordinateMap = new Map<string, number>();
 
-      routes?.forEach(route => {
-        route.route_data.forEach((coord: Coordinate) => {
+      routes.forEach((route: any) => {
+        route.coordinates?.forEach((coord: Coordinate) => {
           const key = `${coord.lat.toFixed(4)},${coord.lng.toFixed(4)}`;
           coordinateMap.set(key, (coordinateMap.get(key) || 0) + 1);
         });
@@ -100,7 +80,7 @@ export class HeatmapService {
         const [lat, lng] = key.split(',').map(Number);
         heatmapPoints.push({
           coordinates: { lat, lng },
-          intensity: Math.min(count / 10, 1), // Normalize intensity
+          intensity: Math.min(count / 10, 1),
         });
       });
 
@@ -112,7 +92,7 @@ export class HeatmapService {
   }
 
   /**
-   * Get popular routes in area
+   * Get popular routes in area (placeholder)
    */
   static async getPopularRoutes(bounds: {
     north: number;
@@ -121,28 +101,7 @@ export class HeatmapService {
     west: number;
   }) {
     try {
-      // This would require PostGIS or similar for efficient geographic queries
-      // For now, fetch recent public routes and filter client-side
-      const { data: routes, error } = await supabase
-        .from('gps_routes')
-        .select('*')
-        .eq('is_public', true)
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      if (error) throw error;
-
-      // Filter routes within bounds
-      const filteredRoutes = routes?.filter(route => {
-        return route.route_data.some((coord: Coordinate) => {
-          return coord.lat >= bounds.south &&
-                 coord.lat <= bounds.north &&
-                 coord.lng >= bounds.west &&
-                 coord.lng <= bounds.east;
-        });
-      });
-
-      return { success: true, routes: filteredRoutes };
+      return { success: true, routes: [] };
     } catch (error) {
       console.error('Failed to get popular routes:', error);
       return { success: false, error };

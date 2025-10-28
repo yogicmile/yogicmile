@@ -77,17 +77,6 @@ export class PhotoUploadService {
         .from(bucketName)
         .getPublicUrl(uploadData.path);
 
-      // Log upload
-      await supabase.from('photo_uploads').insert({
-        user_id: user.user.id,
-        file_path: uploadData.path,
-        bucket_name: bucketName,
-        file_size: file.size,
-        content_type: file.type,
-        public_url: urlData.publicUrl,
-        metadata,
-      });
-
       return {
         success: true,
         url: urlData.publicUrl,
@@ -179,13 +168,6 @@ export class PhotoUploadService {
 
       if (error) throw error;
 
-      // Remove from photo_uploads log
-      await supabase
-        .from('photo_uploads')
-        .delete()
-        .eq('file_path', path)
-        .eq('bucket_name', bucketName);
-
       return { success: true };
     } catch (error) {
       console.error('Failed to delete image:', error);
@@ -194,21 +176,16 @@ export class PhotoUploadService {
   }
 
   /**
-   * Get user's uploaded photos
+   * Get user's uploaded photos (from challenge photos)
    */
   static async getUserPhotos(userId: string, bucket?: keyof typeof PhotoUploadService.BUCKETS) {
     try {
-      let query = supabase
-        .from('photo_uploads')
+      // Get photos from challenge completion photos table
+      const { data: photos, error } = await supabase
+        .from('challenge_completion_photos')
         .select('*')
         .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (bucket) {
-        query = query.eq('bucket_name', this.BUCKETS[bucket]);
-      }
-
-      const { data: photos, error } = await query;
+        .order('uploaded_at', { ascending: false });
 
       if (error) throw error;
       return { success: true, photos };

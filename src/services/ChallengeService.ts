@@ -7,14 +7,13 @@ export class ChallengeService {
   static async createChallenge(data: {
     title: string;
     description: string;
-    challenge_type: 'daily' | 'weekly' | 'custom';
     goal_type: 'steps' | 'distance' | 'duration' | 'photo';
-    goal_value: number;
+    target_value: number;
     start_date: string;
     end_date: string;
     privacy_setting: 'public' | 'private' | 'friends';
-    reward_amount?: number;
     reward_type?: string;
+    reward_items?: any[];
     community_id?: string;
   }) {
     try {
@@ -24,9 +23,17 @@ export class ChallengeService {
       const { data: challenge, error } = await supabase
         .from('challenges')
         .insert({
-          ...data,
+          title: data.title,
+          description: data.description,
+          goal_type: data.goal_type,
+          target_value: data.target_value,
+          start_date: data.start_date,
+          end_date: data.end_date,
           creator_id: user.user.id,
-          participant_count: 1,
+          privacy_setting: data.privacy_setting,
+          reward_type: data.reward_type || 'coins',
+          reward_items: data.reward_items || [],
+          community_id: data.community_id,
           status: 'active',
         })
         .select()
@@ -61,9 +68,6 @@ export class ChallengeService {
 
       if (error) throw error;
 
-      // Update participant count
-      await supabase.rpc('increment_challenge_participants', { challenge_id: challengeId });
-
       return { success: true, participant };
     } catch (error) {
       console.error('Failed to join challenge:', error);
@@ -72,34 +76,31 @@ export class ChallengeService {
   }
 
   /**
-   * Submit challenge progress
+   * Submit challenge progress (updates current_contribution)
    */
   static async submitProgress(data: {
     challenge_id: string;
     progress_value: number;
     progress_type: 'steps' | 'distance' | 'duration' | 'photo';
     photo_url?: string;
-    notes?: string;
   }) {
     try {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('User not authenticated');
 
-      const { data: progress, error } = await supabase
-        .from('challenge_progress')
-        .insert({
-          ...data,
-          user_id: user.user.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Update participant progress
+      // Update participant progress directly
       await this.updateParticipantProgress(data.challenge_id, user.user.id, data.progress_value);
 
-      return { success: true, progress };
+      // If photo proof required, save it
+      if (data.photo_url) {
+        await supabase.from('challenge_completion_photos').insert({
+          challenge_id: data.challenge_id,
+          user_id: user.user.id,
+          photo_url: data.photo_url,
+        });
+      }
+
+      return { success: true };
     } catch (error) {
       console.error('Failed to submit progress:', error);
       return { success: false, error };
@@ -120,23 +121,22 @@ export class ChallengeService {
 
       if (!participant) throw new Error('Participant not found');
 
-      const newProgress = (participant.progress_value || 0) + additionalProgress;
+      const newProgress = (participant.current_contribution || 0) + additionalProgress;
 
       // Check if goal is reached
       const { data: challenge } = await supabase
         .from('challenges')
-        .select('goal_value')
+        .select('target_value, reward_items')
         .eq('id', challengeId)
         .single();
 
-      const isCompleted = challenge && newProgress >= challenge.goal_value;
+      const isCompleted = challenge && newProgress >= challenge.target_value;
 
       const { error } = await supabase
         .from('challenge_participants')
         .update({
-          progress_value: newProgress,
+          current_contribution: newProgress,
           status: isCompleted ? 'completed' : 'active',
-          completed_at: isCompleted ? new Date().toISOString() : null,
         })
         .eq('challenge_id', challengeId)
         .eq('user_id', userId);
@@ -144,7 +144,7 @@ export class ChallengeService {
       if (error) throw error;
 
       // Award rewards if completed
-      if (isCompleted && challenge) {
+      if (isCompleted) {
         await this.awardChallengeCompletion(challengeId, userId);
       }
 
@@ -162,31 +162,42 @@ export class ChallengeService {
     try {
       const { data: challenge } = await supabase
         .from('challenges')
-        .select('reward_amount, reward_type, title')
+        .select('reward_items, reward_type, title')
         .eq('id', challengeId)
         .single();
 
-      if (!challenge || !challenge.reward_amount) return { success: true };
+      if (!challenge || !challenge.reward_items || challenge.reward_items.length === 0) {
+        return { success: true };
+      }
+
+      // Calculate total reward amount
+      const rewardAmount = challenge.reward_items.reduce((sum: number, item: any) => {
+        return sum + (item.amount || 0);
+      }, 0);
+
+      if (rewardAmount <= 0) return { success: true };
 
       // Add coins to wallet
-      await supabase
+      const { error: walletError } = await supabase
         .from('wallet_balances')
         .update({
-          total_balance: supabase.sql`total_balance + ${challenge.reward_amount}`,
-          total_earned: supabase.sql`total_earned + ${challenge.reward_amount}`,
+          total_balance: supabase.raw(`total_balance + ${rewardAmount}`),
+          total_earned: supabase.raw(`total_earned + ${rewardAmount}`),
         })
         .eq('user_id', userId);
+
+      if (walletError) throw walletError;
 
       // Log transaction
       await supabase.from('transactions').insert({
         user_id: userId,
         type: 'challenge_reward',
-        amount: challenge.reward_amount,
+        amount: rewardAmount,
         description: `Completed: ${challenge.title}`,
         metadata: { challenge_id: challengeId },
       });
 
-      return { success: true, reward: challenge.reward_amount };
+      return { success: true, reward: rewardAmount };
     } catch (error) {
       console.error('Failed to award challenge completion:', error);
       return { success: false, error };
@@ -261,12 +272,9 @@ export class ChallengeService {
     try {
       const { data: leaderboard, error } = await supabase
         .from('challenge_participants')
-        .select(`
-          *,
-          user:user_id (id, full_name)
-        `)
+        .select('*')
         .eq('challenge_id', challengeId)
-        .order('progress_value', { ascending: false })
+        .order('current_contribution', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
@@ -284,11 +292,10 @@ export class ChallengeService {
     try {
       // Check if user already submitted
       const { data: existing } = await supabase
-        .from('challenge_progress')
+        .from('challenge_completion_photos')
         .select('*')
         .eq('challenge_id', challengeId)
         .eq('user_id', userId)
-        .eq('progress_type', 'photo')
         .single();
 
       if (existing) {

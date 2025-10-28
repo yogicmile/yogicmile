@@ -49,14 +49,22 @@ export class RewardSystem {
           paisa_earned: supabase.sql`paisa_earned + ${finalCoins}`,
         });
 
-      // Update wallet
-      await supabase
-        .from('wallet_balances')
-        .update({
-          total_balance: supabase.sql`total_balance + ${finalCoins}`,
-          total_earned: supabase.sql`total_earned + ${finalCoins}`,
-        })
-        .eq('user_id', userId);
+      // Update wallet using raw SQL
+      const { error: walletError } = await supabase.rpc('increment', {
+        table_name: 'wallet_balances',
+        user_id: userId,
+        total_balance: finalCoins,
+        total_earned: finalCoins,
+      }).catch(() => {
+        // Fallback: use direct update
+        return supabase
+          .from('wallet_balances')
+          .update({
+            total_balance: supabase.raw(`total_balance + ${finalCoins}`),
+            total_earned: supabase.raw(`total_earned + ${finalCoins}`),
+          })
+          .eq('user_id', userId);
+      });
 
       // Log transaction
       await supabase.from('transactions').insert({
@@ -89,8 +97,8 @@ export class RewardSystem {
       await supabase
         .from('wallet_balances')
         .update({
-          total_balance: supabase.sql`total_balance + ${amount}`,
-          total_earned: supabase.sql`total_earned + ${amount}`,
+          total_balance: supabase.raw(`total_balance + ${amount}`),
+          total_earned: supabase.raw(`total_earned + ${amount}`),
         })
         .eq('user_id', userId);
 

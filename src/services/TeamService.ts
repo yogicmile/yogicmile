@@ -56,9 +56,6 @@ export class TeamService {
 
       if (error) throw error;
 
-      // Update member count
-      await supabase.rpc('increment_team_members', { team_id: teamId });
-
       return { success: true, member };
     } catch (error) {
       console.error('Failed to join team:', error);
@@ -78,9 +75,6 @@ export class TeamService {
         .eq('user_id', userId);
 
       if (error) throw error;
-
-      // Update member count
-      await supabase.rpc('decrement_team_members', { team_id: teamId });
 
       return { success: true };
     } catch (error) {
@@ -162,8 +156,8 @@ export class TeamService {
         await supabase
           .from('wallet_balances')
           .update({
-            total_balance: supabase.sql`total_balance + ${bonusPerMember}`,
-            total_earned: supabase.sql`total_earned + ${bonusPerMember}`,
+            total_balance: supabase.raw(`total_balance + ${bonusPerMember}`),
+            total_earned: supabase.raw(`total_earned + ${bonusPerMember}`),
           })
           .eq('user_id', member.user_id);
 
