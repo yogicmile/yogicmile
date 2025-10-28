@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
+import { App as CapacitorApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { guestDataManager } from '@/services/GuestDataManager';
@@ -150,6 +152,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Listen for app state changes on native platforms (when user returns from browser)
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      let listenerHandle: any;
+      
+      const setupListener = async () => {
+        listenerHandle = await CapacitorApp.addListener('appStateChange', async ({ isActive }) => {
+          if (isActive) {
+            // App came to foreground - check if session was established
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session && !user) {
+              setSession(session);
+              setUser(session.user);
+              setIsGuest(false);
+              localStorage.removeItem('yogic_mile_guest_mode');
+            }
+          }
+        });
+      };
+      
+      setupListener();
+      
+      return () => {
+        if (listenerHandle) {
+          listenerHandle.remove();
+        }
+      };
+    }
+  }, [user]);
 
   const signUp = async (formData: SignUpData) => {
     setIsLoading(true);

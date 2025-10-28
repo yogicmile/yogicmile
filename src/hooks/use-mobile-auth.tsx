@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Preferences } from '@capacitor/preferences';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -520,20 +521,44 @@ export const useMobileAuth = () => {
         .eq('mobile_number', formatted)
         .maybeSingle();
 
+      // Determine redirect URL based on platform
+      const getRedirectUrl = () => {
+        if (Capacitor.isNativePlatform()) {
+          // Native app - use production web URL
+          return 'https://4741923f-866e-4468-918a-6e7c1c4ebf2e.lovableproject.com/';
+        }
+        // Web browser - use current origin
+        return `${window.location.origin}/`;
+      };
+
       // Request a magic login link from the Edge Function and redirect the browser to it
       const { data: sessionData, error: sessionError } = await supabase.functions.invoke('create-auth-session', {
-        body: { mobileNumber: formatted, redirectUrl: `${window.location.origin}/` }
+        body: { mobileNumber: formatted, redirectUrl: getRedirectUrl() }
       });
 
       if (sessionError || !sessionData?.success || !sessionData?.action_link) {
         throw new Error('Failed to create session: ' + (sessionData?.error || sessionError?.message || 'Edge Function returned a non-2xx status code'));
       }
 
-      // Redirect to Supabase magic link to establish the session in this browser
-      window.location.href = sessionData.action_link;
-
-      // The redirect will handle session creation; return success to stop spinners
-      return { success: true };
+      // Handle redirect based on platform
+      if (Capacitor.isNativePlatform()) {
+        // On native, the magic link will open in system browser
+        // Show success message and let AuthContext handle session detection
+        toast({
+          title: "Login Successful! 🎉",
+          description: "Redirecting you to the app...",
+        });
+        
+        // Open the magic link in system browser
+        window.open(sessionData.action_link, '_system');
+        
+        // Return success - AuthContext will detect session when app resumes
+        return { success: true };
+      } else {
+        // Web browser - redirect in same window
+        window.location.href = sessionData.action_link;
+        return { success: true };
+      }
     } catch (error: any) {
       console.error('OTP verification error:', error);
       toast({
