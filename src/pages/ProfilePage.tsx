@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Settings, Share2, LogOut, Trophy, Calendar, Target, Shield } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Settings, Share2, LogOut, Trophy, Calendar, Target, Shield, Camera } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ReferralCard } from '@/components/ReferralCard';
 import { HelpCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProfilePageSkeleton } from '@/components/ui/wallet-skeleton';
+import { PhotoUploadService } from '@/services/PhotoUploadService';
 
 
 export const ProfilePage = () => {
@@ -27,9 +28,12 @@ export const ProfilePage = () => {
     currentStreak: 0,
     joinDate: '',
     currentPhase: 'Paisa Phase 🪙',
-    displayName: 'Yogic Walker'
+    displayName: 'Yogic Walker',
+    avatarUrl: ''
   });
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     document.title = 'Profile | Yogic Mile';
@@ -86,10 +90,10 @@ export const ProfilePage = () => {
         console.error('Error fetching phase:', phaseError);
       }
 
-      // Fetch profile
+      // Fetch profile with avatar
       const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('full_name')
+        .from('user_profiles')
+        .select('display_name, profile_picture_url')
         .eq('user_id', user!.id)
         .maybeSingle();
 
@@ -132,7 +136,8 @@ export const ProfilePage = () => {
         currentStreak: currentStreak,
         joinDate: userPhase?.created_at ? new Date(userPhase.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently',
         currentPhase: String(userPhase?.current_phase || 'Paisa Phase 🪙'),
-        displayName: String(profile?.full_name || 'Yogic Walker')
+        displayName: String(profile?.display_name || 'Yogic Walker'),
+        avatarUrl: String(profile?.profile_picture_url || '')
       });
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -175,6 +180,36 @@ export const ProfilePage = () => {
     } else {
       navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
       toast({ title: "Link copied!", description: "Share link copied to clipboard" });
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      // Compress image before upload
+      const compressed = await PhotoUploadService.compressImage(file, 512, 0.8);
+      
+      // Upload to profile-photos bucket
+      const result = await PhotoUploadService.uploadProfilePhoto(compressed);
+      
+      if (result.success && result.url) {
+        setUserStats(prev => ({ ...prev, avatarUrl: result.url! }));
+        toast({ title: "Success!", description: "Profile photo updated" });
+      } else {
+        throw new Error(result.error as string);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({ 
+        title: "Upload failed", 
+        description: "Could not update profile photo",
+        variant: "destructive" 
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -225,11 +260,28 @@ export const ProfilePage = () => {
 
         {/* Profile Header */}
         <div className="text-center space-y-4">
-          <Avatar className="w-24 h-24 mx-auto">
-            <AvatarFallback className="text-2xl bg-gradient-to-r from-tier-1-paisa to-tier-2-rupaya text-white">
-              {userStats.displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative w-24 h-24 mx-auto group">
+            <Avatar className="w-24 h-24">
+              {userStats.avatarUrl && <AvatarImage src={userStats.avatarUrl} alt={userStats.displayName} />}
+              <AvatarFallback className="text-2xl bg-gradient-to-r from-tier-1-paisa to-tier-2-rupaya text-white">
+                {userStats.displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+              </AvatarFallback>
+            </Avatar>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            >
+              <Camera className="w-6 h-6 text-white" />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleAvatarUpload}
+              className="hidden"
+            />
+          </div>
           <div>
             <h1 className="text-2xl font-bold text-foreground">{userStats.displayName}</h1>
             <p className="text-muted-foreground">Member since {userStats.joinDate}</p>

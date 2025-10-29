@@ -7,6 +7,7 @@ import { Calendar, Clock, Trophy, Users, Target } from 'lucide-react';
 import { useGamification } from '@/hooks/use-gamification';
 import { SEASONAL_THEMES } from '@/types/gamification';
 import { formatDistanceToNow } from 'date-fns';
+import { ChallengeDetailModal } from './ChallengeDetailModal';
 
 export function SeasonalChallenges() {
   const {
@@ -17,6 +18,7 @@ export function SeasonalChallenges() {
   } = useGamification();
 
   const [timeRemaining, setTimeRemaining] = useState<Record<string, string>>({});
+  const [selectedChallengeId, setSelectedChallengeId] = useState<string | null>(null);
 
   // Update countdown timers
   useEffect(() => {
@@ -120,11 +122,12 @@ export function SeasonalChallenges() {
           return (
             <Card
               key={challenge.id}
-              className={`relative overflow-hidden border-2 transition-all duration-300 hover:scale-105 ${
+              className={`relative overflow-hidden border-2 transition-all duration-300 hover:scale-105 cursor-pointer ${
                 isParticipating 
                   ? 'border-primary/50 shadow-lg shadow-primary/10' 
                   : 'hover:border-primary/30'
               }`}
+              onClick={() => setSelectedChallengeId(challenge.id)}
             >
               {/* Background Theme */}
               <div
@@ -232,6 +235,15 @@ export function SeasonalChallenges() {
           );
         })}
       </div>
+
+      {/* Challenge Detail Modal */}
+      {selectedChallengeId && (
+        <ChallengeDetailModal
+          open={!!selectedChallengeId}
+          onOpenChange={(open) => !open && setSelectedChallengeId(null)}
+          challengeId={selectedChallengeId}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Plus, TrendingUp, Heart, MessageCircle, Bookmark, Flag, Filter } from 'lucide-react';
+import { MessageSquare, Plus, TrendingUp, Heart, MessageCircle, Bookmark, Flag, Filter, Image as ImageIcon, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -17,6 +17,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { FORUM_CATEGORIES, type ForumCategory } from '@/types/community';
 import type { ForumPost, ForumComment } from '@/types/community';
+import { PhotoUploadService } from '@/services/PhotoUploadService';
 
 export const CommunityForums = () => {
   const navigate = useNavigate();
@@ -29,6 +30,9 @@ export const CommunityForums = () => {
   const { userProfile } = useCommunity();
   const { user, isGuest } = useAuth();
   const { toast } = useToast();
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadPosts();
@@ -83,6 +87,42 @@ export const CommunityForums = () => {
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setUploading(true);
+    try {
+      const uploadPromises = files.map(async (file) => {
+        const compressed = await PhotoUploadService.compressImage(file, 1920, 0.85);
+        const result = await PhotoUploadService.uploadCommunityPhoto(
+          compressed,
+          'forum-post',
+          undefined
+        );
+        return result.success ? result.url : null;
+      });
+
+      const urls = await Promise.all(uploadPromises);
+      const validUrls = urls.filter((url): url is string => url !== null);
+      setUploadedImages(prev => [...prev, ...validUrls]);
+
+      toast({
+        title: "Success",
+        description: `${validUrls.length} image(s) uploaded`
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: "Could not upload images",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleCreatePost = async (formData: FormData) => {
     if (!userProfile || !user) {
       toast({
@@ -99,7 +139,8 @@ export const CommunityForums = () => {
         category: formData.get('category') as ForumCategory,
         title: formData.get('title') as string,
         content: formData.get('content') as string,
-        tags: (formData.get('tags') as string)?.split(',').map(t => t.trim()).filter(Boolean) || []
+        tags: (formData.get('tags') as string)?.split(',').map(t => t.trim()).filter(Boolean) || [],
+        image_urls: uploadedImages.length > 0 ? uploadedImages : null
       };
 
       const { error } = await supabase
@@ -114,6 +155,7 @@ export const CommunityForums = () => {
       });
 
       setShowCreatePost(false);
+      setUploadedImages([]);
       loadPosts();
     } catch (error) {
       console.error('Error creating post:', error);
@@ -285,12 +327,62 @@ export const CommunityForums = () => {
                   placeholder="Enter tags separated by commas"
                 />
               </div>
+
+              {/* Image Upload */}
+              <div className="space-y-2">
+                <Label>Images (Optional)</Label>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading || uploadedImages.length >= 4}
+                  >
+                    <ImageIcon className="w-4 h-4 mr-2" />
+                    {uploading ? 'Uploading...' : 'Add Images'}
+                  </Button>
+                  <span className="text-xs text-muted-foreground">
+                    {uploadedImages.length}/4 images
+                  </span>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                {uploadedImages.length > 0 && (
+                  <div className="grid grid-cols-4 gap-2">
+                    {uploadedImages.map((url, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={url}
+                          alt={`Upload ${index + 1}`}
+                          className="w-full h-20 object-cover rounded"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setUploadedImages(prev => prev.filter((_, i) => i !== index))}
+                          className="absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               
               <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setShowCreatePost(false)}>
+                <Button type="button" variant="outline" onClick={() => {
+                  setShowCreatePost(false);
+                  setUploadedImages([]);
+                }}>
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button type="submit" disabled={uploading}>
                   Create Post
                 </Button>
               </div>
@@ -413,6 +505,20 @@ export const CommunityForums = () => {
                     <p className="text-muted-foreground mb-3 line-clamp-3">
                       {post.content}
                     </p>
+
+                    {/* Post Images */}
+                    {post.image_urls && Array.isArray(post.image_urls) && post.image_urls.length > 0 && (
+                      <div className={`grid gap-2 mb-3 ${post.image_urls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                        {post.image_urls.slice(0, 4).map((url: string, index: number) => (
+                          <img
+                            key={index}
+                            src={url}
+                            alt={`Post image ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                          />
+                        ))}
+                      </div>
+                    )}
                     
                     {/* Tags */}
                     {post.tags && post.tags.length > 0 && (
