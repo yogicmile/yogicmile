@@ -2020,6 +2020,57 @@ export type Database = {
         }
         Relationships: []
       }
+      gps_routes: {
+        Row: {
+          average_pace: number | null
+          calories_burned: number | null
+          completed_at: string | null
+          created_at: string
+          distance_km: number
+          duration_seconds: number
+          elevation_gain: number | null
+          id: string
+          metadata: Json | null
+          photos: Json | null
+          route_data: Json
+          route_name: string | null
+          route_type: string | null
+          user_id: string
+        }
+        Insert: {
+          average_pace?: number | null
+          calories_burned?: number | null
+          completed_at?: string | null
+          created_at?: string
+          distance_km?: number
+          duration_seconds?: number
+          elevation_gain?: number | null
+          id?: string
+          metadata?: Json | null
+          photos?: Json | null
+          route_data?: Json
+          route_name?: string | null
+          route_type?: string | null
+          user_id: string
+        }
+        Update: {
+          average_pace?: number | null
+          calories_burned?: number | null
+          completed_at?: string | null
+          created_at?: string
+          distance_km?: number
+          duration_seconds?: number
+          elevation_gain?: number | null
+          id?: string
+          metadata?: Json | null
+          photos?: Json | null
+          route_data?: Json
+          route_name?: string | null
+          route_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       integration_analytics: {
         Row: {
           created_at: string | null
