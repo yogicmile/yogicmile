@@ -4,10 +4,14 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, Ruler, Clock, TrendingUp } from 'lucide-react';
+import { Calendar, MapPin, Ruler, Clock, TrendingUp, Lock, Users, Globe, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface RouteData {
   id: string;
@@ -24,6 +28,9 @@ interface RouteData {
   route_type: string;
   created_at: string;
   photos: string[];
+  privacy_level?: 'private' | 'friends_only' | 'public';
+  share_start_end?: boolean;
+  is_route_public?: boolean;
 }
 
 const RouteHistoryMap = () => {
@@ -170,6 +177,47 @@ const RouteHistoryMap = () => {
     return `${pace.toFixed(2)} min/km`;
   };
 
+  const updateRoutePrivacy = async (
+    routeId: string,
+    privacyLevel: 'private' | 'friends_only' | 'public',
+    shareStartEnd: boolean,
+    isRoutePublic: boolean
+  ) => {
+    try {
+      const { error } = await supabase
+        .from('gps_routes')
+        .update({
+          privacy_level: privacyLevel,
+          share_start_end: shareStartEnd,
+          is_route_public: isRoutePublic
+        } as any) // Type will be updated after Supabase regenerates types
+        .eq('id', routeId);
+
+      if (error) throw error;
+
+      // Update local state
+      setRoutes(routes.map(route =>
+        route.id === routeId
+          ? { ...route, privacy_level: privacyLevel, share_start_end: shareStartEnd, is_route_public: isRoutePublic }
+          : route
+      ));
+
+      toast.success('Privacy settings updated');
+    } catch (error) {
+      console.error('Error updating privacy:', error);
+      toast.error('Failed to update privacy settings');
+    }
+  };
+
+  const getPrivacyIcon = (level?: string) => {
+    switch (level) {
+      case 'private': return <Lock className="h-4 w-4" />;
+      case 'friends_only': return <Users className="h-4 w-4" />;
+      case 'public': return <Globe className="h-4 w-4" />;
+      default: return <Lock className="h-4 w-4" />;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Mapbox Token Input */}
@@ -231,57 +279,135 @@ const RouteHistoryMap = () => {
             {routes.map((route) => (
               <Card
                 key={route.id}
-                className={`p-4 cursor-pointer transition-all hover:shadow-lg ${
+                className={`p-4 transition-all hover:shadow-lg ${
                   selectedRoute?.id === route.id ? 'ring-2 ring-primary' : ''
                 }`}
-                onClick={() => setSelectedRoute(route)}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h4 className="font-semibold">
-                      {route.route_name || 'Untitled Route'}
-                    </h4>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                      <Calendar className="h-4 w-4" />
-                      {format(new Date(route.created_at), 'MMM dd, yyyy · HH:mm')}
-                    </div>
-                  </div>
-                  <Badge variant="outline">{route.route_type}</Badge>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="flex items-center gap-2">
-                    <Ruler className="h-4 w-4 text-muted-foreground" />
+                <div 
+                  className="cursor-pointer"
+                  onClick={() => setSelectedRoute(route)}
+                >
+                  <div className="flex items-start justify-between mb-3">
                     <div>
-                      <p className="text-xs text-muted-foreground">Distance</p>
-                      <p className="font-semibold">{route.distance_km.toFixed(2)} km</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Duration</p>
-                      <p className="font-semibold">{formatDuration(route.duration_seconds)}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Pace</p>
-                      <p className="font-semibold">{formatPace(route.average_pace)}</p>
-                    </div>
-                  </div>
-
-                  {route.calories_burned && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">🔥</span>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Calories</p>
-                        <p className="font-semibold">{route.calories_burned}</p>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-semibold">
+                          {route.route_name || 'Untitled Route'}
+                        </h4>
+                        {getPrivacyIcon(route.privacy_level)}
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                        <Calendar className="h-4 w-4" />
+                        {format(new Date(route.created_at), 'MMM dd, yyyy · HH:mm')}
                       </div>
                     </div>
+                    <Badge variant="outline">{route.route_type}</Badge>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="flex items-center gap-2">
+                      <Ruler className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Distance</p>
+                        <p className="font-semibold">{route.distance_km.toFixed(2)} km</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Duration</p>
+                        <p className="font-semibold">{formatDuration(route.duration_seconds)}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Pace</p>
+                        <p className="font-semibold">{formatPace(route.average_pace)}</p>
+                      </div>
+                    </div>
+
+                    {route.calories_burned && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">🔥</span>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Calories</p>
+                          <p className="font-semibold">{route.calories_burned}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Privacy Controls */}
+                <div className="mt-4 pt-4 border-t space-y-4" onClick={(e) => e.stopPropagation()}>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Privacy Settings</Label>
+                    <Select
+                      value={route.privacy_level || 'private'}
+                      onValueChange={(value: 'private' | 'friends_only' | 'public') => {
+                        updateRoutePrivacy(
+                          route.id,
+                          value,
+                          route.share_start_end || false,
+                          value === 'public'
+                        );
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="private">
+                          <div className="flex items-center gap-2">
+                            <Lock className="h-4 w-4" />
+                            <span>Private (Only Me)</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="friends_only">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            <span>Friends Only</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="public">
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-4 w-4" />
+                            <span>Public</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {route.privacy_level === 'public' && (
+                    <>
+                      <Alert>
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription className="text-xs">
+                          Public routes may reveal your location patterns. Consider hiding start/end points.
+                        </AlertDescription>
+                      </Alert>
+                      
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor={`share-${route.id}`} className="text-sm">
+                          Share exact start/end locations
+                        </Label>
+                        <Switch
+                          id={`share-${route.id}`}
+                          checked={route.share_start_end || false}
+                          onCheckedChange={(checked) => {
+                            updateRoutePrivacy(
+                              route.id,
+                              route.privacy_level || 'private',
+                              checked,
+                              true
+                            );
+                          }}
+                        />
+                      </div>
+                    </>
                   )}
                 </div>
               </Card>

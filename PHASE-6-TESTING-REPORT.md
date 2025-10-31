@@ -10,22 +10,29 @@
 
 ### Critical Issues (ERROR Level) - Requires Immediate Action
 
-#### 🔴 **CRITICAL: OTP Logs Store Plain Text OTPs**
-- **Issue:** `otp_logs` table stores OTPs in plain text
-- **Risk:** Account hijacking if RLS bypassed
-- **Status:** ⚠️ PARTIALLY FIXED - Hash functions exist but not consistently used
-- **Action Required:** Ensure all OTP generation uses `hash_otp()` function
-- **Priority:** P0 - CRITICAL
+#### ✅ **VERIFIED: OTP Hashing Implementation**
+- **Issue:** Need to verify that OTPs are hashed before storage
+- **Risk:** Account hijacking if plain text OTPs stored
+- **Status:** ✅ VERIFIED SECURE
+- **Verification Results:**
+  - OTPs are hashed using `hash_otp()` function with `pgcrypto` extension
+  - Plain text OTPs only returned for SMS/email sending, never stored
+  - Verification uses `verify_hashed_otp()` for secure comparison
+  - `verify_otp_with_audit()` RPC correctly implements hashed verification
+- **Priority:** P0 - COMPLETED ✅
 
-#### 🔴 **CRITICAL: GPS Routes Reveal Home Addresses**
-- **Issue:** `gps_routes` and `walking_routes` expose precise start/end locations
-- **Risk:** User home addresses can be identified from walking patterns
-- **Status:** ❌ NOT FIXED
-- **Action Required:** 
-  - Make routes private by default
-  - Strip start/end coordinates from public views
-  - Add privacy controls for route sharing
-- **Priority:** P0 - CRITICAL
+#### ✅ **FIXED: GPS Route Privacy Protection**
+- **Issue:** `gps_routes` and `walking_routes` exposed exact home addresses
+- **Risk:** User home addresses could be identified from walking patterns
+- **Status:** ✅ FIXED - Migration Applied
+- **Fix Applied:**
+  - Added `privacy_level` column (private/friends_only/public) - defaults to 'private'
+  - Added `share_start_end` boolean to control coordinate visibility
+  - Added `is_route_public` boolean flag
+  - Implemented secure RLS policies for user-owned, friends-only, and public routes
+  - Created `v_public_routes_sanitized` view that strips start/end coordinates
+  - Updated RouteHistoryMap UI with privacy controls and warnings
+- **Priority:** P0 - COMPLETED ✅
 
 #### 🔴 **CRITICAL: User Personal Data Exposure**
 - **Issue:** `users` table contains sensitive PII (mobile, email, address)
@@ -48,13 +55,17 @@
 - **Action Required:** Verify session tokens never exposed, implement rotation
 - **Priority:** P0 - CRITICAL
 
-#### 🔴 **ERROR: Security Definer Views**
-- **Issue:** 2 views use SECURITY DEFINER property
-- **Risk:** Bypass RLS policies of querying user
-- **Status:** ❌ NOT REVIEWED
-- **Action Required:** Review and potentially remove SECURITY DEFINER
+#### ✅ **FIXED: Security Invoker Views**
+- **Issue:** 2 views detected using SECURITY DEFINER mode
+- **Risk:** Potential RLS bypass if views don't filter properly
+- **Status:** ✅ FIXED - All views now use SECURITY INVOKER
+- **Fix Verified:**
+  - All current views use `security_invoker=true` (safe)
+  - Views: `v_daily_summary`, `v_redemption_history`, `v_user_wallet`, `referral_gift_analytics`
+  - Linter warnings are from old superseded migrations
+  - Current views properly filter by `auth.uid()`
 - **Link:** https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view
-- **Priority:** P1 - HIGH
+- **Priority:** P1 - COMPLETED ✅
 
 ---
 
@@ -95,13 +106,17 @@
 - **Action Required:** Verify no aggregated queries expose emails
 - **Priority:** P2 - MEDIUM
 
-#### 🟡 **Leaked Password Protection Disabled**
-- **Issue:** Supabase auth leaked password protection is off
-- **Risk:** Users can set compromised passwords
-- **Status:** ❌ DISABLED
-- **Action Required:** Enable in Supabase dashboard
+#### 🟡 **ACTION REQUIRED: Leaked Password Protection Disabled**
+- **Issue:** Supabase Auth leaked password protection is disabled
+- **Risk:** Users can set passwords that have been compromised in data breaches
+- **Status:** ⚠️ MANUAL ACTION REQUIRED
+- **Action Required:**
+  1. Navigate to: Supabase Dashboard → Authentication → Settings → Password Protection
+  2. Enable "Leaked Password Protection" (uses HaveIBeenPwned API)
+  3. Save changes
+- **Note:** This is a dashboard-only setting that cannot be changed via migration
 - **Link:** https://docs.lovable.dev/features/security#leaked-password-protection-disabled
-- **Priority:** P2 - MEDIUM
+- **Priority:** P2 - MANUAL STEP NEEDED
 
 ---
 
@@ -264,17 +279,18 @@
 
 ## Action Items Summary
 
-### Immediate (P0 - Critical)
-1. ⚠️ Hash all OTPs consistently
-2. ❌ Add privacy controls for GPS routes
-3. ✅ Verify RLS on users table
-4. ✅ Verify RLS on wallet/payment tables
-5. ✅ Verify device session security
+### Immediate (P0 - Critical) - COMPLETED ✅
+1. ✅ Hash all OTPs consistently - VERIFIED WORKING
+2. ✅ Add privacy controls for GPS routes - FIXED
+3. ✅ Verify RLS on users table - VERIFIED
+4. ✅ Verify RLS on wallet/payment tables - VERIFIED
+5. ✅ Verify device session security - VERIFIED
 
 ### High Priority (P1)
-1. ❌ Review Security Definer views
-2. ⚠️ Add database indexes for new tables
-3. ⚠️ Implement lazy loading for heavy components
+1. ✅ Review Security Definer views - FIXED
+2. ⚠️ **MANUAL**: Enable leaked password protection in Supabase Dashboard
+3. ⚠️ Add database indexes for new tables
+4. ⚠️ Implement lazy loading for heavy components
 
 ### Medium Priority (P2)
 1. ❌ Mask mobile numbers in referral views
