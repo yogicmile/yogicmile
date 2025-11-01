@@ -8,7 +8,8 @@ import { CommunityProfiles } from "@/components/community/CommunityProfiles";
 import { CommunityForums } from "@/components/community/CommunityForums";
 import { CommunityCreator } from "@/components/community/CommunityCreator";
 import { CommunityCard } from "@/components/community/CommunityCard";
-import { Users, Trophy, UserPlus, MessageSquare, Plus } from "lucide-react";
+import RouteHistoryMap from "@/components/gps/RouteHistoryMap";
+import { Users, Trophy, UserPlus, MessageSquare, Plus, Map } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -75,7 +76,7 @@ export const CommunityPage = () => {
       </section>
 
       <Tabs defaultValue="leaderboards" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="leaderboards" className="flex items-center gap-2">
             <Trophy className="w-4 h-4" />
             <span className="hidden sm:inline">Leaderboards</span>
@@ -87,6 +88,10 @@ export const CommunityPage = () => {
           <TabsTrigger value="profiles" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             <span className="hidden sm:inline">Profiles</span>
+          </TabsTrigger>
+          <TabsTrigger value="routes" className="flex items-center gap-2">
+            <Map className="w-4 h-4" />
+            <span className="hidden sm:inline">Routes</span>
           </TabsTrigger>
           <TabsTrigger value="forums" className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4" />
@@ -104,6 +109,10 @@ export const CommunityPage = () => {
 
         <TabsContent value="profiles" className="mt-6">
           <CommunityProfiles />
+        </TabsContent>
+
+        <TabsContent value="routes" className="mt-6">
+          <RouteHistoryMap />
         </TabsContent>
 
         <TabsContent value="forums" className="mt-6">
