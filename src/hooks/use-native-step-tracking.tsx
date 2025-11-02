@@ -91,13 +91,24 @@ export const useNativeStepTracking = () => {
   const lastStepCount = useRef(0);
   const stepCheckInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize native step tracking
+  // Initialize native step tracking ONLY after authentication
   useEffect(() => {
-    initializeNativeTracking();
+    // Don't initialize tracking for guest users
+    if (isGuest) {
+      console.log('[StepTracking] Skipping initialization for guest user');
+      return;
+    }
+    
+    // Only initialize if user is authenticated
+    if (user) {
+      console.log('[StepTracking] User authenticated, initializing tracking');
+      initializeNativeTracking();
+    }
+    
     return () => {
       cleanup();
     };
-  }, []);
+  }, [user, isGuest]);
 
   // Auto-sync with backend
   useEffect(() => {

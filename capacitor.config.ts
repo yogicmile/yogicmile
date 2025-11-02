@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.4741923f866e4468918a6e7c1c4ebf2e',
-  appName: 'yogicmile',
+  appId: 'app.lovable.yogicmile',
+  appName: 'YogicMile',
   webDir: 'dist',
   // Production: Web assets bundled in app for offline support
   // For development hot-reload, uncomment the server config below:

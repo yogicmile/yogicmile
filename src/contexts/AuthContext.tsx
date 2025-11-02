@@ -50,6 +50,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   useEffect(() => {
+    // Handle deep link authentication on mobile FIRST
+    if (Capacitor.isNativePlatform()) {
+      const handleDeepLink = async (url: string) => {
+        console.log('[AuthContext] Deep link received:', url);
+        
+        // Check if it's an auth callback
+        if (url.includes('yogicmile://auth-callback')) {
+          try {
+            // Extract the URL fragment containing auth tokens
+            const parsedUrl = new URL(url);
+            const fragment = parsedUrl.hash;
+            
+            if (fragment) {
+              // Parse the fragment to get access_token and refresh_token
+              const params = new URLSearchParams(fragment.substring(1));
+              const accessToken = params.get('access_token');
+              const refreshToken = params.get('refresh_token');
+              
+              if (accessToken) {
+                console.log('[AuthContext] Setting session from deep link');
+                const { data: sessionData, error } = await supabase.auth.setSession({
+                  access_token: accessToken,
+                  refresh_token: refreshToken || '',
+                });
+                
+                if (error) {
+                  console.error('[AuthContext] Deep link auth error:', error);
+                } else {
+                  console.log('[AuthContext] Deep link auth success');
+                  setSession(sessionData.session);
+                  setUser(sessionData.session?.user ?? null);
+                  setIsGuest(false);
+                  localStorage.removeItem('yogic_mile_guest_mode');
+                }
+              }
+            }
+          } catch (error) {
+            console.error('[AuthContext] Deep link parsing error:', error);
+          }
+        }
+      };
+      
+      // Listen for app URL open events
+      CapacitorApp.addListener('appUrlOpen', async (data: any) => {
+        await handleDeepLink(data.url);
+      });
+    }
+    
     // Read guest mode flag but DO NOT early return; always initialize Supabase auth
     const guestMode = localStorage.getItem('yogic_mile_guest_mode') === 'true';
     setIsGuest(guestMode);
@@ -188,10 +236,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       let authResult;
       
+      // Get redirect URL based on platform
+      const getRedirectUrl = () => {
+        if (Capacitor.isNativePlatform()) {
+          return 'yogicmile://auth-callback';
+        }
+        return `${window.location.origin}/`;
+      };
+      
       // Always use Supabase authentication - no custom users table approach
       if (formData.email && formData.password) {
         // Email/password signup
-        const redirectUrl = `${window.location.origin}/`;
+        const redirectUrl = getRedirectUrl();
         
         authResult = await supabase.auth.signUp({
           email: formData.email,
