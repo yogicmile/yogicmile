@@ -15,6 +15,7 @@ import { ProfilePage } from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import WelcomePage from "./pages/WelcomePage";
+import AuthRedirectPage from "./pages/AuthRedirectPage";
 import NotFound from "./pages/NotFound";
 import { SettingsPage } from "./pages/SettingsPage";
 import { HelpPage } from "./pages/HelpPage";
@@ -42,6 +43,7 @@ const App = () => {
                   <Route path="welcome" element={<WelcomePage />} />
                   <Route path="login" element={<LoginPage />} />
                   <Route path="signup" element={<SignupPage />} />
+                  <Route path="auth/redirect" element={<AuthRedirectPage />} />
                   <Route path="" element={<Index />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="wallet" element={<WalletPage />} />

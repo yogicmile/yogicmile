@@ -190,13 +190,21 @@ export const useMobileAuth = () => {
       // Create user account using secure RPC function
       let userId: string | null = null;
       
+      // Helper: Get redirect URL based on platform
+      const getAuthRedirectUrl = () => {
+        if (Capacitor.isNativePlatform()) {
+          return 'yogicmile://auth-callback';
+        }
+        return `${window.location.origin}/`;
+      };
+
       if (formData.authChoice === 'password' && formData.email && formData.password) {
         // Email + Password signup through Supabase Auth
         const { data, error } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
           options: {
-            emailRedirectTo: `${window.location.origin}/`,
+            emailRedirectTo: getAuthRedirectUrl(),
             data: {
               full_name: formData.fullName,
               mobile_number: formatted,

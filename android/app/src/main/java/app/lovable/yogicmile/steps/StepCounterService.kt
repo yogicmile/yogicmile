@@ -154,9 +154,9 @@ class StepCounterService : Service(), SensorEventListener {
     
     private fun loadPersistedData() {
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        baselineSteps = prefs.getInt(KEY_BASELINE, 0)
-        sessionStartSteps = prefs.getInt(KEY_BASELINE, 0)
-        lastSensorValue = prefs.getInt(KEY_BASELINE, 0)
+        baselineSteps = prefs.getInt(KEY_BASELINE, -1)
+        sessionStartSteps = prefs.getInt(KEY_BASELINE, -1)
+        lastSensorValue = prefs.getInt(KEY_BASELINE, -1)
     }
     
     private fun checkMidnightRollover() {
@@ -178,7 +178,35 @@ class StepCounterService : Service(), SensorEventListener {
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
             if (it.sensor.type == Sensor.TYPE_STEP_COUNTER) {
-                lastSensorValue = it.values[0].toInt()
+                val currentSensorValue = it.values[0].toInt()
+                
+                // First run: initialize baseline to current sensor value
+                if (baselineSteps == -1) {
+                    baselineSteps = currentSensorValue
+                    sessionStartSteps = currentSensorValue
+                    lastSensorValue = currentSensorValue
+                    
+                    // Save initial baseline
+                    val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    prefs.edit()
+                        .putInt(KEY_BASELINE, baselineSteps)
+                        .putString(KEY_LAST_RESET, SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date()))
+                        .apply()
+                    
+                    // Start with 0 steps
+                    saveCurrentState(0)
+                    updateNotification(0)
+                    
+                    val intent = Intent(ACTION_STEPS_UPDATED).apply {
+                        putExtra(EXTRA_STEPS, 0)
+                        putExtra(EXTRA_SESSION_STEPS, 0)
+                        putExtra(EXTRA_TIMESTAMP, System.currentTimeMillis())
+                    }
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+                    return
+                }
+                
+                lastSensorValue = currentSensorValue
                 val todaySteps = maxOf(0, lastSensorValue - baselineSteps)
                 val sessionSteps = maxOf(0, lastSensorValue - sessionStartSteps)
                 
