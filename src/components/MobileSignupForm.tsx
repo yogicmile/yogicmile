@@ -8,9 +8,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useMobileAuth, SignUpFormData } from '@/hooks/use-mobile-auth';
 import { useToast } from '@/hooks/use-toast';
-import { Smartphone, Mail, MapPin, User, Shield, Users } from 'lucide-react';
+import { Smartphone, Mail, MapPin, User, Shield, Users, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LegalPolicyModal } from './LegalPolicyModal';
+import { getEmailErrorMessage, validateEmailRealtime } from '@/utils/emailValidation';
 
 interface MobileSignupFormProps {
   onSuccess: (mobileNumber: string) => void;
@@ -59,6 +60,11 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
   const [showPolicyModal, setShowPolicyModal] = useState(false);
   const [policyType, setPolicyType] = useState<'privacy' | 'terms'>('privacy');
   const [isReferralLocked, setIsReferralLocked] = useState(false);
+  const [emailValidation, setEmailValidation] = useState<{
+    isValid: boolean;
+    error: string | null;
+    suggestions: string[];
+  }>({ isValid: true, error: null, suggestions: [] });
 
   // Auto-fill referral code from URL parameter
   useEffect(() => {
@@ -90,6 +96,12 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
         ...prev,
         [field]: value
       }));
+    }
+    
+    // Real-time email validation
+    if (field === 'email' && typeof value === 'string') {
+      const validation = validateEmailRealtime(value);
+      setEmailValidation(validation);
     }
     
     // Clear error when user starts typing
@@ -129,8 +141,11 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
     if (formData.authChoice === 'password') {
       if (!formData.email) {
         newErrors.email = 'Email is required for password login';
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-        newErrors.email = 'Please enter a valid email address';
+      } else {
+        const emailError = getEmailErrorMessage(formData.email);
+        if (emailError) {
+          newErrors.email = emailError;
+        }
       }
 
       if (!formData.password) {
@@ -252,6 +267,9 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
               <Label htmlFor="email" className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
                 Email Address *
+                {emailValidation.isValid && formData.email && (
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                )}
               </Label>
               <Input
                 id="email"
@@ -259,10 +277,23 @@ export const MobileSignupForm: React.FC<MobileSignupFormProps> = ({ onSuccess, c
                 placeholder="your.email@example.com"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className={errors.email ? "border-red-500" : ""}
+                className={cn(
+                  errors.email || emailValidation.error ? "border-red-500" : "",
+                  emailValidation.isValid && formData.email ? "border-green-500" : ""
+                )}
               />
               {errors.email && (
                 <p className="text-sm text-red-500">{errors.email}</p>
+              )}
+              {!errors.email && emailValidation.error && formData.email && (
+                <p className="text-sm text-red-500">{emailValidation.error}</p>
+              )}
+              {emailValidation.suggestions.length > 0 && (
+                <div className="text-xs text-amber-600 space-y-1">
+                  {emailValidation.suggestions.map((suggestion, idx) => (
+                    <p key={idx}>💡 {suggestion}</p>
+                  ))}
+                </div>
               )}
             </div>
 

@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getEmailErrorMessage, validateEmailRealtime } from '@/utils/emailValidation';
 
 interface EmailPasswordLoginProps {
   onSuccess: () => void;
@@ -25,11 +26,24 @@ export const EmailPasswordLogin: React.FC<EmailPasswordLoginProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [emailValidation, setEmailValidation] = useState<{
+    isValid: boolean;
+    error: string | null;
+    suggestions: string[];
+  }>({ isValid: true, error: null, suggestions: [] });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+
+    // Validate email before API call
+    const emailError = getEmailErrorMessage(email.trim());
+    if (emailError) {
+      setError(emailError);
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -48,6 +62,13 @@ export const EmailPasswordLogin: React.FC<EmailPasswordLoginProps> = ({
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    const validation = validateEmailRealtime(value);
+    setEmailValidation(validation);
+    if (error) setError('');
   };
 
   const handleForgotPassword = async () => {
@@ -89,16 +110,33 @@ export const EmailPasswordLogin: React.FC<EmailPasswordLoginProps> = ({
               <Label htmlFor="email" className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
                 Email Address
+                {emailValidation.isValid && email && (
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                )}
               </Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="your.email@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => handleEmailChange(e.target.value)}
                 disabled={isLoading}
                 required
+                className={cn(
+                  emailValidation.error && email ? "border-red-500" : "",
+                  emailValidation.isValid && email ? "border-green-500" : ""
+                )}
               />
+              {emailValidation.error && email && !error && (
+                <p className="text-sm text-red-500">{emailValidation.error}</p>
+              )}
+              {emailValidation.suggestions.length > 0 && (
+                <div className="text-xs text-amber-600 space-y-1">
+                  {emailValidation.suggestions.map((suggestion, idx) => (
+                    <p key={idx}>💡 {suggestion}</p>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Password Field */}
