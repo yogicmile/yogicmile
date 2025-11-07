@@ -1,6 +1,3 @@
-# AuthRedirectPage - FIXED for Both Token Flows
-
-```tsx
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
@@ -84,7 +81,6 @@ export default function AuthRedirectPage() {
       const params = new URLSearchParams(hash.substring(1));
       const accessToken = params.get('access_token');
       const refreshToken = params.get('refresh_token');
-      const type = params.get('type'); // 'signup' or 'recovery' etc
 
       if (!accessToken || !refreshToken) {
         console.error('❌ Missing tokens in hash flow');
@@ -215,12 +211,12 @@ export default function AuthRedirectPage() {
         </div>
         
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-gray-900">Completing Authentication</h2>
-          <p className="text-gray-600">Please wait while we redirect you to the app...</p>
+          <h2 className="text-2xl font-bold text-foreground">Completing Authentication</h2>
+          <p className="text-muted-foreground">Please wait while we redirect you to the app...</p>
         </div>
 
         {/* Debug info (remove in production) */}
-        <div className="mt-8 text-xs text-gray-500 bg-gray-100 p-3 rounded max-w-xs">
+        <div className="mt-8 text-xs text-muted-foreground bg-muted p-3 rounded max-w-xs">
           <p>URL Params:</p>
           <code className="text-left break-all">
             {window.location.hash || window.location.search || 'No params'}
@@ -230,23 +226,3 @@ export default function AuthRedirectPage() {
     </div>
   );
 }
-```
-
-## Key Fixes
-
-✅ **Handles both token flows**:
-- Hash-based: Direct tokens in URL fragment
-- Code-based: Code parameter requiring exchange
-
-✅ **Better error handling**:
-- Specific error messages for different failures
-- "Signature invalid" → "Link expired" message
-- User-friendly toast notifications
-
-✅ **Deep linking**:
-- Proper deep link support for native apps
-- Fallback to web navigation
-
-✅ **Logging**:
-- Detailed console logs for debugging
-- Identifies which flow is being used
