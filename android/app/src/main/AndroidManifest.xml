@@ -1,102 +1,204 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="app.lovable.yogicmile">
+    package="com.yogicmile.app">
 
-    <!-- Network permissions for Supabase -->
+    <!-- =========================== -->
+    <!-- PERMISSIONS FOR STEP TRACKING -->
+    <!-- =========================== -->
+    
+    <!-- Android 12+ - Physical Activity (step counter) -->
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <uses-permission android:name="android.permission.BODY_SENSORS_BACKGROUND" />
+
+    <!-- General permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
-    <!-- Location permissions for step tracking and GPS validation -->
+    <!-- Optional: For GPS tracking (if implementing route tracking) -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
-    <!-- Step tracking permissions -->
-    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
-    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
-    <uses-feature android:name="android.hardware.sensor.stepcounter" android:required="false" />
-
-    <!-- Notification permissions -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-
-    <!-- Storage permissions -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
-    <!-- Background service permissions -->
+    <!-- For background step tracking service -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
-    <!-- Google Fit API -->
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <!-- Optional: Push notifications -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Optional: Camera for verification photos -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- Feature declarations (what your app needs to work) -->
+    <uses-feature
+        android:name="android.hardware.sensor.accelerometer"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.sensor.stepcounter"
+        android:required="false" />
+
+    <!-- Application declaration -->
     <application
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:networkSecurityConfig="@xml/network_security_config"
         android:usesCleartextTraffic="false">
 
         <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
-            android:launchMode="singleTask"
-            android:theme="@style/AppTheme.NoActionBarLaunch"
-            android:windowSoftInputMode="adjustResize">
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            
-            <!-- Deep Link for Authentication Redirects -->
+
+            <!-- Deep linking for auth redirect -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="yogicmile" android:host="auth-callback" />
+                <data
+                    android:scheme="yogicmile"
+                    android:host="auth-callback" />
+                <data
+                    android:scheme="yogicmile"
+                    android:host="auth-success" />
+            </intent-filter>
+
+            <!-- Deep linking for email verification (optional) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="app.lovable.dev"
+                    android:path="/auth/redirect" />
             </intent-filter>
         </activity>
 
-        <!-- Step Counter Foreground Service -->
+        <!-- Background Service for Step Tracking -->
         <service
-            android:name="app.lovable.yogicmile.steps.StepCounterService"
-            android:enabled="true"
+            android:name=".services.StepTrackingService"
             android:exported="false"
-            android:foregroundServiceType="health"
-            android:stopWithTask="false" />
+            android:label="Yogic Mile Step Tracking Service">
+        </service>
 
-        <!-- Boot Receiver for Auto-Restart -->
-        <receiver
-            android:name="app.lovable.yogicmile.steps.BootReceiver"
-            android:enabled="true"
+        <!-- Background Job Scheduler for periodic sync -->
+        <service
+            android:name=".services.StepSyncJobService"
             android:exported="true"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            android:permission="android.permission.BIND_JOB_SERVICE">
+        </service>
+
+        <!-- Broadcast receiver for boot completion (start service on device boot) -->
+        <receiver
+            android:name=".receivers.BootCompletedReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-                <action android:name="android.intent.action.ACTION_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
 
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
+        <!-- App shortcuts (optional) -->
+        <meta-data
+            android:name="android.app.shortcuts"
+            android:resource="@xml/shortcuts" />
+
     </application>
+
 </manifest>
+```
+
+## capacitor.config.ts - FIXED Configuration
+
+```typescript
+// Location: capacitor.config.ts
+
+import { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'com.yogicmile.app',
+  appName: 'Yogic Mile',
+  webDir: 'dist',
+  server: {
+    androidScheme: 'https',
+    cleartext: false,
+  },
+  
+  // Android-specific configuration
+  android: {
+    path: 'android',
+    minWebViewVersion: 90,
+    allowMixedContent: false,
+  },
+
+  // iOS-specific configuration
+  ios: {
+    path: 'ios',
+    minVersion: '12.0',
+  },
+
+  // Plugin configurations
+  plugins: {
+    // Capacitor core
+    'CapacitorCore': {
+      // Enable permission delegation
+      allowMixedContent: false,
+    },
+
+    // Permissions plugin
+    'Permissions': {
+      // Permissions configuration
+      'BodySensors': {
+        'requestAsyn': true,
+      },
+    },
+
+    // Storage plugin for persistent data
+    'Storage': {
+      'autoInit': true,
+    },
+
+    // App lifecycle
+    'App': {
+      'name': 'Yogic Mile',
+    },
+
+    // Notifications (if using push notifications)
+    'PushNotifications': {
+      'presentationOptions': ['badge', 'sound', 'alert'],
+    },
+
+    // Status bar
+    'StatusBar': {
+      'style': 'dark',
+      'backgroundColor': '#ffffff',
+      'overlaysWebView': false,
+    },
+
+    // Safe area
+    'SafeArea': {
+      'customSafeAreaInsets': {
+        'top': 0,
+        'bottom': 0,
+        'left': 0,
+        'right': 0,
+      },
+    },
+  },
+};
+
+export default config;
