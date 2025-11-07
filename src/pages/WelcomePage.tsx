@@ -30,10 +30,10 @@ const WelcomePage = () => {
         const check = async () => {
           console.log('[WelcomePage] Checking onboarding status...');
           try {
-            const result = await Promise.race<boolean>([
-              permissionManager.hasCompletedOnboarding(),
-              new Promise<boolean>((resolve) => setTimeout(() => resolve(true), 5000)), // timeout -> treat as completed to avoid blocking
-            ]);
+          const result = await Promise.race<boolean>([
+            Promise.resolve(permissionManager.hasCompletedPermissions()),
+            new Promise<boolean>((resolve) => setTimeout(() => resolve(true), 5000)), // timeout -> treat as completed to avoid blocking
+          ]);
             if (!cancelled && result === false) {
               setShowPermissionFlow(true);
             }
@@ -50,9 +50,9 @@ const WelcomePage = () => {
       }
     }, [isLoading, user]);
 
-    const handlePermissionsComplete = async () => {
+    const handlePermissionsComplete = () => {
       try {
-        await permissionManager.markOnboardingComplete();
+        permissionManager.markOnboardingComplete();
       } catch (e) {
         console.warn('[WelcomePage] markOnboardingComplete failed', e);
       }
