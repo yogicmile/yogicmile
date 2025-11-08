@@ -21,6 +21,9 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { HelpPage } from "./pages/HelpPage";
 import { ChallengesPage } from "./pages/ChallengesPage";
 import { CommunityPage } from "./pages/CommunityPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
+import AchievementsGalleryPage from "./pages/AchievementsGalleryPage";
+import ReferralDashboardPage from "./pages/ReferralDashboardPage";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +53,9 @@ const App = () => {
                   <Route path="rewards" element={<RewardsPage />} />
                   <Route path="challenges" element={<ChallengesPage />} />
                   <Route path="community" element={<CommunityPage />} />
+                  <Route path="analytics" element={<AnalyticsPage />} />
+                  <Route path="achievements" element={<AchievementsGalleryPage />} />
+                  <Route path="referrals" element={<ReferralDashboardPage />} />
                   <Route path="settings" element={<SettingsPage />} />
                   <Route path="help" element={<HelpPage />} />
                   <Route path="*" element={<NotFound />} />

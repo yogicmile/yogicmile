@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Settings, Share2, LogOut, Trophy, Calendar, Target, Shield, Camera } from 'lucide-react';
+import { Settings, Share2, LogOut, Trophy, Calendar, Target, Shield, Camera, Users, TrendingUp, Award } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -214,6 +214,24 @@ export const ProfilePage = () => {
   };
 
   const menuItems = [
+    {
+      icon: <TrendingUp className="w-5 h-5" />,
+      label: 'Analytics',
+      description: 'Track your progress and earnings',
+      action: () => navigate('/analytics')
+    },
+    {
+      icon: <Award className="w-5 h-5" />,
+      label: 'Achievements',
+      description: 'View unlocked badges and rewards',
+      action: () => navigate('/achievements')
+    },
+    {
+      icon: <Users className="w-5 h-5" />,
+      label: 'Referral Program',
+      description: 'Invite friends and earn bonuses',
+      action: () => navigate('/referrals')
+    },
     {
       icon: <Settings className="w-5 h-5" />,
       label: 'Settings',
