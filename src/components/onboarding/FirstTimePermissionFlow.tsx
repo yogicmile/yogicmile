@@ -134,20 +134,74 @@ export const FirstTimePermissionFlow: React.FC<FirstTimePermissionFlowProps> = (
   const handleComplete = async () => {
     setIsLoading(true);
     try {
-      // Start foreground service
-      const result = await permissionManager.startForegroundService();
+      console.log('🚀 Starting permission completion flow...');
       
-      if (result.success) {
-        toast({ title: 'Tracking Started!', description: 'Your steps are being counted' });
-        await permissionManager.markOnboardingComplete();
-        onComplete();
+      // Request all permissions to verify status
+      const activityGranted = await permissionManager.requestActivityRecognition();
+      const motionGranted = await permissionManager.requestMotionPermission();
+      
+      console.log('Activity Permission:', activityGranted);
+      console.log('Motion Permission:', motionGranted);
+      
+      // If permissions granted, START BACKGROUND SERVICE
+      if (activityGranted || motionGranted) {
+        console.log('✅ Permissions granted. Starting background service...');
+        
+        const serviceResult = await permissionManager.startForegroundService();
+        
+        if (serviceResult.success) {
+          console.log('✅ Background service started successfully');
+          
+          // Save tracking status to localStorage
+          localStorage.setItem('background_tracking_enabled', 'true');
+          localStorage.setItem('service_start_time', new Date().toISOString());
+          
+          toast({ 
+            title: '🎉 Tracking Started!', 
+            description: 'Your steps are being counted in the background'
+          });
+          
+          // Mark onboarding complete
+          await permissionManager.markOnboardingComplete();
+          
+          // Call parent completion callback
+          onComplete();
+        } else {
+          console.error('❌ Failed to start service');
+          
+          toast({ 
+            title: 'Service Start Failed', 
+            description: 'Background tracking could not be started. You can enable it later in Settings.',
+            variant: 'destructive'
+          });
+          
+          // Still complete onboarding
+          await permissionManager.markOnboardingComplete();
+          onComplete();
+        }
       } else {
-        toast({ title: 'Setup Complete', description: 'You can enable tracking in Settings', variant: 'default' });
+        console.warn('⚠️ Permissions not granted. Service not started.');
+        
+        toast({ 
+          title: 'Permissions Required', 
+          description: 'Please grant permissions in Settings to enable step tracking.',
+          variant: 'destructive'
+        });
+        
+        // Still complete onboarding
         await permissionManager.markOnboardingComplete();
         onComplete();
       }
     } catch (error) {
-      console.error('Complete error:', error);
+      console.error('❌ Permission flow error:', error);
+      
+      toast({ 
+        title: 'Error', 
+        description: 'An error occurred during setup. Please try again in Settings.',
+        variant: 'destructive'
+      });
+      
+      // Complete onboarding anyway (graceful degradation)
       await permissionManager.markOnboardingComplete();
       onComplete();
     } finally {
