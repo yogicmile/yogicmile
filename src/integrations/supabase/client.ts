@@ -2,8 +2,12 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://rwymfvfaiqvtiqjfmejv.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3eW1mdmZhaXF2dGlxamZtZWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2NzY4ODAsImV4cCI6MjA3MzI1Mjg4MH0.BuuVywo2S7yhIsO4LvqCvJVULKdUlXKNKiKzVjgr6yw";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://rwymfvfaiqvtiqjfmejv.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3eW1mdmZhaXF2dGlxamZtZWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2NzY4ODAsImV4cCI6MjA3MzI1Mjg4MH0.BuuVywo2S7yhIsO4LvqCvJVULKdUlXKNKiKzVjgr6yw";
+
+if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+  console.warn('⚠️ Using fallback Supabase credentials. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in .env');
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";

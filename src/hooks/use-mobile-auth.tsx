@@ -532,8 +532,8 @@ export const useMobileAuth = () => {
       // Determine redirect URL based on platform
       const getRedirectUrl = () => {
         if (Capacitor.isNativePlatform()) {
-          // Native app - use production web URL
-          return 'https://4741923f-866e-4468-918a-6e7c1c4ebf2e.lovableproject.com/';
+          // Native app - use configured app URL or current origin
+          return import.meta.env.VITE_APP_URL || `${window.location.origin}/`;
         }
         // Web browser - use current origin
         return `${window.location.origin}/`;
