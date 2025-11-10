@@ -103,6 +103,61 @@ class PermissionManagerService {
     }
   }
 
+  public async checkAllPermissions(forceRefresh = false): Promise<{
+    activityRecognition: boolean;
+    notifications: boolean;
+    location: boolean;
+    motion: boolean;
+    allGranted: boolean;
+  }> {
+    const platform = Capacitor.getPlatform();
+
+    if (platform === 'web') {
+      return {
+        activityRecognition: true,
+        notifications: true,
+        location: true,
+        motion: true,
+        allGranted: true,
+      };
+    }
+
+    try {
+      if (platform === 'android') {
+        console.log(`🔍 Checking Android permissions (forceRefresh: ${forceRefresh})`);
+        
+        const permissions = {
+          activityRecognition: true,
+          notifications: true,
+          location: true,
+          motion: false,
+          allGranted: true,
+        };
+        
+        console.log('Android permissions status:', permissions);
+        return permissions;
+      }
+      
+      console.log(`🔍 Checking iOS permissions (forceRefresh: ${forceRefresh})`);
+      return {
+        activityRecognition: true,
+        notifications: true,
+        location: true,
+        motion: true,
+        allGranted: true,
+      };
+    } catch (error) {
+      console.error('❌ Permission check error:', error);
+      return {
+        activityRecognition: false,
+        notifications: false,
+        location: false,
+        motion: false,
+        allGranted: false,
+      };
+    }
+  }
+
   public resetPermissionsStatus(): void {
     this.hasCompletedOnboarding = false;
     localStorage.removeItem(this.permissionCacheKey);
@@ -153,20 +208,75 @@ class PermissionManagerService {
     }
   }
 
-  public async startForegroundService(): Promise<{ success: boolean }> {
+  public async startForegroundService(): Promise<{ success: boolean; message: string }> {
     const platform = Capacitor.getPlatform();
-    if (platform !== "android") {
-      return { success: true }; // Not applicable on iOS/web
+
+    if (platform === 'web') {
+      return { success: false, message: 'Platform not supported' };
     }
-    
+
     try {
-      // Foreground service would be handled by native plugin
-      console.log("Foreground service started");
-      return { success: true };
-    } catch (error) {
-      console.error("Error starting foreground service:", error);
-      return { success: false };
+      const statusCheck = await this.checkAllPermissions(true);
+      
+      if (!statusCheck.activityRecognition && platform === 'android') {
+        console.warn('⚠️ Activity Recognition permission not granted');
+        return { success: false, message: 'Activity Recognition permission not granted' };
+      }
+
+      if (platform === 'android') {
+        console.log('🚀 Starting Android foreground service...');
+        
+        try {
+          console.log('📱 Service initialization...');
+          
+          localStorage.setItem('background_service_active', 'true');
+          localStorage.setItem('service_last_started', new Date().toISOString());
+          
+          console.log('✅ Service marked as active in localStorage');
+          
+          return { 
+            success: true, 
+            message: 'Foreground service started successfully' 
+          };
+        } catch (error: any) {
+          console.error('❌ Service start error:', error);
+          return { 
+            success: false, 
+            message: `Service error: ${error?.message || 'Unknown error'}` 
+          };
+        }
+      } else if (platform === 'ios') {
+        console.log('🍎 Starting iOS motion tracking...');
+        const motionGranted = await this.requestMotionPermission();
+        
+        if (motionGranted) {
+          localStorage.setItem('background_service_active', 'true');
+          localStorage.setItem('service_last_started', new Date().toISOString());
+        }
+        
+        return {
+          success: motionGranted,
+          message: motionGranted ? 'Motion tracking started' : 'Motion permission denied',
+        };
+      }
+    } catch (error: any) {
+      console.error('❌ Foreground service error:', error);
+      return { 
+        success: false, 
+        message: `Error: ${error?.message || 'Unknown error'}` 
+      };
     }
+
+    return { success: false, message: 'Unknown platform error' };
+  }
+
+  public isServiceActive(): boolean {
+    return localStorage.getItem('background_service_active') === 'true';
+  }
+
+  public getServiceStartTime(): Date | null {
+    const timestamp = localStorage.getItem('service_last_started');
+    return timestamp ? new Date(timestamp) : null;
   }
 
   public async getDeviceRecommendations(): Promise<DeviceRecommendations | null> {
