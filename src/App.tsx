@@ -9,6 +9,7 @@ import { AuthGuard } from "@/components/AuthGuard";
 import { AppLayout } from "@/components/AppLayout";
 import { useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
+import { App as CapacitorApp } from '@capacitor/app';
 import { permissionManager } from '@/services/PermissionManager';
 import Index from "./pages/Index";
 import { WalletPage } from "./pages/WalletPage";
@@ -96,6 +97,56 @@ const App = () => {
       console.log('🛑 Stopping background service monitor');
       if (serviceMonitor) {
         clearInterval(serviceMonitor);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    // Only add listener on native platforms
+    const platform = Capacitor.getPlatform();
+    if (platform === 'web') {
+      console.log('🌐 Web platform - skipping app resume listener');
+      return;
+    }
+
+    console.log('📱 Setting up app resume listener on', platform);
+
+    let cleanupListener: (() => void) | null = null;
+
+    // Listen for app becoming active (resume from background)
+    const setupListener = async () => {
+      const resumeListener = await CapacitorApp.addListener('appStateChange', async (state) => {
+        if (state.isActive) {
+          console.log('📱 App resumed. Refreshing permissions...');
+          
+          try {
+            // Force refresh permissions (ignore cache)
+            const status = await permissionManager.checkAllPermissions(true);
+            
+            console.log('✅ Current permissions refreshed:', status);
+            
+            // Dispatch custom event so UI components can update
+            window.dispatchEvent(new CustomEvent('permissionsUpdated', { 
+              detail: status 
+            }));
+          } catch (error) {
+            console.error('❌ Error refreshing permissions:', error);
+          }
+        } else {
+          console.log('📱 App went to background');
+        }
+      });
+
+      cleanupListener = () => resumeListener.remove();
+    };
+
+    setupListener();
+
+    // Cleanup listener when component unmounts
+    return () => {
+      console.log('🛑 Removing app resume listener');
+      if (cleanupListener) {
+        cleanupListener();
       }
     };
   }, []);
