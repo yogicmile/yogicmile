@@ -9,6 +9,7 @@ const corsHeaders = {
 interface CreateSessionRequest {
   mobileNumber: string;
   redirectUrl?: string;
+  platform?: string; // 'native' or 'web'
 }
 
 Deno.serve(async (req) => {
@@ -29,7 +30,7 @@ Deno.serve(async (req) => {
       }
     });
 
-    const { mobileNumber, redirectUrl }: CreateSessionRequest = await req.json();
+    const { mobileNumber, redirectUrl, platform }: CreateSessionRequest = await req.json();
 
     if (!mobileNumber) {
       return new Response(
@@ -187,10 +188,43 @@ Deno.serve(async (req) => {
 
     console.log('Magic link generated for user:', authUserId);
 
+    // For native platforms, return tokens directly instead of magic link
+    if (platform === 'native') {
+      // Extract tokens from the magic link URL
+      const actionUrl = new URL(linkData.properties.action_link);
+      const accessToken = actionUrl.searchParams.get('access_token');
+      const refreshToken = actionUrl.searchParams.get('refresh_token');
+      const expiresIn = actionUrl.searchParams.get('expires_in');
+
+      if (!accessToken || !refreshToken) {
+        console.error('Failed to extract tokens from magic link');
+        return new Response(
+          JSON.stringify({ success: false, error: 'Failed to extract authentication tokens' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log('Returning tokens directly for native platform');
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          user_id: authUserId,
+          platform: 'native',
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          expires_in: expiresIn ? parseInt(expiresIn) : 3600
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // For web platforms, return magic link as before
     return new Response(
       JSON.stringify({
         success: true,
         user_id: authUserId,
+        platform: 'web',
         action_link: linkData.properties.action_link
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

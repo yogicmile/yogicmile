@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Preferences } from '@capacitor/preferences';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { LocalNotifications } from '@capacitor/local-notifications';
@@ -58,6 +59,7 @@ const safeScheduleNotification = async (payload: any) => {
 
 export const useMobileAuth = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [state, setState] = useState<MobileAuthState>({
     isLoading: false,
     otpSent: false,
@@ -529,43 +531,55 @@ export const useMobileAuth = () => {
         .eq('mobile_number', formatted)
         .maybeSingle();
 
-      // Determine redirect URL based on platform
-      const getRedirectUrl = () => {
-        if (Capacitor.isNativePlatform()) {
-          // Native app - use configured app URL or current origin
-          return import.meta.env.VITE_APP_URL || `${window.location.origin}/`;
-        }
-        // Web browser - use current origin
-        return `${window.location.origin}/`;
-      };
+      // Detect if running on native platform
+      const isNative = Capacitor.isNativePlatform();
+      const platform = isNative ? 'native' : 'web';
 
-      // Request a magic login link from the Edge Function and redirect the browser to it
+      // Request session creation from Edge Function
       const { data: sessionData, error: sessionError } = await supabase.functions.invoke('create-auth-session', {
-        body: { mobileNumber: formatted, redirectUrl: getRedirectUrl() }
+        body: { 
+          mobileNumber: formatted, 
+          platform,
+          redirectUrl: isNative ? 'yogicmile://auth-callback' : `${window.location.origin}/`
+        }
       });
 
-      if (sessionError || !sessionData?.success || !sessionData?.action_link) {
+      if (sessionError || !sessionData?.success) {
         throw new Error('Failed to create session: ' + (sessionData?.error || sessionError?.message || 'Edge Function returned a non-2xx status code'));
       }
 
-      // Handle redirect based on platform
-      if (Capacitor.isNativePlatform()) {
-        // On native, the magic link will open in system browser
-        // Show success message and let AuthContext handle session detection
+      // Handle response based on platform
+      if (isNative && sessionData.access_token && sessionData.refresh_token) {
+        // Native platform: Set session directly in-app
+        console.log('🔐 Setting session directly for native platform');
+        
+        const { error: setSessionError } = await supabase.auth.setSession({
+          access_token: sessionData.access_token,
+          refresh_token: sessionData.refresh_token
+        });
+
+        if (setSessionError) {
+          throw new Error('Failed to establish session: ' + setSessionError.message);
+        }
+
+        await safeHapticImpact(ImpactStyle.Medium);
+        
         toast({
           title: "Login Successful! 🎉",
-          description: "Redirecting you to the app...",
+          description: "Welcome back!",
         });
+
+        // Navigate within the app using React Router
+        navigate('/');
         
-        // Open the magic link in system browser
-        window.open(sessionData.action_link, '_system');
-        
-        // Return success - AuthContext will detect session when app resumes
         return { success: true };
-      } else {
-        // Web browser - redirect in same window
+      } else if (!isNative && sessionData.action_link) {
+        // Web platform: Use magic link redirect
+        console.log('🌐 Redirecting to magic link for web platform');
         window.location.href = sessionData.action_link;
         return { success: true };
+      } else {
+        throw new Error('Invalid response from session creation');
       }
     } catch (error: any) {
       console.error('OTP verification error:', error);
