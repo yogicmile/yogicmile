@@ -188,35 +188,89 @@ Deno.serve(async (req) => {
 
     console.log('Magic link generated for user:', authUserId);
 
-    // For native platforms, return tokens directly instead of magic link
+    // For native platforms, exchange the magic link token for session tokens
     if (platform === 'native') {
-      // Extract tokens from the magic link URL
-      const actionUrl = new URL(linkData.properties.action_link);
-      const accessToken = actionUrl.searchParams.get('access_token');
-      const refreshToken = actionUrl.searchParams.get('refresh_token');
-      const expiresIn = actionUrl.searchParams.get('expires_in');
+      console.log('🔧 Native platform detected, extracting session tokens');
+      
+      try {
+        // Extract the hashed token from the magic link URL
+        const actionUrl = new URL(linkData.properties.action_link);
+        const hashedToken = actionUrl.searchParams.get('token');
+        const tokenType = actionUrl.searchParams.get('type') || 'magiclink';
 
-      if (!accessToken || !refreshToken) {
-        console.error('Failed to extract tokens from magic link');
+        if (!hashedToken) {
+          console.error('❌ Failed to extract hashed token from magic link');
+          return new Response(
+            JSON.stringify({ success: false, error: 'Failed to generate session token' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        console.log('🔑 Verifying token to get session credentials');
+
+        // Verify the token to get the actual session tokens
+        const verifyUrl = `${supabaseUrl}/auth/v1/verify?token=${hashedToken}&type=${tokenType}`;
+        const verifyResponse = await fetch(verifyUrl, {
+          method: 'GET',
+          headers: {
+            'apikey': Deno.env.get('SUPABASE_ANON_KEY')!,
+          },
+          redirect: 'manual' // Don't follow redirects, we need the Location header
+        });
+
+        console.log(`📍 Verify response status: ${verifyResponse.status}`);
+
+        // The response is a 302 redirect with tokens in the Location header
+        const location = verifyResponse.headers.get('location');
+        
+        if (!location) {
+          console.error('❌ No location header in verify response');
+          return new Response(
+            JSON.stringify({ success: false, error: 'Failed to verify token' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        console.log('🔗 Extracting tokens from redirect URL');
+
+        // Extract tokens from the redirect URL fragment (after #)
+        const locationUrl = new URL(location, supabaseUrl);
+        const fragment = locationUrl.hash.substring(1); // Remove the # symbol
+        const params = new URLSearchParams(fragment);
+        
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token');
+        const expires_in = params.get('expires_in');
+
+        if (!access_token || !refresh_token) {
+          console.error('❌ Failed to extract tokens from location header');
+          console.error('Fragment:', fragment);
+          return new Response(
+            JSON.stringify({ success: false, error: 'Failed to extract authentication tokens' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        console.log('✅ Successfully generated tokens for native platform');
+
         return new Response(
-          JSON.stringify({ success: false, error: 'Failed to extract authentication tokens' }),
+          JSON.stringify({
+            success: true,
+            user_id: authUserId,
+            platform: 'native',
+            access_token,
+            refresh_token,
+            expires_in: expires_in ? parseInt(expires_in) : 3600
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      } catch (error: any) {
+        console.error('❌ Error creating native session:', error.message);
+        return new Response(
+          JSON.stringify({ success: false, error: `Session creation failed: ${error.message}` }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-
-      console.log('Returning tokens directly for native platform');
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          user_id: authUserId,
-          platform: 'native',
-          access_token: accessToken,
-          refresh_token: refreshToken,
-          expires_in: expiresIn ? parseInt(expiresIn) : 3600
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
     }
 
     // For web platforms, return magic link as before
