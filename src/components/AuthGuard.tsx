@@ -30,7 +30,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     // Wait for both auth and onboarding checks to complete
     if (authLoading || checkingOnboarding) return;
 
-    const publicRoutes = ['/welcome', '/login', '/signup', '/auth/redirect'];
+    const publicRoutes = ['/permissions', '/welcome', '/login', '/signup', '/auth/redirect'];
     const isPublicRoute = publicRoutes.includes(location.pathname);
 
     const authOnlyRoutes = ['/profile', '/wallet', '/rewards', '/settings', '/community', '/challenges'];
@@ -50,10 +50,10 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     }
 
     // RULE 2: For unauthenticated users, check onboarding status
-    // If onboarding not complete AND trying to access any route except /welcome
+    // If onboarding not complete AND trying to access any route except /permissions
     if (!onboardingComplete && !isPublicRoute) {
-      console.log('[AuthGuard] Onboarding not complete, redirecting to /welcome');
-      navigate('/welcome');
+      console.log('[AuthGuard] Onboarding not complete, redirecting to /permissions');
+      navigate('/permissions');
       return;
     }
 

@@ -18,6 +18,7 @@ import { ProfilePage } from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import WelcomePage from "./pages/WelcomePage";
+import PermissionsPage from "./pages/PermissionsPage";
 import AuthRedirectPage from "./pages/AuthRedirectPage";
 import NotFound from "./pages/NotFound";
 import { SettingsPage } from "./pages/SettingsPage";
@@ -163,6 +164,7 @@ const App = () => {
             <AuthGuard>
               <AppLayout>
                 <Routes>
+                  <Route path="permissions" element={<PermissionsPage />} />
                   <Route path="welcome" element={<WelcomePage />} />
                   <Route path="login" element={<LoginPage />} />
                   <Route path="signup" element={<SignupPage />} />
