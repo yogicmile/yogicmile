@@ -43,6 +43,7 @@ export class GoogleFitService {
   private autoSyncEnabled = true;
   private syncInterval: NodeJS.Timeout | null = null;
   private syncListeners: Array<(data: GoogleFitSyncResult) => void> = [];
+  private static syncLock = false; // Race condition protection
 
   static getInstance(): GoogleFitService {
     if (!GoogleFitService.instance) {
@@ -132,6 +133,19 @@ export class GoogleFitService {
   }
 
   /**
+   * Check if native BackgroundStepTracking plugin is available
+   */
+  private async isPluginAvailable(): Promise<boolean> {
+    try {
+      const { BackgroundStepTracking } = await import('@/services/AndroidBackgroundService');
+      return BackgroundStepTracking !== undefined;
+    } catch (error) {
+      console.error('[GoogleFit] Native plugin not available:', error);
+      return false;
+    }
+  }
+
+  /**
    * Request Google Fit permissions
    */
   async requestPermissions(): Promise<GoogleFitPermissions> {
@@ -199,6 +213,18 @@ export class GoogleFitService {
    * Sync steps from Google Fit
    */
   async syncSteps(): Promise<GoogleFitSyncResult> {
+    // Race condition protection
+    if (GoogleFitService.syncLock) {
+      console.log('[GoogleFit] Sync already in progress, skipping');
+      return {
+        success: false,
+        steps: 0,
+        lastSyncTime: Date.now(),
+        source: 'sensor',
+        error: 'Sync already in progress',
+      };
+    }
+
     if (!this.isConnected) {
       return {
         success: false,
@@ -210,6 +236,7 @@ export class GoogleFitService {
     }
 
     try {
+      GoogleFitService.syncLock = true;
       const now = Date.now();
       const startOfDay = new Date();
       startOfDay.setHours(0, 0, 0, 0);
@@ -258,38 +285,57 @@ export class GoogleFitService {
         source: 'sensor',
         error: (error as Error).message,
       };
+    } finally {
+      GoogleFitService.syncLock = false;
     }
   }
 
   /**
-   * Fetch steps from Google Fit API
+   * Fetch steps from Google Fit API - NOW USES REAL NATIVE PLUGIN
    */
   private async fetchStepsFromGoogleFit(
     startTime: number,
     endTime: number
   ): Promise<number> {
     try {
-      // In production, this would call Google Fitness REST API:
-      // GET https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate
-      //
-      // Request body:
-      // {
-      //   "aggregateBy": [{
-      //     "dataTypeName": "com.google.step_count.delta",
-      //     "dataSourceId": "derived:com.google.step_count.delta:com.google.android.gms:estimated_steps"
-      //   }],
-      //   "bucketByTime": { "durationMillis": 86400000 },
-      //   "startTimeMillis": startTime,
-      //   "endTimeMillis": endTime
-      // }
+      // Check if native plugin is available
+      const pluginAvailable = await this.isPluginAvailable();
+      
+      if (!pluginAvailable) {
+        console.log('[GoogleFit] Native plugin not available, using cache fallback');
+        // Immediate fallback to cache
+        const { value } = await Preferences.get({ key: 'android_daily_steps' });
+        if (value) {
+          const data = JSON.parse(value);
+          return data.steps || 0;
+        }
+        return 0;
+      }
 
-      // For now, simulate fetching steps
-      // In real implementation, parse the response and sum up step counts
-      const simulatedSteps = Math.floor(Math.random() * 2000) + 1000;
-      return simulatedSteps;
+      // Import and use the REAL native plugin
+      const { BackgroundStepTracking } = await import('@/services/AndroidBackgroundService');
+      
+      // Get today's steps from native plugin
+      const result = await BackgroundStepTracking.getStepCount();
+      
+      console.log('[GoogleFit] ✅ Real steps from native plugin:', result.steps);
+      return result.steps || 0;
     } catch (error) {
-      console.error('Failed to fetch from Google Fit:', error);
-      return 0;
+      console.error('[GoogleFit] ❌ Failed to fetch real steps:', error);
+      
+      // Fallback: Try to get from SharedPreferences cache
+      try {
+        const { value } = await Preferences.get({ key: 'android_daily_steps' });
+        if (value) {
+          const data = JSON.parse(value);
+          console.log('[GoogleFit] Using cached steps:', data.steps);
+          return data.steps || 0;
+        }
+      } catch (fallbackError) {
+        console.error('[GoogleFit] Fallback also failed:', fallbackError);
+      }
+      
+      return 0; // Return 0 instead of fake data
     }
   }
 

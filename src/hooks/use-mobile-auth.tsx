@@ -591,6 +591,33 @@ export const useMobileAuth = () => {
           });
         }
 
+        // Trigger immediate health data sync on login (Android)
+        if (Capacitor.getPlatform() === 'android') {
+          try {
+            console.log('[Auth] Initializing Google Fit on login...');
+            const { googleFitService } = await import('@/services/GoogleFitService');
+            const initResult = await googleFitService.initialize();
+            
+            if (initResult.success) {
+              console.log('[Auth] Performing immediate sync...');
+              const syncResult = await googleFitService.syncSteps();
+              
+              if (syncResult.success && syncResult.steps > 0) {
+                toast({
+                  title: "Steps Synced! ✅",
+                  description: `${syncResult.steps.toLocaleString()} steps loaded from Google Fit`,
+                  duration: 3000,
+                });
+              }
+            } else {
+              console.log('[Auth] Google Fit unavailable, using local sensors');
+            }
+          } catch (error) {
+            console.error('[Auth] Failed to sync health data on login:', error);
+            // Graceful degradation - continue without Google Fit
+          }
+        }
+
         // Navigate to dashboard (modal will show if needed)
         navigate('/');
         

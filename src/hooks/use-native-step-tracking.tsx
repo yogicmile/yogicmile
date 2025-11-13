@@ -243,8 +243,8 @@ export const useNativeStepTracking = () => {
               lastSyncTime: new Date(data.timestamp),
             });
             
-            // Sync to database
-            await syncStepsToDatabase(finalSteps);
+            // Sync to database with lifetime steps
+            await syncStepsToDatabase(finalSteps, capped, stepData.lifetimeSteps);
             
             // Milestone notifications
             if (capped % 1000 === 0 && capped > stepData.dailySteps) {
@@ -408,13 +408,19 @@ export const useNativeStepTracking = () => {
 
   // Use centralized phase definitions
 
-  // Sync steps to database
-  const syncStepsToDatabase = useCallback(async (steps: number) => {
+  // Sync steps to database with lifetime steps
+  const syncStepsToDatabase = useCallback(async (
+    steps: number,
+    cappedSteps?: number,
+    lifetimeSteps?: number
+  ) => {
     if (isGuest || !user) return;
 
     try {
-      const cappedSteps = Math.min(steps, MAX_DAILY_STEPS);
-      const units = Math.floor(cappedSteps / 25);
+      const finalCappedSteps = cappedSteps ?? Math.min(steps, MAX_DAILY_STEPS);
+      const units = Math.floor(finalCappedSteps / 25);
+      
+      console.log(`[StepTracking] Syncing to database: daily=${steps}, capped=${finalCappedSteps}, lifetime=${lifetimeSteps}`);
       
       // Get current phase from database
       const { data: userPhaseData } = await supabase
@@ -449,19 +455,33 @@ export const useNativeStepTracking = () => {
           user_id: user.id,
           date: today,
           steps: steps,
-          capped_steps: cappedSteps,
+          personal_steps: steps,
+          capped_steps: finalCappedSteps,
           units_earned: units,
           paisa_earned: paisaEarned,
           phase_id: currentPhase,
           phase_rate: phaseRate,
         });
 
+      // Update user_phases table with lifetime steps
+      if (lifetimeSteps !== undefined) {
+        await supabase
+          .from('user_phases')
+          .update({
+            total_steps: lifetimeSteps,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', user.id);
+      }
+
+      console.log('[StepTracking] ✅ Database sync complete');
+
       // Update challenge progress if there are new steps
       if (stepsAdded > 0 && updateChallengeProgress) {
         await updateChallengeProgress(stepsAdded);
       }
     } catch (error) {
-      console.error('Error syncing steps to database:', error);
+      console.error('[StepTracking] ❌ Database sync failed:', error);
     }
   }, [user, isGuest, updateChallengeProgress]);
 
@@ -529,6 +549,20 @@ export const useNativeStepTracking = () => {
         });
         
         console.log('[StepTracking] Permissions re-checked on resume');
+        
+        // Trigger Google Fit sync on app resume (Android only)
+        const currentPlatform = Capacitor.getPlatform();
+        if (currentPlatform === 'android') {
+          try {
+            const { googleFitService } = await import('@/services/GoogleFitService');
+            if (googleFitService.isGoogleFitConnected()) {
+              console.log('[StepTracking] Syncing Google Fit on app resume...');
+              await googleFitService.syncSteps();
+            }
+          } catch (error) {
+            console.error('[StepTracking] Failed to sync Google Fit on resume:', error);
+          }
+        }
         
         // App became active - sync any pending data
         syncPendingSteps();

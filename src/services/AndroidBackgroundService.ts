@@ -103,6 +103,8 @@ const BackgroundStepTracking = registerPlugin<BackgroundStepTrackingPlugin>(
   }
 );
 
+export { BackgroundStepTracking };
+
 export class AndroidBackgroundStepService {
   private static instance: AndroidBackgroundStepService;
   private listeners: Map<string, (data: any) => void> = new Map();
