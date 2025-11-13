@@ -33,6 +33,16 @@ export const PostLoginPermissionModal = ({ open, onClose, permissionStatus: init
   useEffect(() => {
     if (!open) return;
 
+    // Check permissions immediately when modal opens
+    const checkPermissionsNow = async () => {
+      setIsCheckingPermissions(true);
+      const realTimeStatus = await permissionManager.checkRealTimePermissionStatus();
+      setPermissionStatus(realTimeStatus);
+      setIsCheckingPermissions(false);
+    };
+    
+    checkPermissionsNow();
+
     // Listen for app coming back to foreground (user returned from settings)
     const setupListener = async () => {
       const listener = await App.addListener('appStateChange', async (state) => {

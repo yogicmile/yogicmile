@@ -110,8 +110,15 @@ export const StepTrackingValidator: React.FC = () => {
       });
     }
 
-    // Check 4: GPS Accuracy
-    if (stepData.gpsAccuracy > 0 && stepData.gpsAccuracy < 50) {
+    // Check 4: GPS Accuracy - distinguish between permission denied vs waiting for signal
+    if (!permissions.location) {
+      newChecks.push({
+        name: 'GPS',
+        status: 'error',
+        message: 'Location permission denied',
+        icon: <MapPin className="h-4 w-4" />
+      });
+    } else if (stepData.gpsAccuracy > 0 && stepData.gpsAccuracy < 50) {
       newChecks.push({
         name: 'GPS',
         status: 'success',
@@ -130,7 +137,7 @@ export const StepTrackingValidator: React.FC = () => {
       newChecks.push({
         name: 'GPS',
         status: 'pending',
-        message: 'Waiting for GPS signal',
+        message: 'Waiting for GPS signal... (Permission granted)',
         icon: <MapPin className="h-4 w-4" />
       });
     }

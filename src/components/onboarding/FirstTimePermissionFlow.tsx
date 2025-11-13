@@ -62,6 +62,12 @@ export const FirstTimePermissionFlow: React.FC<FirstTimePermissionFlowProps> = (
     try {
       if (platform === 'android') {
         const granted = await permissionManager.requestActivityRecognition();
+        
+        // Cache permission status with timestamp
+        localStorage.setItem('permission_activity_recognition_cache', granted ? 'true' : 'false');
+        localStorage.setItem('permission_activity_recognition_time', Date.now().toString());
+        console.log('✅ Activity Recognition permission stored:', granted);
+        
         if (granted) {
           toast({ title: 'Permission Granted', description: 'Activity recognition enabled' });
           handleNext('notifications');
@@ -74,6 +80,12 @@ export const FirstTimePermissionFlow: React.FC<FirstTimePermissionFlowProps> = (
         }
       } else if (platform === 'ios') {
         const granted = await permissionManager.requestMotionPermission();
+        
+        // Cache permission status
+        localStorage.setItem('permission_motion_cache', granted ? 'true' : 'false');
+        localStorage.setItem('permission_motion_time', Date.now().toString());
+        console.log('✅ Motion permission stored:', granted);
+        
         if (granted) {
           toast({ title: 'Permission Granted', description: 'Motion & Fitness enabled' });
           handleNext('complete');
@@ -97,6 +109,12 @@ export const FirstTimePermissionFlow: React.FC<FirstTimePermissionFlowProps> = (
     setIsLoading(true);
     try {
       const granted = await permissionManager.requestNotifications();
+      
+      // Cache permission status
+      localStorage.setItem('permission_notifications_cache', granted ? 'true' : 'false');
+      localStorage.setItem('permission_notifications_time', Date.now().toString());
+      console.log('✅ Notifications permission stored:', granted);
+      
       if (granted) {
         toast({ title: 'Notifications Enabled', description: 'You\'ll receive step tracking updates' });
       }
@@ -155,6 +173,8 @@ export const FirstTimePermissionFlow: React.FC<FirstTimePermissionFlowProps> = (
           // Save tracking status to localStorage
           localStorage.setItem('background_tracking_enabled', 'true');
           localStorage.setItem('service_start_time', new Date().toISOString());
+          localStorage.setItem('permissions_onboarding_complete', 'true');
+          localStorage.setItem('permissions_complete_time', Date.now().toString());
           
           toast({ 
             title: '🎉 Tracking Started!', 

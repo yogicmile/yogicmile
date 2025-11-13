@@ -43,6 +43,54 @@ const Index = () => {
     }
   }, []);
 
+  // Re-check permissions when app resumes from background
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const setupAppResumeListener = async () => {
+      const { Capacitor } = await import('@capacitor/core');
+      
+      if (!Capacitor.isNativePlatform()) return;
+      
+      const { App } = await import('@capacitor/app');
+      const { permissionManager } = await import('@/services/PermissionManager');
+      
+      // Periodic check every 30 seconds while app is active
+      const checkInterval = setInterval(async () => {
+        const status = await permissionManager.checkAllPermissions(true);
+        console.log('🔄 Periodic permission check:', status);
+        
+        // Detect if permissions changed
+        if (permissionStatus && !status.allGranted && permissionStatus.allGranted) {
+          console.warn('⚠️ Permissions were revoked!');
+          setPermissionStatus(status);
+          setShowPermissionModal(true);
+        }
+      }, 30000);
+      
+      // Re-check when app resumes
+      const listener = await App.addListener('appStateChange', async (state) => {
+        if (state.isActive) {
+          console.log('📱 Dashboard: App resumed - re-checking permissions');
+          const status = await permissionManager.checkAllPermissions(true);
+          console.log('📋 Dashboard: Current permission status:', status);
+          setPermissionStatus(status);
+        }
+      });
+      
+      return { listener, checkInterval };
+    };
+    
+    const cleanup = setupAppResumeListener();
+    
+    return () => {
+      cleanup.then(({ listener, checkInterval }) => {
+        listener.remove();
+        clearInterval(checkInterval);
+      });
+    };
+  }, [permissionStatus]);
+
   const handleClaimReward = async (): Promise<boolean> => {
     try {
       const success = await yogicData.redeemDailyCoins();

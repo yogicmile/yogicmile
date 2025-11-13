@@ -130,6 +130,31 @@ export const useNativeStepTracking = () => {
       if (platform === 'android') {
         console.log('[StepTracking] Starting Android initialization...');
         
+        // Check permissions immediately on Android
+        console.log('[StepTracking] Checking Android permissions...');
+        const locationStatus = await Geolocation.checkPermissions();
+        const notificationStatus = await LocalNotifications.checkPermissions();
+        
+        setPermissions({
+          location: locationStatus.location === 'granted',
+          notifications: notificationStatus.display === 'granted',
+          motion: true, // Android uses activity recognition, not motion
+        });
+        
+        console.log('[StepTracking] Android permissions:', {
+          location: locationStatus.location,
+          notifications: notificationStatus.display,
+        });
+        
+        // If location not granted, show warning
+        if (locationStatus.location !== 'granted') {
+          toast({
+            title: "Location Permission Required",
+            description: "Enable location for GPS validation",
+            variant: "destructive",
+          });
+        }
+        
         // Initialize Google Fit first
         console.log('[StepTracking] Attempting Google Fit connection...');
         const googleFitResult = await googleFitService.initialize();
@@ -489,8 +514,22 @@ export const useNativeStepTracking = () => {
   }, [stepData, permissions, syncStepsToDatabase]);
 
   const setupAppStateListeners = () => {
-    App.addListener('appStateChange', ({ isActive }) => {
+    App.addListener('appStateChange', async ({ isActive }) => {
       if (isActive) {
+        console.log('[StepTracking] App resumed - re-checking permissions');
+        
+        // Re-check permissions when app resumes
+        const locationStatus = await Geolocation.checkPermissions();
+        const notificationStatus = await LocalNotifications.checkPermissions();
+        
+        setPermissions({
+          location: locationStatus.location === 'granted',
+          notifications: notificationStatus.display === 'granted',
+          motion: true,
+        });
+        
+        console.log('[StepTracking] Permissions re-checked on resume');
+        
         // App became active - sync any pending data
         syncPendingSteps();
         // Refresh step count immediately

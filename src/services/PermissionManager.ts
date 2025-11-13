@@ -118,6 +118,8 @@ class PermissionManagerService {
     location: boolean;
     motion: boolean;
     allGranted: boolean;
+    partiallyGranted: boolean;
+    missingPermissions: string[];
   }> {
     const platform = Capacitor.getPlatform();
 
@@ -128,32 +130,78 @@ class PermissionManagerService {
         location: true,
         motion: true,
         allGranted: true,
+        partiallyGranted: false,
+        missingPermissions: [],
       };
     }
 
     try {
+      console.log(`🔍 Checking ${platform} permissions (forceRefresh: ${forceRefresh})`);
+      
+      // Check Notifications (both platforms)
+      let notificationsGranted = false;
+      try {
+        const notificationResult = await LocalNotifications.checkPermissions();
+        notificationsGranted = notificationResult.display === 'granted';
+        console.log('✅ Notifications:', notificationsGranted);
+      } catch (error) {
+        console.error('❌ Notification check failed:', error);
+      }
+
+      // Check Location (both platforms)
+      let locationGranted = false;
+      try {
+        const { Geolocation } = await import('@capacitor/geolocation');
+        const locationStatus = await Geolocation.checkPermissions();
+        locationGranted = locationStatus.location === 'granted';
+        console.log('✅ Location:', locationGranted);
+      } catch (error) {
+        console.error('❌ Location check failed:', error);
+      }
+
       if (platform === 'android') {
-        console.log(`🔍 Checking Android permissions (forceRefresh: ${forceRefresh})`);
+        // For Android, use real-time check for activity recognition
+        const realTimeStatus = await this.checkRealTimePermissionStatus();
         
-        const permissions = {
-          activityRecognition: true,
-          notifications: true,
-          location: true,
-          motion: false,
-          allGranted: true,
+        const missingPermissions: string[] = [];
+        if (!realTimeStatus.activityRecognition) missingPermissions.push('Activity Recognition');
+        if (!notificationsGranted) missingPermissions.push('Notifications');
+        if (!locationGranted) missingPermissions.push('Location');
+        
+        const grantedCount = [realTimeStatus.activityRecognition, notificationsGranted, locationGranted].filter(Boolean).length;
+        const allGranted = realTimeStatus.activityRecognition && notificationsGranted && locationGranted;
+        
+        return {
+          activityRecognition: realTimeStatus.activityRecognition,
+          notifications: notificationsGranted,
+          location: locationGranted,
+          motion: false, // Android doesn't use motion
+          allGranted,
+          partiallyGranted: grantedCount > 0 && !allGranted,
+          missingPermissions,
         };
-        
-        console.log('Android permissions status:', permissions);
-        return permissions;
       }
       
-      console.log(`🔍 Checking iOS permissions (forceRefresh: ${forceRefresh})`);
+      // iOS - check motion permission
+      console.log(`🔍 Checking iOS permissions`);
+      let motionGranted = true; // iOS motion is usually auto-granted
+      
+      const missingPermissions: string[] = [];
+      if (!notificationsGranted) missingPermissions.push('Notifications');
+      if (!locationGranted) missingPermissions.push('Location');
+      if (!motionGranted) missingPermissions.push('Motion');
+      
+      const grantedCount = [notificationsGranted, locationGranted, motionGranted].filter(Boolean).length;
+      const allGranted = notificationsGranted && locationGranted && motionGranted;
+      
       return {
-        activityRecognition: true,
-        notifications: true,
-        location: true,
-        motion: true,
-        allGranted: true,
+        activityRecognition: true, // iOS doesn't need this
+        notifications: notificationsGranted,
+        location: locationGranted,
+        motion: motionGranted,
+        allGranted,
+        partiallyGranted: grantedCount > 0 && !allGranted,
+        missingPermissions,
       };
     } catch (error) {
       console.error('❌ Permission check error:', error);
@@ -163,6 +211,8 @@ class PermissionManagerService {
         location: false,
         motion: false,
         allGranted: false,
+        partiallyGranted: false,
+        missingPermissions: ['All permissions'],
       };
     }
   }
@@ -200,10 +250,31 @@ class PermissionManagerService {
         try {
           const status = await BackgroundStepTracking.requestAllPermissions();
           activityGranted = status?.activityRecognition === true;
-          console.log('✅ Activity Recognition status:', activityGranted);
+          console.log('✅ Activity Recognition status (native):', activityGranted);
+          
+          // Cache the result with timestamp
+          localStorage.setItem('permission_activity_recognition_cache', activityGranted ? 'true' : 'false');
+          localStorage.setItem('permission_activity_recognition_time', Date.now().toString());
         } catch (error) {
-          console.error('❌ Activity Recognition check failed:', error);
-          activityGranted = false;
+          console.warn('⚠️ BackgroundStepTracking plugin not available, checking localStorage cache');
+          
+          // Fallback to cached value if plugin fails
+          const cached = localStorage.getItem('permission_activity_recognition_cache');
+          const cacheTime = localStorage.getItem('permission_activity_recognition_time');
+          
+          if (cached && cacheTime) {
+            const ageMinutes = (Date.now() - parseInt(cacheTime)) / 60000;
+            if (ageMinutes < 15) { // Cache valid for 15 minutes
+              activityGranted = cached === 'true';
+              console.log(`✅ Using cached Activity Recognition status: ${activityGranted} (${ageMinutes.toFixed(0)}m old)`);
+            } else {
+              console.warn(`⚠️ Cache expired (${ageMinutes.toFixed(0)}m old), assuming not granted`);
+              activityGranted = false;
+            }
+          } else {
+            console.warn('⚠️ No cache available, assuming not granted');
+            activityGranted = false;
+          }
         }
       } else if (platform === 'ios') {
         // For iOS, check if motion tracking is available
@@ -246,9 +317,30 @@ class PermissionManagerService {
           const batteryStatus = await BackgroundStepTracking.isBatteryOptimizationDisabled();
           batteryOptimized = batteryStatus?.disabled || false;
           console.log('✅ Battery optimization disabled:', batteryOptimized);
+          
+          // Cache the result
+          localStorage.setItem('permission_battery_optimized_cache', batteryOptimized ? 'true' : 'false');
+          localStorage.setItem('permission_battery_optimized_time', Date.now().toString());
         } catch (error) {
-          console.error('❌ Battery check failed:', error);
-          batteryOptimized = this.isServiceActive();
+          console.warn('⚠️ Battery check failed, using cache/fallback');
+          
+          // Fallback to cached value
+          const cached = localStorage.getItem('permission_battery_optimized_cache');
+          const cacheTime = localStorage.getItem('permission_battery_optimized_time');
+          
+          if (cached && cacheTime) {
+            const ageMinutes = (Date.now() - parseInt(cacheTime)) / 60000;
+            if (ageMinutes < 15) {
+              batteryOptimized = cached === 'true';
+              console.log(`✅ Using cached battery status: ${batteryOptimized} (${ageMinutes.toFixed(0)}m old)`);
+            } else {
+              batteryOptimized = this.isServiceActive();
+              console.log(`⚠️ Cache expired, using service status: ${batteryOptimized}`);
+            }
+          } else {
+            batteryOptimized = this.isServiceActive();
+            console.log(`⚠️ No cache, using service status: ${batteryOptimized}`);
+          }
         }
       }
 
@@ -468,6 +560,48 @@ class PermissionManagerService {
     } catch (error) {
       console.error("Error getting device recommendations:", error);
       return null;
+    }
+  }
+
+  // Testing utilities (DEV only)
+  public simulatePermissionState(permissions: Partial<{
+    activityRecognition: boolean;
+    notifications: boolean;
+    location: boolean;
+    batteryOptimized: boolean;
+  }>): void {
+    if (import.meta.env.DEV) {
+      if (permissions.activityRecognition !== undefined) {
+        localStorage.setItem('permission_activity_recognition_cache', permissions.activityRecognition ? 'true' : 'false');
+        localStorage.setItem('permission_activity_recognition_time', Date.now().toString());
+      }
+      if (permissions.notifications !== undefined) {
+        localStorage.setItem('permission_notifications_cache', permissions.notifications ? 'true' : 'false');
+        localStorage.setItem('permission_notifications_time', Date.now().toString());
+      }
+      if (permissions.location !== undefined) {
+        localStorage.setItem('permission_location_cache', permissions.location ? 'true' : 'false');
+        localStorage.setItem('permission_location_time', Date.now().toString());
+      }
+      if (permissions.batteryOptimized !== undefined) {
+        localStorage.setItem('permission_battery_optimized_cache', permissions.batteryOptimized ? 'true' : 'false');
+        localStorage.setItem('permission_battery_optimized_time', Date.now().toString());
+      }
+      console.log('🧪 DEV: Simulated permission state:', permissions);
+    }
+  }
+
+  public clearPermissionCache(): void {
+    if (import.meta.env.DEV) {
+      localStorage.removeItem('permission_activity_recognition_cache');
+      localStorage.removeItem('permission_activity_recognition_time');
+      localStorage.removeItem('permission_notifications_cache');
+      localStorage.removeItem('permission_notifications_time');
+      localStorage.removeItem('permission_location_cache');
+      localStorage.removeItem('permission_location_time');
+      localStorage.removeItem('permission_battery_optimized_cache');
+      localStorage.removeItem('permission_battery_optimized_time');
+      console.log('🧪 DEV: Permission cache cleared');
     }
   }
 }
