@@ -6,6 +6,7 @@ import { LocalNotifications } from '@capacitor/local-notifications';
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { permissionManager } from '@/services/PermissionManager';
 
 export interface MobileAuthState {
   isLoading: boolean;
@@ -563,13 +564,34 @@ export const useMobileAuth = () => {
         }
 
         await safeHapticImpact(ImpactStyle.Medium);
-        
-        toast({
-          title: "Login Successful! 🎉",
-          description: "Welcome back!",
-        });
 
-        // Navigate within the app using React Router
+        // Check permissions after successful login
+        console.log('🔍 Checking permissions after login...');
+        const permissionStatus = await permissionManager.checkRealTimePermissionStatus();
+
+        if (!permissionStatus.allGranted) {
+          // Permissions incomplete - store flags for modal
+          console.log('⚠️ Permissions incomplete:', permissionStatus);
+          
+          sessionStorage.setItem('show_permission_modal', 'true');
+          sessionStorage.setItem('permission_status', JSON.stringify(permissionStatus));
+          
+          toast({
+            title: "Login Successful! 🎉",
+            description: "Please complete setup to start tracking",
+            variant: "default",
+          });
+        } else {
+          // All permissions granted
+          console.log('✅ All permissions granted');
+          
+          toast({
+            title: "Login Successful! 🎉",
+            description: "Welcome back! Step tracking active.",
+          });
+        }
+
+        // Navigate to dashboard (modal will show if needed)
         navigate('/');
         
         return { success: true };

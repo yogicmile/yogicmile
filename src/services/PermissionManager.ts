@@ -1,6 +1,15 @@
 import { Capacitor } from "@capacitor/core";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import { App } from "@capacitor/app";
+import { registerPlugin } from '@capacitor/core';
+
+interface BackgroundStepTrackingPlugin {
+  requestAllPermissions(): Promise<{ activityRecognition: boolean; notifications: boolean; allGranted: boolean }>;
+  isBatteryOptimizationDisabled(): Promise<{ disabled: boolean }>;
+  openSettings?(): Promise<void>;
+}
+
+const BackgroundStepTracking = registerPlugin<BackgroundStepTrackingPlugin>('BackgroundStepTracking');
 
 interface PermissionStatus {
   activity: "prompt" | "prompt-with-rationale" | "granted" | "denied";
@@ -155,6 +164,166 @@ class PermissionManagerService {
         motion: false,
         allGranted: false,
       };
+    }
+  }
+
+  public async checkRealTimePermissionStatus(): Promise<{
+    activityRecognition: boolean;
+    notifications: boolean;
+    location: boolean;
+    motion: boolean;
+    batteryOptimized: boolean;
+    allGranted: boolean;
+    systemHealth: number;
+  }> {
+    const platform = Capacitor.getPlatform();
+
+    if (platform === 'web') {
+      return {
+        activityRecognition: true,
+        notifications: true,
+        location: true,
+        motion: true,
+        batteryOptimized: true,
+        allGranted: true,
+        systemHealth: 100,
+      };
+    }
+
+    try {
+      // Check Activity Recognition (Android) or Motion (iOS)
+      let activityGranted = false;
+      let motionGranted = false;
+      
+      if (platform === 'android') {
+        // Use native Capacitor plugin for Android
+        try {
+          const status = await BackgroundStepTracking.requestAllPermissions();
+          activityGranted = status?.activityRecognition === true;
+          console.log('✅ Activity Recognition status:', activityGranted);
+        } catch (error) {
+          console.error('❌ Activity Recognition check failed:', error);
+          activityGranted = false;
+        }
+      } else if (platform === 'ios') {
+        // For iOS, check if motion tracking is available
+        try {
+          const { Motion } = await import('@capacitor/motion');
+          // Motion doesn't have requestPermissions, just check if accelerometer works
+          motionGranted = true; // Assume granted for iOS
+          console.log('✅ Motion permission assumed granted');
+        } catch (error) {
+          console.error('❌ Motion check failed:', error);
+          motionGranted = false;
+        }
+      }
+
+      // Check Notifications
+      let notificationsGranted = false;
+      try {
+        const notificationResult = await LocalNotifications.checkPermissions();
+        notificationsGranted = notificationResult.display === 'granted';
+        console.log('✅ Notifications status:', notificationsGranted);
+      } catch (error) {
+        console.error('❌ Notification check failed:', error);
+      }
+
+      // Check Location (for GPS tracking)
+      let locationGranted = false;
+      try {
+        const { Geolocation } = await import('@capacitor/geolocation');
+        const locationStatus = await Geolocation.checkPermissions();
+        locationGranted = locationStatus.location === 'granted' || locationStatus.location === 'prompt';
+        console.log('✅ Location status:', locationGranted);
+      } catch (error) {
+        console.error('❌ Location check failed:', error);
+      }
+
+      // Check Battery Optimization (Android only)
+      let batteryOptimized = true;
+      if (platform === 'android') {
+        try {
+          const batteryStatus = await BackgroundStepTracking.isBatteryOptimizationDisabled();
+          batteryOptimized = batteryStatus?.disabled || false;
+          console.log('✅ Battery optimization disabled:', batteryOptimized);
+        } catch (error) {
+          console.error('❌ Battery check failed:', error);
+          batteryOptimized = this.isServiceActive();
+        }
+      }
+
+      // Calculate system health percentage (4 checks)
+      const checks = [
+        activityGranted || motionGranted,
+        notificationsGranted,
+        locationGranted,
+        batteryOptimized,
+      ];
+      const granted = checks.filter(c => c).length;
+      const systemHealth = Math.round((granted / checks.length) * 100);
+
+      const allGranted = platform === 'android' 
+        ? activityGranted && notificationsGranted && locationGranted && batteryOptimized
+        : motionGranted && notificationsGranted && locationGranted;
+
+      console.log('📊 Permission Status Summary:', {
+        activityRecognition: activityGranted,
+        notifications: notificationsGranted,
+        location: locationGranted,
+        motion: motionGranted,
+        batteryOptimized,
+        systemHealth,
+        allGranted
+      });
+
+      return {
+        activityRecognition: activityGranted,
+        notifications: notificationsGranted,
+        location: locationGranted,
+        motion: motionGranted,
+        batteryOptimized,
+        allGranted,
+        systemHealth,
+      };
+    } catch (error) {
+      console.error('❌ Real-time permission check error:', error);
+      return {
+        activityRecognition: false,
+        notifications: false,
+        location: false,
+        motion: false,
+        batteryOptimized: false,
+        allGranted: false,
+        systemHealth: 0,
+      };
+    }
+  }
+
+  public async openSystemSettings(): Promise<void> {
+    const platform = Capacitor.getPlatform();
+    
+    try {
+      if (platform === 'android') {
+        // Try using native plugin method first
+        try {
+          await BackgroundStepTracking.openSettings?.();
+          console.log('✅ Opened Android app settings via plugin');
+        } catch {
+          // Fallback: Open via Android Settings intent using window location
+          const packageName = 'app.lovable.yogicmile';
+          window.location.href = `intent://settings/applications/details?package=${packageName}#Intent;scheme=android-app;end`;
+          console.log('✅ Opened Android app settings via intent');
+        }
+      } else if (platform === 'ios') {
+        // Open app settings on iOS
+        window.location.href = 'app-settings:';
+        console.log('✅ Opened iOS app settings');
+      }
+    } catch (error) {
+      console.error('❌ Error opening system settings:', error);
+      
+      // Fallback: Show instructions
+      throw new Error('Could not open settings. Please go to Settings → YogicMile → Permissions manually.');
     }
   }
 

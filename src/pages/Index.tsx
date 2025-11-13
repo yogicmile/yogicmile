@@ -9,13 +9,38 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { HomePageSkeleton } from '@/components/performance/SkeletonLoaders';
 import { useYogicData } from '@/hooks/use-yogic-data';
 import { useNativeStepTracking } from '@/hooks/use-native-step-tracking';
+import { PostLoginPermissionModal } from '@/components/PostLoginPermissionModal';
 
 const Index = () => {
   const yogicData = useYogicData();
   const nativeSteps = useNativeStepTracking();
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [permissionStatus, setPermissionStatus] = useState<any>(null);
 
   useEffect(() => {
     document.title = 'Yogic Mile - Walk. Earn. Evolve.';
+  }, []);
+
+  useEffect(() => {
+    // Check if we need to show permission modal after login
+    const shouldShow = sessionStorage.getItem('show_permission_modal');
+    const storedStatus = sessionStorage.getItem('permission_status');
+    
+    if (shouldShow === 'true' && storedStatus) {
+      try {
+        const status = JSON.parse(storedStatus);
+        setPermissionStatus(status);
+        setShowPermissionModal(true);
+        
+        // Clear flags so modal doesn't show again
+        sessionStorage.removeItem('show_permission_modal');
+        sessionStorage.removeItem('permission_status');
+        
+        console.log('📋 Showing post-login permission modal');
+      } catch (error) {
+        console.error('❌ Error parsing permission status:', error);
+      }
+    }
   }, []);
 
   const handleClaimReward = async (): Promise<boolean> => {
@@ -87,6 +112,15 @@ const Index = () => {
             <EnhancedNavigationCards />
           </div>
         </main>
+
+        {/* Post-Login Permission Modal */}
+        {showPermissionModal && permissionStatus && (
+          <PostLoginPermissionModal
+            open={showPermissionModal}
+            onClose={() => setShowPermissionModal(false)}
+            permissionStatus={permissionStatus}
+          />
+        )}
       </div>
     </ErrorBoundary>
   );
