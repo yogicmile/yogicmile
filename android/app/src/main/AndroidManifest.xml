@@ -1,38 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.yogicmile.app">
+    package="app.lovable.yogicmile">
 
     <!-- =========================== -->
-    <!-- PERMISSIONS FOR STEP TRACKING -->
+    <!-- CRITICAL PERMISSIONS -->
     <!-- =========================== -->
     
-    <!-- Android 12+ - Physical Activity (step counter) -->
+    <!-- Android 10+ - REQUIRED for step counting -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    
+    <!-- For sensor access -->
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-permission android:name="android.permission.BODY_SENSORS_BACKGROUND" />
 
-    <!-- General permissions -->
+    <!-- Network -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Optional: For GPS tracking (if implementing route tracking) -->
+    <!-- Location (for GPS validation) -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
-    <!-- For background step tracking service -->
+    <!-- Background service -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+    
+    <!-- Auto-restart after reboot -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    
+    <!-- Battery optimization exemption -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
-    <!-- Optional: Push notifications -->
+    <!-- Notifications -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- Optional: Camera for verification photos -->
+    <!-- Camera & Storage (optional) -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
-    <!-- Feature declarations (what your app needs to work) -->
+    <!-- Hardware features -->
     <uses-feature
         android:name="android.hardware.sensor.accelerometer"
         android:required="true" />
@@ -40,7 +49,7 @@
         android:name="android.hardware.sensor.stepcounter"
         android:required="false" />
 
-    <!-- Application declaration -->
+    <!-- Application -->
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -76,7 +85,7 @@
                     android:host="auth-success" />
             </intent-filter>
 
-            <!-- Deep linking for email verification (optional) -->
+            <!-- Deep linking for email verification -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -88,31 +97,29 @@
             </intent-filter>
         </activity>
 
-        <!-- Background Service for Step Tracking -->
+        <!-- Step Counter Foreground Service -->
         <service
-            android:name=".services.StepTrackingService"
+            android:name="app.lovable.yogicmile.steps.StepCounterService"
+            android:enabled="true"
             android:exported="false"
-            android:label="Yogic Mile Step Tracking Service">
-        </service>
+            android:foregroundServiceType="health"
+            android:stopWithTask="false" />
 
-        <!-- Background Job Scheduler for periodic sync -->
-        <service
-            android:name=".services.StepSyncJobService"
-            android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE">
-        </service>
-
-        <!-- Broadcast receiver for boot completion (start service on device boot) -->
+        <!-- Boot Receiver for Auto-Restart -->
         <receiver
-            android:name=".receivers.BootCompletedReceiver"
-            android:exported="true">
+            android:name="app.lovable.yogicmile.steps.BootReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <!-- Xiaomi specific -->
+                <action android:name="android.intent.action.ACTION_BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
-        <!-- App shortcuts (optional) -->
+        <!-- App shortcuts -->
         <meta-data
             android:name="android.app.shortcuts"
             android:resource="@xml/shortcuts" />
@@ -120,85 +127,3 @@
     </application>
 
 </manifest>
-```
-
-## capacitor.config.ts - FIXED Configuration
-
-```typescript
-// Location: capacitor.config.ts
-
-import { CapacitorConfig } from '@capacitor/cli';
-
-const config: CapacitorConfig = {
-  appId: 'com.yogicmile.app',
-  appName: 'Yogic Mile',
-  webDir: 'dist',
-  server: {
-    androidScheme: 'https',
-    cleartext: false,
-  },
-  
-  // Android-specific configuration
-  android: {
-    path: 'android',
-    minWebViewVersion: 90,
-    allowMixedContent: false,
-  },
-
-  // iOS-specific configuration
-  ios: {
-    path: 'ios',
-    minVersion: '12.0',
-  },
-
-  // Plugin configurations
-  plugins: {
-    // Capacitor core
-    'CapacitorCore': {
-      // Enable permission delegation
-      allowMixedContent: false,
-    },
-
-    // Permissions plugin
-    'Permissions': {
-      // Permissions configuration
-      'BodySensors': {
-        'requestAsyn': true,
-      },
-    },
-
-    // Storage plugin for persistent data
-    'Storage': {
-      'autoInit': true,
-    },
-
-    // App lifecycle
-    'App': {
-      'name': 'Yogic Mile',
-    },
-
-    // Notifications (if using push notifications)
-    'PushNotifications': {
-      'presentationOptions': ['badge', 'sound', 'alert'],
-    },
-
-    // Status bar
-    'StatusBar': {
-      'style': 'dark',
-      'backgroundColor': '#ffffff',
-      'overlaysWebView': false,
-    },
-
-    // Safe area
-    'SafeArea': {
-      'customSafeAreaInsets': {
-        'top': 0,
-        'bottom': 0,
-        'left': 0,
-        'right': 0,
-      },
-    },
-  },
-};
-
-export default config;
