@@ -32,66 +32,34 @@ export function useGamification() {
     return user;
   };
 
-  // Load all achievements (using community_achievements as template)
+  // Load all achievements from achievement_definitions table
   const loadAchievements = useCallback(async () => {
     try {
       setLoading(true);
-      // For now, create mock achievement templates since we don't have a proper achievements template table
-      const mockAchievements: Achievement[] = [
-        {
-          id: '1',
-          name: 'First Steps',
-          description: 'Take your very first steps with Yogic Mile',
-          category: 'step_milestones',
-          rarity: 'common',
-          unlock_criteria: { daily_steps: 1 },
-          icon_url: '🚶',
-          animation_type: 'glow',
-          coin_reward: 10,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          name: 'Thousand Steps',
-          description: 'Achieve 1,000 steps in one day',
-          category: 'step_milestones',
-          rarity: 'common',
-          unlock_criteria: { daily_steps: 1000 },
-          icon_url: '🎯',
-          animation_type: 'glow',
-          coin_reward: 50,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: '3',
-          name: 'Week Warrior',
-          description: 'Maintain a 7-day walking streak',
-          category: 'streak_champions',
-          rarity: 'uncommon',
-          unlock_criteria: { streak_days: 7 },
-          icon_url: '🔥',
-          animation_type: 'glow',
-          coin_reward: 150,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: '4',
-          name: 'Friend Finder',
-          description: 'Add your first friend',
-          category: 'community_heroes',
-          rarity: 'common',
-          unlock_criteria: { friends_count: 1 },
-          icon_url: '👥',
-          animation_type: 'glow',
-          coin_reward: 50,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ];
-      setAchievements(mockAchievements);
+      const { data, error } = await supabase
+        .from('achievement_definitions')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      
+      // Map database schema to Achievement type
+      const mappedAchievements: Achievement[] = (data || []).map(def => ({
+        id: def.id,
+        name: def.name,
+        description: def.description,
+        category: def.category_id || 'general',
+        rarity: (def.rarity || 'common') as 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary',
+        unlock_criteria: def.requirement as any,
+        icon_url: def.emoji,
+        animation_type: (def.unlock_celebration as any)?.animation || 'glow',
+        coin_reward: def.reward_coins || 0,
+        created_at: def.created_at || new Date().toISOString(),
+        updated_at: def.updated_at || new Date().toISOString()
+      }));
+      
+      setAchievements(mappedAchievements);
     } catch (error) {
       console.error('Error loading achievements:', error);
       toast({
@@ -99,6 +67,7 @@ export function useGamification() {
         description: "Failed to load achievements",
         variant: "destructive",
       });
+      setAchievements([]);
     } finally {
       setLoading(false);
     }
