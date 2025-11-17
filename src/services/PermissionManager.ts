@@ -64,13 +64,18 @@ class PermissionManagerService {
 
   private async requestAndroidActivityPermission(): Promise<PermissionStatus> {
     try {
-      // For Android, we need to use native plugin or web fallback
-      // Since Capacitor doesn't have built-in ACTIVITY_RECOGNITION permission API
-      // we'll return granted for web compatibility
-      console.log("Requesting Android activity recognition permission");
-      return { activity: "granted" };
+      console.log("🔐 Requesting Android activity recognition permission via native plugin");
+      const result = await BackgroundStepTracking.requestAllPermissions();
+
+      if (result.allGranted) {
+        console.log("✅ All permissions granted");
+        return { activity: "granted" };
+      } else {
+        console.log("❌ Some permissions denied");
+        return { activity: "denied" };
+      }
     } catch (error) {
-      console.error("Error requesting Android activity permission:", error);
+      console.error("Error requesting permissions:", error);
       return { activity: "denied" };
     }
   }
@@ -485,6 +490,18 @@ class PermissionManagerService {
       }
 
       if (platform === 'android') {
+        // Request permissions first
+        console.log('🔐 Requesting all required permissions...');
+        const permResult = await BackgroundStepTracking.requestAllPermissions();
+
+        if (!permResult.allGranted) {
+          return {
+            success: false,
+            message: 'Please grant Activity Recognition and Notifications permissions'
+          };
+        }
+
+        console.log('✅ All permissions granted, starting service...');
         console.log('🚀 Starting Android foreground service...');
         
         try {

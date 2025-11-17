@@ -205,24 +205,28 @@ export const useNativeStepTracking = () => {
         
         if (!bgServiceResult.success) {
           console.error('[StepTracking] Background service failed:', bgServiceResult.message);
-          toast({
-            title: "Background Tracking",
-            description: bgServiceResult.message,
-            variant: "destructive",
-          });
-          
-          // Get device-specific recommendations
-          const recommendations = await androidBackgroundService.getDeviceRecommendations();
-          if (recommendations.length > 0) {
-            console.log('Device recommendations:', recommendations);
+
+          // Show specific error for permission issues
+          if (bgServiceResult.message.includes('permissions')) {
             toast({
-              title: "Setup Required",
-              description: recommendations[0],
-              duration: 8000,
+              title: "Permissions Required",
+              description: "Please grant Activity Recognition and Notifications permissions to track steps",
+              variant: "destructive",
+              duration: 10000,
+            });
+          } else {
+            toast({
+              title: "Background Tracking Error",
+              description: bgServiceResult.message,
+              variant: "destructive",
             });
           }
+
+          setIsTracking(false);
           return;
         }
+
+        console.log('[StepTracking] Background service started successfully ✅');
         
         // Subscribe to step updates from background service
         console.log('[StepTracking] Subscribing to step updates...');
