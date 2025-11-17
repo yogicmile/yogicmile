@@ -1,5 +1,5 @@
 import { registerPlugin } from '@capacitor/core';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, PluginListenerHandle } from '@capacitor/core';
 
 /**
  * Android Background Step Tracking Service
@@ -51,15 +51,6 @@ export interface BackgroundStepTrackingPlugin {
    */
   getStepCount(): Promise<{ steps: number; timestamp: number }>;
 
-  /**
-   * Subscribe to step count updates
-   */
-  addStepListener(callback: (data: { steps: number; timestamp: number }) => void): Promise<string>;
-
-  /**
-   * Remove step listener
-   */
-  removeStepListener(options: { id: string }): Promise<void>;
 
   /**
    * Sync with Google Fit in background
@@ -108,6 +99,7 @@ export { BackgroundStepTracking };
 export class AndroidBackgroundStepService {
   private static instance: AndroidBackgroundStepService;
   private listeners: Map<string, (data: any) => void> = new Map();
+  private listenerHandle: PluginListenerHandle | null = null;
   private isServiceActive = false;
 
   static getInstance(): AndroidBackgroundStepService {
@@ -223,7 +215,15 @@ export class AndroidBackgroundStepService {
     const listenerId = `listener_${Date.now()}`;
     this.listeners.set(listenerId, callback);
 
-    await BackgroundStepTracking.addStepListener(callback);
+    // Use Capacitor's built-in event listener (all plugins have this at runtime)
+    this.listenerHandle = await (BackgroundStepTracking as any).addListener('step', (event: any) => {
+      if (callback) {
+        callback({
+          steps: event.steps,
+          timestamp: event.timestamp
+        });
+      }
+    });
 
     return listenerId;
   }
@@ -233,8 +233,11 @@ export class AndroidBackgroundStepService {
    */
   async unsubscribeFromStepUpdates(listenerId: string): Promise<void> {
     if (this.listeners.has(listenerId)) {
-      await BackgroundStepTracking.removeStepListener({ id: listenerId });
       this.listeners.delete(listenerId);
+      if (this.listenerHandle) {
+        await this.listenerHandle.remove();
+        this.listenerHandle = null;
+      }
     }
   }
 
