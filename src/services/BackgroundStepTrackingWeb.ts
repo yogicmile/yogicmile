@@ -53,6 +53,10 @@ export class BackgroundStepTrackingWeb extends WebPlugin implements BackgroundSt
     return { opened: false };
   }
 
+  async openAppSettings(): Promise<void> {
+    console.log('Web: openAppSettings called - not available on web');
+  }
+
   async getStepCount(): Promise<{ steps: number; timestamp: number }> {
     return { steps: 0, timestamp: Date.now() };
   }
