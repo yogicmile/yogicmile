@@ -47,6 +47,11 @@ export interface BackgroundStepTrackingPlugin {
   openManufacturerBatterySettings(): Promise<{ opened: boolean }>;
 
   /**
+   * Open app settings for manual permission configuration
+   */
+  openAppSettings(): Promise<void>;
+
+  /**
    * Get current step count from service
    */
   getStepCount(): Promise<{ steps: number; timestamp: number }>;

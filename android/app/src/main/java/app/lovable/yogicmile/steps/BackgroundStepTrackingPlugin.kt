@@ -91,11 +91,11 @@ class BackgroundStepTrackingPlugin : Plugin() {
 
     @PluginMethod
     fun requestAllPermissions(call: PluginCall) {
-        android.util.Log.d("StepTracking", "requestAllPermissions called")
+        android.util.Log.d("StepTracking", "=== requestAllPermissions called ===")
         
         val activity = getActivity()
         if (activity == null) {
-            android.util.Log.e("StepTracking", "Activity context not available")
+            android.util.Log.e("StepTracking", "❌ Activity context not available")
             val result = JSObject()
             result.put("activityRecognition", false)
             result.put("notifications", false)
@@ -105,30 +105,26 @@ class BackgroundStepTrackingPlugin : Plugin() {
             return
         }
         
-        android.util.Log.d("StepTracking", "Activity context available: $activity")
+        android.util.Log.d("StepTracking", "✅ Activity context available")
         
-        val permissions = mutableListOf<String>()
-        
-        // Activity Recognition (Android 10+)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACTIVITY_RECOGNITION)
-                != PackageManager.PERMISSION_GRANTED) {
-                permissions.add(Manifest.permission.ACTIVITY_RECOGNITION)
-                android.util.Log.d("StepTracking", "Need ACTIVITY_RECOGNITION permission")
-            }
+        // Check current permission status
+        val activityGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
         }
         
-        // Notifications (Android 13+)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
-                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
-                android.util.Log.d("StepTracking", "Need POST_NOTIFICATIONS permission")
-            }
+        val notificationsGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
         }
         
-        if (permissions.isEmpty()) {
-            android.util.Log.d("StepTracking", "All permissions already granted")
+        android.util.Log.d("StepTracking", "Current status - Activity: $activityGranted, Notifications: $notificationsGranted")
+        
+        // If all already granted, return immediately
+        if (activityGranted && notificationsGranted) {
+            android.util.Log.d("StepTracking", "✅ All permissions already granted")
             val result = JSObject()
             result.put("activityRecognition", true)
             result.put("notifications", true)
@@ -137,16 +133,29 @@ class BackgroundStepTrackingPlugin : Plugin() {
             return
         }
         
-        android.util.Log.d("StepTracking", "Requesting permissions: $permissions")
+        // Build permission array
+        val permissions = mutableListOf<String>()
         
-        // Save call for later callback
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !activityGranted) {
+            permissions.add(Manifest.permission.ACTIVITY_RECOGNITION)
+            android.util.Log.d("StepTracking", "📋 Need to request ACTIVITY_RECOGNITION")
+        }
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !notificationsGranted) {
+            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+            android.util.Log.d("StepTracking", "📋 Need to request POST_NOTIFICATIONS")
+        }
+        
+        android.util.Log.d("StepTracking", "🔐 Requesting ${permissions.size} permissions: $permissions")
+        
+        // CRITICAL: Store call BEFORE requesting
         pendingPermissionCall = call
         
-        // Request using ActivityCompat directly for better control
-        ActivityCompat.requestPermissions(
-            activity,
+        // Use Capacitor's requestPermissionForAliases for proper callback handling
+        requestPermissionForAliases(
             permissions.toTypedArray(),
-            REQUEST_CODE_PERMISSIONS
+            call,
+            "allPermissionsCallback"
         )
     }
 
@@ -168,6 +177,8 @@ class BackgroundStepTrackingPlugin : Plugin() {
 
     @PermissionCallback
     private fun allPermissionsCallback(call: PluginCall) {
+        android.util.Log.d("StepTracking", "=== allPermissionsCallback triggered ===")
+        
         val activityGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             getPermissionState("activity") == PermissionState.GRANTED
         } else {
@@ -179,6 +190,8 @@ class BackgroundStepTrackingPlugin : Plugin() {
         } else {
             true
         }
+        
+        android.util.Log.d("StepTracking", "Permission callback result: Activity=$activityGranted, Notifications=$notificationsGranted")
         
         val result = JSObject()
         result.put("activityRecognition", activityGranted)
@@ -401,6 +414,20 @@ class BackgroundStepTrackingPlugin : Plugin() {
         call.resolve(result)
     }
 
+    @PluginMethod
+    fun openAppSettings(call: PluginCall) {
+        try {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            val uri = Uri.fromParts("package", context.packageName, null)
+            intent.data = uri
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+            call.resolve()
+        } catch (error: Exception) {
+            call.reject("Failed to open settings", error)
+        }
+    }
+    
     @PluginMethod
     fun openManufacturerBatterySettings(call: PluginCall) {
         val manufacturer = Build.MANUFACTURER.toLowerCase(Locale.ROOT)

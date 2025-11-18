@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 import { permissionManager } from '@/services/PermissionManager';
 import { useToast } from '@/hooks/use-toast';
+import { BackgroundStepTracking } from '@/services/AndroidBackgroundService';
 
 interface FirstTimePermissionFlowProps {
   onComplete: () => void;
@@ -61,30 +62,37 @@ export const FirstTimePermissionFlow: React.FC<FirstTimePermissionFlowProps> = (
     setIsLoading(true);
     try {
       if (platform === 'android') {
-        const granted = await permissionManager.requestActivityRecognition();
+        console.log('🔐 Requesting Android permissions...');
+        
+        // Direct call to native plugin
+        const result = await BackgroundStepTracking.requestAllPermissions();
+        console.log('Permission result:', result);
         
         // Cache permission status with timestamp
-        localStorage.setItem('permission_activity_recognition_cache', granted ? 'true' : 'false');
+        localStorage.setItem('permission_activity_recognition_cache', result.allGranted ? 'true' : 'false');
         localStorage.setItem('permission_activity_recognition_time', Date.now().toString());
-        console.log('✅ Activity Recognition permission stored:', granted);
         
-        if (granted) {
-          toast({ title: 'Permission Granted', description: 'Activity recognition enabled' });
-          handleNext('notifications');
-        } else {
+        if (result.allGranted) {
+          console.log('✅ All permissions granted');
           toast({ 
-            title: 'Permission Denied', 
-            description: 'You can enable this later in Settings',
-            variant: 'destructive'
+            title: 'Permissions Granted', 
+            description: 'Activity recognition and notifications enabled' 
+          });
+          handleNext('battery');
+        } else {
+          console.warn('❌ Permissions denied:', result);
+          toast({ 
+            title: 'Permissions Required', 
+            description: 'Please grant Activity Recognition and Notifications permissions to use step tracking. You can enable them in Android Settings.',
+            variant: 'destructive',
+            duration: 10000
           });
         }
       } else if (platform === 'ios') {
         const granted = await permissionManager.requestMotionPermission();
         
-        // Cache permission status
         localStorage.setItem('permission_motion_cache', granted ? 'true' : 'false');
         localStorage.setItem('permission_motion_time', Date.now().toString());
-        console.log('✅ Motion permission stored:', granted);
         
         if (granted) {
           toast({ title: 'Permission Granted', description: 'Motion & Fitness enabled' });
@@ -98,8 +106,12 @@ export const FirstTimePermissionFlow: React.FC<FirstTimePermissionFlowProps> = (
         }
       }
     } catch (error) {
-      console.error('Activity permission error:', error);
-      toast({ title: 'Error', description: 'Failed to request permission', variant: 'destructive' });
+      console.error('❌ Error requesting permissions:', error);
+      toast({
+        title: 'Permission Error',
+        description: `Failed to request permissions: ${(error as Error).message}`,
+        variant: 'destructive'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -317,9 +329,26 @@ export const FirstTimePermissionFlow: React.FC<FirstTimePermissionFlowProps> = (
                 className="w-full cta-button"
                 disabled={isLoading}
               >
-                {isLoading ? 'Requesting...' : 'Allow Step Tracking'}
+                {isLoading ? 'Requesting...' : platform === 'ios' ? 'Allow Motion & Fitness' : 'Allow Step Tracking'}
                 <Activity className="h-5 w-5 ml-2" strokeWidth={2.5} />
               </Button>
+              
+              {platform === 'android' && (
+                <Button 
+                  variant="outline" 
+                  onClick={async () => {
+                    try {
+                      await BackgroundStepTracking.openAppSettings();
+                    } catch (error) {
+                      console.error('Failed to open settings:', error);
+                    }
+                  }} 
+                  className="w-full"
+                >
+                  Open Settings
+                </Button>
+              )}
+              
               <Button variant="ghost" onClick={handleSkip} className="w-full">
                 Set up later
               </Button>
