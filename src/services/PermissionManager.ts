@@ -1,15 +1,7 @@
 import { Capacitor } from "@capacitor/core";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import { App } from "@capacitor/app";
-import { registerPlugin } from '@capacitor/core';
-
-interface BackgroundStepTrackingPlugin {
-  requestAllPermissions(): Promise<{ activityRecognition: boolean; notifications: boolean; allGranted: boolean }>;
-  isBatteryOptimizationDisabled(): Promise<{ disabled: boolean }>;
-  openSettings?(): Promise<void>;
-}
-
-const BackgroundStepTracking = registerPlugin<BackgroundStepTrackingPlugin>('BackgroundStepTracking');
+import { BackgroundStepTracking } from '@/services/AndroidBackgroundService';
 
 interface PermissionStatus {
   activity: "prompt" | "prompt-with-rationale" | "granted" | "denied";
@@ -403,7 +395,7 @@ class PermissionManagerService {
       if (platform === 'android') {
         // Try using native plugin method first
         try {
-          await BackgroundStepTracking.openSettings?.();
+          await BackgroundStepTracking.openAppSettings();
           console.log('✅ Opened Android app settings via plugin');
         } catch {
           // Fallback: Open via Android Settings intent using window location
