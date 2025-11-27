@@ -60,18 +60,8 @@ repositories {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     
-    // Capacitor Core
+    // Capacitor Core - plugins auto-managed by capacitor.build.gradle
     implementation "com.getcapacitor:core:7.4.3"
-    implementation project(':capacitor-android')
-    
-    // Capacitor Plugins
-    implementation project(':capacitor-app')
-    implementation project(':capacitor-geolocation')
-    implementation project(':capacitor-haptics')
-    implementation project(':capacitor-local-notifications')
-    implementation project(':capacitor-motion')
-    implementation project(':capacitor-preferences')
-    implementation project(':capacitor-push-notifications')
     
     // AndroidX - Required for native libraries
     implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -84,7 +74,7 @@ dependencies {
     // Kotlin Standard Library
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
     
-    // Google Play Services (for Google Fit if needed)
+    // Google Play Services (for Google Fit)
     implementation 'com.google.android.gms:play-services-fitness:21.1.0'
     implementation 'com.google.android.gms:play-services-auth:21.0.0'
     
